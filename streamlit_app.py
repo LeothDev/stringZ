@@ -30,6 +30,7 @@ if 'processing_stats' not in st.session_state:
 
 def main():
     # Header
+    st.image(image="https://cdn.moogold.com/2024/10/watcher-of-realms.jpg", use_container_width=True)
     st.title("🎮 StringZ")
     st.markdown("**Translation QA Tool for ZGAME**")
     st.markdown("*Deduplicate translations and sort by semantic correlation*")
