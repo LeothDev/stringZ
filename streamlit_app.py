@@ -1,16 +1,35 @@
 import streamlit as st
+import subprocess
 import pandas as pd
 import io
 import time
 import sys
 import os
 
-# Add the src directory to Python path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
-
 # Import our core modules
 from stringZ.models.data_models import TranslationDataset
 from stringZ.core.processor import TranslationProcessor, ProcessingConfig
+
+@st.cache_resource
+def download_spacy_model():
+    try:
+        import spacy
+        nlp = spacy.load("en_core_web_lg")
+        return nlp
+    except OSError:
+        st.info("📥 Downloading language model... (this may take a minute)")
+        subprocess.check_call([sys.executable, "-m", "spacy", "download", "en_core_web_md"])
+        import spacy
+        nlp = spacy.load("en_core_web_md")
+        return nlp
+
+# Initialize the model
+if 'nlp_model' not in st.session_state:
+    st.session_state.nlp_model = download_spacy_model()
+
+# Add the src directory to Python path
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
+
 
 # Configure Streamlit
 st.set_page_config(
