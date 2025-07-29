@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 class SimilarityCalculator:
     """Handles different methods for calculating text similarity"""
     
-    def __init__(self, use_spacy: bool = True, spacy_model: str = "en_core_web_lg"):
+    def __init__(self, use_spacy: bool = True, spacy_model: str = "en_core_web_md"):
         self.use_spacy = use_spacy and SPACY_AVAILABLE
         self.spacy_model_name = spacy_model
         self.nlp = None
