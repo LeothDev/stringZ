@@ -1,5 +1,3 @@
-# src/stringZ/core/correlator.py
-
 import logging
 from typing import List, Optional, Tuple, Dict
 import numpy as np
