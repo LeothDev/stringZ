@@ -13,25 +13,6 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 from stringZ.models.data_models import TranslationDataset
 from stringZ.core.processor import TranslationProcessor, ProcessingConfig
 
-@st.cache_resource
-def download_spacy_model():
-    try:
-        import spacy
-        nlp = spacy.load("en_core_web_lg")
-        return nlp
-    except OSError:
-        st.info("📥 Downloading language model... (this may take a minute)")
-        subprocess.check_call([sys.executable, "-m", "spacy", "download", "en_core_web_md"])
-        import spacy
-        nlp = spacy.load("en_core_web_md")
-        return nlp
-
-# Initialize the model
-if 'nlp_model' not in st.session_state:
-    st.session_state.nlp_model = download_spacy_model()
-
-
-
 # Configure Streamlit
 st.set_page_config(
     page_title="StringZ - ZGAME Translation Tool",
@@ -548,7 +529,7 @@ def show_full_dataframe_viewer():
     
     if 'Occurrences' in page_df.columns:
         column_config["Occurrences"] = st.column_config.NumberColumn(
-            "Uses", 
+            "Occurrences", 
             width="small",
             help="Number of times this string appears"
         )
