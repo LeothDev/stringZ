@@ -6,6 +6,9 @@ import time
 import sys
 import os
 
+# Add the src directory to Python path
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
+
 # Import our core modules
 from stringZ.models.data_models import TranslationDataset
 from stringZ.core.processor import TranslationProcessor, ProcessingConfig
@@ -27,8 +30,6 @@ def download_spacy_model():
 if 'nlp_model' not in st.session_state:
     st.session_state.nlp_model = download_spacy_model()
 
-# Add the src directory to Python path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 
 
 # Configure Streamlit
