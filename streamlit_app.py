@@ -1,4 +1,5 @@
 import streamlit as st
+import html
 import pandas as pd
 import io
 import time
@@ -676,9 +677,295 @@ def show_preview():
     
     st.dataframe(df_display, use_container_width=True, height=400)
 
+def format_text_for_visualizer(text):
+    """
+    Format text for visualizer display - converts game markup to HTML
+    
+    Args:
+        text: str - original text with game markup
+    
+    Returns:
+        tuple: (raw_text, formatted_text)
+    """
+    if not text or pd.isna(text) or text == 'nan':
+        return '', ''
+    
+    text = str(text)
+    
+    # RAW DATA: HTML encode everything for debugging view
+    raw_text = html.escape(text)
+    
+    # FORMATTED DATA: Convert game markup to proper HTML
+    formatted_text = text
+    
+    # Convert color tags: <color="#eadca2">text</color> -> <span style="color: #eadca2;">text</span>
+    color_pattern = r'<color[=]?"([^">]+)"?>([^<]*)</color>'
+    formatted_text = re.sub(color_pattern, r'<span style="color: \1;">\2</span>', formatted_text)
+    
+    # Convert line breaks: \\n -> <br>
+    formatted_text = formatted_text.replace('\\n', '<br>')
+    
+    # Convert other common patterns
+    formatted_text = formatted_text.replace('\\t', '&nbsp;&nbsp;&nbsp;&nbsp;')  # tabs to spaces
+    
+    return raw_text, formatted_text
+
+def generate_visualizer_html(dataset, original_filename=None):
+    """
+    Generate interactive HTML visualizer file from processed dataset
+    
+    Args:
+        dataset: TranslationDataset - the processed dataset
+        original_filename: str - original filename for naming
+    
+    Returns:
+        str: Complete HTML content ready for download
+    """
+    
+    # Extract data from dataset
+    df = dataset.to_dataframe()
+    
+    # Determine target language column name
+    target_lang = dataset.target_lang or "Target"
+    
+    # Create headers array
+    headers = ["strId", dataset.source_lang, target_lang, "State", "Token Check Result"]
+    
+    # Generate raw data array (JavaScript format)
+    raw_data_rows = []
+    formatted_data_rows = []
+    
+    for _, row in df.iterrows():
+        # Extract values
+        str_id = str(row.get('strId', ''))
+        en_text = str(row.get(dataset.source_lang, ''))
+        target_text = str(row.get(target_lang, '')) if target_lang in df.columns else ''
+        
+        # Format text properly for both raw and formatted views
+        raw_en, formatted_en = format_text_for_visualizer(en_text)
+        raw_target, formatted_target = format_text_for_visualizer(target_text)
+        
+        # Create raw data row (HTML encoded for debugging)
+        raw_row = [str_id, raw_en, raw_target, "", ""]
+        
+        # Create formatted data row (proper HTML for display)
+        formatted_row = [
+            html.escape(str_id),  # ID is always escaped
+            formatted_en,         # EN text with HTML formatting
+            formatted_target,     # Target text with HTML formatting
+            "",                   # State column - empty for user input
+            ""                    # Token Check Result - empty for user input
+        ]
+        
+        raw_data_rows.append(raw_row)
+        formatted_data_rows.append(formatted_row)
+    
+    # Convert to JavaScript array format
+    def python_list_to_js_array(data_rows):
+        js_rows = []
+        for row in data_rows:
+            # Properly escape each string for JavaScript
+            escaped_row = []
+            for item in row:
+                if isinstance(item, str):
+                    # Escape quotes and special characters for JavaScript
+                    escaped = item.replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n')
+                    escaped_row.append(f'"{escaped}"')
+                else:
+                    escaped_row.append(f'"{str(item)}"')
+            js_rows.append('[' + ', '.join(escaped_row) + ']')
+        return '[' + ', '.join(js_rows) + ']'
+    
+    raw_data_js = python_list_to_js_array(raw_data_rows)
+    formatted_data_js = python_list_to_js_array(formatted_data_rows)
+    headers_js = '[' + ', '.join(f'"{h}"' for h in headers) + ']'
+    
+    # Generate title
+    if original_filename:
+        clean_filename = re.sub(r'\.[^.]+$', '', original_filename)  # Remove extension
+        title = f"StringZ Visualizer - {clean_filename}"
+    else:
+        title = f"StringZ Visualizer - {target_lang} Translation Review"
+    
+    # HTML template with data injection
+    html_content = f'''<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>{html.escape(title)}</title>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <style>
+      body {{
+                    font-family: Arial, sans-serif;
+                }}
+                .toggle-btn {{
+                    position: fixed;
+                    top: 10px;
+                    left: 10px;
+                    z-index: 9999;
+                    padding: 8px 16px;
+                    background-color: #007bff;
+                    color: white;
+                    border: none;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+                }}
+                #clearState {{
+                    float: left;
+                    margin-right: 10px;
+                    margin-bottom: 10px;
+                    padding: 5px 10px;
+                    background-color: #dc3545;
+                    color: white;
+                    border: none;
+                    border-radius: 4px;
+                    cursor: pointer;
+                }}
+                .container {{
+                    padding-top: 60px;
+                }}
+                #myTable td {{
+                    user-select: text !important;
+                }}
+                select.state-select {{
+                    width: 100%;
+                    font-weight: bold;
+                }}
+                select.state-select.pass {{
+                    color: green;
+                }}
+                select.state-select.fail {{
+                    color: red;
+                }}
+                .info-banner {{
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    padding: 15px;
+                    margin: 10px 0;
+                    border-radius: 8px;
+                    text-align: center;
+                }}
+    </style>
+  </head>
+  <body>
+    <button class="toggle-btn" onclick="toggleData()">Toggle Raw/Formatted</button>
+    <div class="container">
+      <div class="info-banner">
+        <h2>🎮 {html.escape(title)}</h2>
+        <p>📊 <strong>{len(df)}</strong> strings • 🌍 <strong>{dataset.source_lang}</strong> → <strong>{target_lang}</strong> • 🛠️ Generated by StringZ</p>
+      </div>
+      <button id="clearState">Clear All States</button>
+      <table id="myTable" class="display" style="width:100%"></table>
+    </div>
+    <script>
+      const headers = {headers_js};
+            const rawData = {raw_data_js};
+            const formattedData = {formatted_data_js};
+            let showingRaw = false;
+            let tableData = formattedData;
+            let dataTable;
+        
+            function getStateKey(index) {{
+                return "state_{html.escape(title.replace(' ', '_'))}_row_" + index;
+            }}
+        
+            function generateRowWithState(row, idx) {{
+                const savedState = localStorage.getItem(getStateKey(idx)) || "";
+                const selectHTML = '<select class="state-select ' + savedState.toLowerCase() + '">' +
+                    '<option value="" ' + (savedState === "" ? "selected" : "") + '></option>' +
+                    '<option value="Pass" ' + (savedState === "Pass" ? "selected" : "") + '>Pass</option>' +
+                    '<option value="Fail" ' + (savedState === "Fail" ? "selected" : "") + '>Fail</option>' +
+                    '</select>';
+                const newRow = row.slice();
+                const stateIndex = headers.indexOf("State");
+                newRow[stateIndex] = selectHTML;
+                return newRow;
+            }}
+        
+            function renderData(data) {{
+                tableData = data;
+                const transformed = data.map((row, idx) => generateRowWithState(row, idx));
+        
+                if (!dataTable) {{
+                    dataTable = $('#myTable').DataTable({{
+                        data: transformed,
+                        columns: headers.map(h => ({{ title: h }})),
+                        scrollX: true,
+                        paging: true,
+                        searching: true,
+                        ordering: true,
+                        deferRender: true,
+                        lengthMenu: [[-1, 10, 25, 50], ["All", 10, 25, 50]],
+                        columnDefs: [
+                            {{
+                                targets: headers.indexOf("State"),
+                                orderable: true
+                            }}
+                        ]
+                    }});
+        
+                    $('#myTable tbody').on('change', 'select.state-select', function () {{
+                        const rowIdx = dataTable.row($(this).closest('tr')).index();
+                        const value = $(this).val();
+                        localStorage.setItem(getStateKey(rowIdx), value);
+                        this.className = "state-select " + value.toLowerCase();
+                    }});
+                }} else {{
+                    const currentPage = dataTable.page();
+                    const currentLength = dataTable.page.len();
+                    dataTable.clear().rows.add(transformed).draw(false);
+                    dataTable.page.len(currentLength).draw();
+                    dataTable.page(currentPage).draw(false);
+                }}
+            }}
+        
+            function toggleData() {{
+                showingRaw = !showingRaw;
+                renderData(showingRaw ? rawData : formattedData);
+                
+                // Update button text
+                const btn = document.querySelector('.toggle-btn');
+                btn.textContent = showingRaw ? 'Show Formatted' : 'Show Raw';
+            }}
+        
+            function clearAllStates() {{
+                const total = tableData.length;
+                for (let i = 0; i < total; i++) {{
+                    localStorage.removeItem(getStateKey(i));
+                }}
+                renderData(tableData);
+                alert('All review states cleared!');
+            }}
+        
+            $(document).ready(function () {{
+                renderData(formattedData);
+                $('#clearState').click(clearAllStates);
+            }});
+    </script>
+  </body>
+</html>'''
+    
+    return html_content
+
+def enhanced_file_upload():
+    """Enhanced file upload that remembers original filename"""
+    uploaded_file = st.file_uploader(
+        "Upload Translation File",
+        type=['xlsx', 'xls'],
+        help="Upload Excel file with strId, EN, and target language columns"
+    )
+    
+    if uploaded_file:
+        # Store original filename in session state
+        st.session_state.original_filename = uploaded_file.name
+    
+    return uploaded_file
 
 def show_results():
-    """Show processing results with download button"""
+    """Modified show_results function with visualizer export"""
     
     processed_dataset = st.session_state.processed_dataset
     stats = st.session_state.processing_stats
@@ -705,27 +992,83 @@ def show_results():
     with col4:
         st.metric("Groups Created", summary['clusters_created'])
     
-    # MAIN DOWNLOAD SECTION
-    st.subheader("📥 Download Processed File")
+    # MAIN DOWNLOAD SECTION - NEW LAYOUT
+    st.subheader("📥 Export Processed Results")
     
-    df_processed = processed_dataset.to_dataframe()
-    buffer = io.BytesIO()
-    with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
-        df_processed.to_excel(writer, sheet_name='Processed_Translations', index=False)
+    # Two-column layout for main downloads
+    col1, col2 = st.columns(2)
     
-    # MAIN DOWNLOAD BUTTON
-    st.download_button(
-        label="📊 Download Processed Translation File",
-        data=buffer.getvalue(),
-        file_name=f"stringz_processed_{int(time.time())}.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        type="primary",
-        use_container_width=True,
-        help="Download the complete processed file with duplicates removed and strings organized"
-    )
+    with col1:
+        # Interactive Visualizer Download (LEFT - GREEN)
+        st.markdown("""
+        <div style="padding: 15px; background: linear-gradient(135deg, #28a745, #20c997); border-radius: 10px; margin-bottom: 10px;">
+            <h4 style="color: white; margin: 0;">🎮 Interactive Visualizer</h4>
+            <p style="color: white; margin: 5px 0 0 0; font-size: 14px;">HTML file for LQA team review with Pass/Fail states</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Generate filename for visualizer
+        current_time = int(time.time())
+        original_filename = getattr(st.session_state, 'original_filename', None)
+        
+        if original_filename:
+            clean_name = re.sub(r'\.[^.]+$', '', original_filename)
+            visualizer_filename = f"Visualizer-{clean_name}.html"
+        else:
+            visualizer_filename = f"StringZ-Visualizer-{processed_dataset.target_lang}-{current_time}.html"
+        
+        # Generate visualizer HTML
+        try:
+            visualizer_html = generate_visualizer_html(processed_dataset, original_filename)
+            
+            st.download_button(
+                label="🎮 Download Interactive Visualizer",
+                data=visualizer_html.encode('utf-8'),
+                file_name=visualizer_filename,
+                mime="text/html",
+                type="primary",
+                use_container_width=True,
+                help="Interactive HTML file for LQA review with Pass/Fail tracking"
+            )
+            
+            # Info about visualizer
+            st.info(f"📝 **{len(processed_dataset)}** strings ready for review\n\n✨ **Features:** Interactive table, Pass/Fail states, offline use, shareable with team")
+            
+        except Exception as e:
+            st.error(f"Error generating visualizer: {str(e)}")
+            st.exception(e)
     
-    # Additional download options
-    st.markdown("**Additional Downloads:**")
+    with col2:
+        # Excel Spreadsheet Download (RIGHT - BLUE)
+        st.markdown("""
+        <div style="padding: 15px; background: linear-gradient(135deg, #007bff, #6c757d); border-radius: 10px; margin-bottom: 10px;">
+            <h4 style="color: white; margin: 0;">📊 Excel Spreadsheet</h4>
+            <p style="color: white; margin: 5px 0 0 0; font-size: 14px;">Standard Excel file for translation work and analysis</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        df_processed = processed_dataset.to_dataframe()
+        buffer = io.BytesIO()
+        with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
+            df_processed.to_excel(writer, sheet_name='Processed_Translations', index=False)
+        
+        st.download_button(
+            label="📊 Download Excel Spreadsheet",
+            data=buffer.getvalue(),
+            file_name=f"StringZ-Processed-{current_time}.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            type="secondary",
+            use_container_width=True,
+            help="Excel file with processed translations, duplicates removed, and strings organized"
+        )
+        
+        # Info about Excel
+        completion_rate = processed_dataset.get_completion_rate()
+        st.info(f"📊 **{len(df_processed)}** entries\n\n📈 **{completion_rate:.1f}%** translation completion\n\n🔄 **{summary['duplicates_removed']}** duplicates removed")
+    
+    # Additional download options (smaller)
+    st.markdown("---")
+    st.markdown("**Additional Export Options:**")
     col1, col2 = st.columns(2)
     
     with col1:
@@ -738,9 +1081,9 @@ def show_results():
                     missing_df.to_excel(writer, sheet_name='Missing_Translations', index=False)
                 
                 st.download_button(
-                    label=f"❌ Download Missing Only ({len(missing_df)} strings)",
+                    label=f"❌ Missing Only ({len(missing_df)} strings)",
                     data=missing_buffer.getvalue(),
-                    file_name=f"stringz_missing_{int(time.time())}.xlsx",
+                    file_name=f"StringZ-Missing-{current_time}.xlsx",
                     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                     use_container_width=True
                 )
@@ -755,9 +1098,9 @@ def show_results():
                     priority_df.to_excel(writer, sheet_name='Priority_Strings', index=False)
                 
                 st.download_button(
-                    label=f"⭐ Download High Priority ({len(priority_df)} strings)",
+                    label=f"⭐ High Priority ({len(priority_df)} strings)",
                     data=priority_buffer.getvalue(),
-                    file_name=f"stringz_priority_{int(time.time())}.xlsx",
+                    file_name=f"StringZ-Priority-{current_time}.xlsx",
                     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                     use_container_width=True
                 )
