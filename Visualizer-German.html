@@ -7,174 +7,274 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
     <style>
+      :root {
+        /* Light mode colors */
+        --bg-primary: #f8f9fa;
+        --bg-secondary: white;
+        --bg-banner: #f8f9fa;
+        --text-primary: #333;
+        --text-secondary: #6c757d;
+        --text-muted: #495057;
+        --border-color: #dee2e6;
+        --table-header-bg: #f8f9fa;
+        --table-border: #dee2e6;
+        --button-bg: #6c757d;
+        --button-hover: #5a6268;
+        --input-bg: white;
+      }
+      
+      [data-theme="dark"] {
+        /* Dark mode colors */
+        --bg-primary: #1a1a1a;
+        --bg-secondary: #2d2d2d;
+        --bg-banner: #343a40;
+        --text-primary: #f8f9fa;
+        --text-secondary: #adb5bd;
+        --text-muted: #ced4da;
+        --border-color: #495057;
+        --table-header-bg: #343a40;
+        --table-border: #495057;
+        --button-bg: #495057;
+        --button-hover: #5a6268;
+        --input-bg: #343a40;
+      }
+      
       body {
-                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                    background-color: #f8f9fa;
-                    margin: 0;
-                    padding: 0;
-                    color: #333;
-                }
-                .toggle-btn {
-                    position: fixed;
-                    top: 15px;
-                    left: 15px;
-                    z-index: 9999;
-                    padding: 8px 16px;
-                    background-color: #6c757d;
-                    color: white;
-                    border: 1px solid #6c757d;
-                    border-radius: 4px;
-                    cursor: pointer;
-                    font-weight: 500;
-                    font-size: 14px;
-                    transition: background-color 0.2s ease;
-                }
-                .toggle-btn:hover {
-                    background-color: #5a6268;
-                    border-color: #545b62;
-                }
-                #clearState {
-                    float: left;
-                    margin-right: 15px;
-                    margin-bottom: 15px;
-                    padding: 8px 16px;
-                    background-color: #dc3545;
-                    color: white;
-                    border: 1px solid #dc3545;
-                    border-radius: 4px;
-                    cursor: pointer;
-                    font-weight: 500;
-                    font-size: 14px;
-                    transition: background-color 0.2s ease;
-                }
-                #clearState:hover {
-                    background-color: #c82333;
-                    border-color: #bd2130;
-                }
-                .container {
-                    padding: 70px 30px 30px 30px;
-                    background: white;
-                    margin: 0;
-                    min-height: 100vh;
-                }
-                .info-banner {
-                    background-color: #f8f9fa;
-                    border: 1px solid #dee2e6;
-                    color: #495057;
-                    padding: 20px;
-                    margin-bottom: 25px;
-                    border-radius: 4px;
-                    text-align: center;
-                }
-                .info-banner h2 {
-                    margin: 0 0 10px 0;
-                    font-size: 24px;
-                    font-weight: 600;
-                    color: #343a40;
-                }
-                .info-banner p {
-                    margin: 0;
-                    font-size: 14px;
-                    color: #6c757d;
-                }
-                #myTable {
-                    border: 1px solid #dee2e6;
-                    border-radius: 4px;
-                    overflow: hidden;
-                }
-                #myTable td {
-                    user-select: text !important;
-                    padding: 12px 8px;
-                    vertical-align: top;
-                    border-bottom: 1px solid #dee2e6;
-                }
-                #myTable th {
-                    background-color: #f8f9fa;
-                    border-bottom: 2px solid #dee2e6;
-                    color: #495057;
-                    font-weight: 600;
-                    padding: 15px 8px;
-                    text-align: center;
-                }
-                /* Enhanced styling for different columns */
-                #myTable td:first-child {
-                    font-family: 'Courier New', monospace;
-                    font-size: 12px;
-                    color: #6c757d;
-                    max-width: 120px;
-                }
-                #myTable td:nth-child(2), #myTable td:nth-child(3) {
-                    line-height: 1.4;
-                    max-width: 300px;
-                    word-wrap: break-word;
-                }
-                #myTable td:nth-child(4) {
-                    text-align: center;
-                    font-weight: 600;
-                    color: #495057;
-                    font-size: 14px;
-                }
-                select.state-select {
-                    width: 100%;
-                    font-weight: 500;
-                    padding: 6px 8px;
-                    border: 1px solid #ced4da;
-                    border-radius: 4px;
-                    font-size: 14px;
-                    background-color: white;
-                }
-                select.state-select:focus {
-                    outline: none;
-                    border-color: #80bdff;
-                    box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
-                }
-                select.state-select.pass {
-                    color: #28a745;
-                    border-color: #28a745;
-                }
-                select.state-select.fail {
-                    color: #dc3545;
-                    border-color: #dc3545;
-                }
-                /* DataTables styling */
-                .dataTables_wrapper .dataTables_length,
-                .dataTables_wrapper .dataTables_filter,
-                .dataTables_wrapper .dataTables_info,
-                .dataTables_wrapper .dataTables_paginate {
-                    margin: 15px 0;
-                }
-                .dataTables_wrapper .dataTables_filter input {
-                    border: 1px solid #ced4da;
-                    border-radius: 4px;
-                    padding: 6px 12px;
-                    margin-left: 8px;
-                }
-                .dataTables_wrapper .dataTables_length select {
-                    border: 1px solid #ced4da;
-                    border-radius: 4px;
-                    padding: 4px 8px;
-                    margin: 0 8px;
-                }
-                .dataTables_wrapper .dataTables_paginate .paginate_button {
-                    border: 1px solid #dee2e6;
-                    border-radius: 4px;
-                    padding: 6px 12px;
-                    margin: 0 2px;
-                    background-color: white;
-                }
-                .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
-                    background-color: #f8f9fa;
-                    border-color: #adb5bd;
-                }
-                .dataTables_wrapper .dataTables_paginate .paginate_button.current {
-                    background-color: #007bff;
-                    border-color: #007bff;
-                    color: white !important;
-                }
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: var(--bg-primary);
+        margin: 0;
+        padding: 0;
+        color: var(--text-primary);
+        transition: background-color 0.3s ease, color 0.3s ease;
+      }
+      
+      .toggle-btn {
+        position: fixed;
+        top: 15px;
+        left: 15px;
+        z-index: 9999;
+        padding: 8px 16px;
+        background-color: var(--button-bg);
+        color: white;
+        border: 1px solid var(--button-bg);
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        font-size: 14px;
+        transition: background-color 0.2s ease;
+      }
+      
+      .toggle-btn:hover {
+        background-color: var(--button-hover);
+        border-color: var(--button-hover);
+      }
+      
+      .dark-mode-btn {
+        position: fixed;
+        top: 15px;
+        left: 120px;
+        z-index: 9999;
+        padding: 8px 16px;
+        background-color: var(--button-bg);
+        color: white;
+        border: 1px solid var(--button-bg);
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        font-size: 14px;
+        transition: background-color 0.2s ease;
+      }
+      
+      .dark-mode-btn:hover {
+        background-color: var(--button-hover);
+        border-color: var(--button-hover);
+      }
+      
+      #clearState {
+        float: left;
+        margin-right: 15px;
+        margin-bottom: 15px;
+        padding: 8px 16px;
+        background-color: #dc3545;
+        color: white;
+        border: 1px solid #dc3545;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        font-size: 14px;
+        transition: background-color 0.2s ease;
+      }
+      
+      #clearState:hover {
+        background-color: #c82333;
+        border-color: #bd2130;
+      }
+      
+      .container {
+        padding: 70px 30px 30px 30px;
+        background: var(--bg-secondary);
+        margin: 0;
+        min-height: 100vh;
+        transition: background-color 0.3s ease;
+      }
+      
+      .info-banner {
+        background-color: var(--bg-banner);
+        border: 1px solid var(--border-color);
+        color: var(--text-muted);
+        padding: 20px;
+        margin-bottom: 25px;
+        border-radius: 4px;
+        text-align: center;
+        transition: background-color 0.3s ease, border-color 0.3s ease;
+      }
+      
+      .info-banner h2 {
+        margin: 0 0 10px 0;
+        font-size: 24px;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+      
+      .info-banner p {
+        margin: 0;
+        font-size: 14px;
+        color: var(--text-secondary);
+      }
+      
+      #myTable {
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        overflow: hidden;
+        transition: border-color 0.3s ease;
+      }
+      
+      #myTable td {
+        user-select: text !important;
+        padding: 12px 8px;
+        vertical-align: top;
+        border-bottom: 1px solid var(--table-border);
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+        transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+      }
+      
+      #myTable th {
+        background-color: var(--table-header-bg);
+        border-bottom: 2px solid var(--border-color);
+        color: var(--text-muted);
+        font-weight: 600;
+        padding: 15px 8px;
+        text-align: center;
+        transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+      }
+      
+      /* Enhanced styling for different columns */
+      #myTable td:first-child {
+        font-family: 'Courier New', monospace;
+        font-size: 12px;
+        color: var(--text-secondary);
+        max-width: 120px;
+      }
+      
+      #myTable td:nth-child(2), #myTable td:nth-child(3) {
+        line-height: 1.4;
+        max-width: 300px;
+        word-wrap: break-word;
+      }
+      
+      #myTable td:nth-child(4) {
+        text-align: center;
+        font-weight: 600;
+        color: var(--text-muted);
+        font-size: 14px;
+      }
+      
+      select.state-select {
+        width: 100%;
+        font-weight: 500;
+        padding: 6px 8px;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        font-size: 14px;
+        background-color: var(--input-bg);
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+      }
+      
+      select.state-select:focus {
+        outline: none;
+        border-color: #80bdff;
+        box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+      }
+      
+      select.state-select.pass {
+        color: #28a745;
+        border-color: #28a745;
+      }
+      
+      select.state-select.fail {
+        color: #dc3545;
+        border-color: #dc3545;
+      }
+      
+      /* DataTables styling */
+      .dataTables_wrapper {
+        color: var(--text-primary);
+      }
+      
+      .dataTables_wrapper .dataTables_length,
+      .dataTables_wrapper .dataTables_filter,
+      .dataTables_wrapper .dataTables_info,
+      .dataTables_wrapper .dataTables_paginate {
+        margin: 15px 0;
+      }
+      
+      .dataTables_wrapper .dataTables_filter input {
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        padding: 6px 12px;
+        margin-left: 8px;
+        background-color: var(--input-bg);
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+      }
+      
+      .dataTables_wrapper .dataTables_length select {
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        padding: 4px 8px;
+        margin: 0 8px;
+        background-color: var(--input-bg);
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+      }
+      
+      .dataTables_wrapper .dataTables_paginate .paginate_button {
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        padding: 6px 12px;
+        margin: 0 2px;
+        background-color: var(--input-bg);
+        color: var(--text-primary) !important;
+        transition: all 0.3s ease;
+      }
+      
+      .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+        background-color: var(--bg-banner);
+        border-color: var(--text-secondary);
+      }
+      
+      .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+        background-color: #007bff;
+        border-color: #007bff;
+        color: white !important;
+      }
     </style>
   </head>
   <body>
     <button class="toggle-btn" onclick="toggleData()">Show Raw</button>
+    <button class="dark-mode-btn" onclick="toggleDarkMode()">🌙 Dark</button>
     <div class="container">
       <div class="info-banner">
         <h2>🎮 StringZ Visualizer - German Translation Review</h2>
@@ -306,7 +406,36 @@
                 }
             }
         
+            function toggleDarkMode() {
+                const body = document.body;
+                const btn = document.querySelector('.dark-mode-btn');
+                const isDark = body.getAttribute('data-theme') === 'dark';
+                
+                if (isDark) {
+                    body.removeAttribute('data-theme');
+                    btn.textContent = '🌙 Dark';
+                    localStorage.setItem('visualizer-theme', 'light');
+                } else {
+                    body.setAttribute('data-theme', 'dark');
+                    btn.textContent = '☀️ Light'; 
+                    localStorage.setItem('visualizer-theme', 'dark');
+                }
+            }
+            
+            function initializeTheme() {
+                const savedTheme = localStorage.getItem('visualizer-theme');
+                const btn = document.querySelector('.dark-mode-btn');
+                
+                if (savedTheme === 'dark') {
+                    document.body.setAttribute('data-theme', 'dark');
+                    btn.textContent = '☀️ Light';
+                } else {
+                    btn.textContent = '🌙 Dark';
+                }
+            }
+        
             $(document).ready(function () {
+                initializeTheme();
                 renderData(formattedData);
                 $('#clearState').click(clearAllStates);
                 
