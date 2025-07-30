@@ -12,7 +12,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 from stringZ.models.data_models import TranslationDataset
 from stringZ.core.processor import TranslationProcessor, ProcessingConfig
 from stringZ.export.visualizer import generate_visualizer_html
-from strinZ.validation.validators import run_validation
+from stringZ.validation.validators import run_validation
 
 st.set_page_config(
     page_title="StringZ - ZGAME Translation Tool",

@@ -1,7 +1,5 @@
 import re
-
-from game_elements import count_enhanced_tokens
-from game_elements import detect_malformed_tags
+from .game_elements import count_enhanced_tokens, detect_malformed_tags
 
 def validate_translation_pair(str_id, en_text, target_text, target_lang):
     """Validate a single translation pair - returns list of issues"""
