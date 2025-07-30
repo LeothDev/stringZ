@@ -710,6 +710,7 @@ def format_text_for_visualizer(text):
     
     return raw_text, formatted_text
 
+
 def generate_visualizer_html(dataset, original_filename=None):
     """
     Generate interactive HTML visualizer file from processed dataset
@@ -728,8 +729,8 @@ def generate_visualizer_html(dataset, original_filename=None):
     # Determine target language column name
     target_lang = dataset.target_lang or "Target"
     
-    # Create headers array
-    headers = ["strId", dataset.source_lang, target_lang, "State", "Token Check Result"]
+    # Create headers array - cleaner layout focused on LQA needs
+    headers = ["strId", dataset.source_lang, target_lang, "Occurrences", "State"]
     
     # Generate raw data array (JavaScript format)
     raw_data_rows = []
@@ -740,21 +741,22 @@ def generate_visualizer_html(dataset, original_filename=None):
         str_id = str(row.get('strId', ''))
         en_text = str(row.get(dataset.source_lang, ''))
         target_text = str(row.get(target_lang, '')) if target_lang in df.columns else ''
+        occurrences = int(row.get('Occurrences', 1))  # Default to 1 if missing
         
         # Format text properly for both raw and formatted views
         raw_en, formatted_en = format_text_for_visualizer(en_text)
         raw_target, formatted_target = format_text_for_visualizer(target_text)
         
         # Create raw data row (HTML encoded for debugging)
-        raw_row = [str_id, raw_en, raw_target, "", ""]
+        raw_row = [str_id, raw_en, raw_target, str(occurrences), ""]
         
         # Create formatted data row (proper HTML for display)
         formatted_row = [
             html.escape(str_id),  # ID is always escaped
             formatted_en,         # EN text with HTML formatting
             formatted_target,     # Target text with HTML formatting
-            "",                   # State column - empty for user input
-            ""                    # Token Check Result - empty for user input
+            str(occurrences),     # Occurrences count - useful for prioritization
+            ""                    # State column - empty for user input
         ]
         
         raw_data_rows.append(raw_row)
@@ -798,63 +800,176 @@ def generate_visualizer_html(dataset, original_filename=None):
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
     <style>
       body {{
-                    font-family: Arial, sans-serif;
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                    background-color: #f8f9fa;
+                    margin: 0;
+                    padding: 0;
+                    color: #333;
                 }}
                 .toggle-btn {{
                     position: fixed;
-                    top: 10px;
-                    left: 10px;
+                    top: 15px;
+                    left: 15px;
                     z-index: 9999;
                     padding: 8px 16px;
-                    background-color: #007bff;
+                    background-color: #6c757d;
                     color: white;
-                    border: none;
+                    border: 1px solid #6c757d;
                     border-radius: 4px;
                     cursor: pointer;
-                    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+                    font-weight: 500;
+                    font-size: 14px;
+                    transition: background-color 0.2s ease;
+                }}
+                .toggle-btn:hover {{
+                    background-color: #5a6268;
+                    border-color: #545b62;
                 }}
                 #clearState {{
                     float: left;
-                    margin-right: 10px;
-                    margin-bottom: 10px;
-                    padding: 5px 10px;
+                    margin-right: 15px;
+                    margin-bottom: 15px;
+                    padding: 8px 16px;
                     background-color: #dc3545;
                     color: white;
-                    border: none;
+                    border: 1px solid #dc3545;
                     border-radius: 4px;
                     cursor: pointer;
+                    font-weight: 500;
+                    font-size: 14px;
+                    transition: background-color 0.2s ease;
+                }}
+                #clearState:hover {{
+                    background-color: #c82333;
+                    border-color: #bd2130;
                 }}
                 .container {{
-                    padding-top: 60px;
+                    padding: 70px 30px 30px 30px;
+                    background: white;
+                    margin: 0;
+                    min-height: 100vh;
+                }}
+                .info-banner {{
+                    background-color: #f8f9fa;
+                    border: 1px solid #dee2e6;
+                    color: #495057;
+                    padding: 20px;
+                    margin-bottom: 25px;
+                    border-radius: 4px;
+                    text-align: center;
+                }}
+                .info-banner h2 {{
+                    margin: 0 0 10px 0;
+                    font-size: 24px;
+                    font-weight: 600;
+                    color: #343a40;
+                }}
+                .info-banner p {{
+                    margin: 0;
+                    font-size: 14px;
+                    color: #6c757d;
+                }}
+                #myTable {{
+                    border: 1px solid #dee2e6;
+                    border-radius: 4px;
+                    overflow: hidden;
                 }}
                 #myTable td {{
                     user-select: text !important;
+                    padding: 12px 8px;
+                    vertical-align: top;
+                    border-bottom: 1px solid #dee2e6;
+                }}
+                #myTable th {{
+                    background-color: #f8f9fa;
+                    border-bottom: 2px solid #dee2e6;
+                    color: #495057;
+                    font-weight: 600;
+                    padding: 15px 8px;
+                    text-align: center;
+                }}
+                /* Enhanced styling for different columns */
+                #myTable td:first-child {{
+                    font-family: 'Courier New', monospace;
+                    font-size: 12px;
+                    color: #6c757d;
+                    max-width: 120px;
+                }}
+                #myTable td:nth-child(2), #myTable td:nth-child(3) {{
+                    line-height: 1.4;
+                    max-width: 300px;
+                    word-wrap: break-word;
+                }}
+                #myTable td:nth-child(4) {{
+                    text-align: center;
+                    font-weight: 600;
+                    color: #495057;
+                    font-size: 14px;
                 }}
                 select.state-select {{
                     width: 100%;
-                    font-weight: bold;
+                    font-weight: 500;
+                    padding: 6px 8px;
+                    border: 1px solid #ced4da;
+                    border-radius: 4px;
+                    font-size: 14px;
+                    background-color: white;
+                }}
+                select.state-select:focus {{
+                    outline: none;
+                    border-color: #80bdff;
+                    box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
                 }}
                 select.state-select.pass {{
-                    color: green;
+                    color: #28a745;
+                    border-color: #28a745;
                 }}
                 select.state-select.fail {{
-                    color: red;
+                    color: #dc3545;
+                    border-color: #dc3545;
                 }}
-                .info-banner {{
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                    color: white;
-                    padding: 15px;
-                    margin: 10px 0;
-                    border-radius: 8px;
-                    text-align: center;
+                /* DataTables styling */
+                .dataTables_wrapper .dataTables_length,
+                .dataTables_wrapper .dataTables_filter,
+                .dataTables_wrapper .dataTables_info,
+                .dataTables_wrapper .dataTables_paginate {{
+                    margin: 15px 0;
+                }}
+                .dataTables_wrapper .dataTables_filter input {{
+                    border: 1px solid #ced4da;
+                    border-radius: 4px;
+                    padding: 6px 12px;
+                    margin-left: 8px;
+                }}
+                .dataTables_wrapper .dataTables_length select {{
+                    border: 1px solid #ced4da;
+                    border-radius: 4px;
+                    padding: 4px 8px;
+                    margin: 0 8px;
+                }}
+                .dataTables_wrapper .dataTables_paginate .paginate_button {{
+                    border: 1px solid #dee2e6;
+                    border-radius: 4px;
+                    padding: 6px 12px;
+                    margin: 0 2px;
+                    background-color: white;
+                }}
+                .dataTables_wrapper .dataTables_paginate .paginate_button:hover {{
+                    background-color: #f8f9fa;
+                    border-color: #adb5bd;
+                }}
+                .dataTables_wrapper .dataTables_paginate .paginate_button.current {{
+                    background-color: #007bff;
+                    border-color: #007bff;
+                    color: white !important;
                 }}
     </style>
   </head>
   <body>
-    <button class="toggle-btn" onclick="toggleData()">Toggle Raw/Formatted</button>
+    <button class="toggle-btn" onclick="toggleData()">Show Raw</button>
     <div class="container">
       <div class="info-banner">
-        <h2>🎮 {html.escape(title)}</h2>
+        <h2>{html.escape(title)}</h2>
         <p>📊 <strong>{len(df)}</strong> strings • 🌍 <strong>{dataset.source_lang}</strong> → <strong>{target_lang}</strong> • 🛠️ Generated by StringZ</p>
       </div>
       <button id="clearState">Clear All States</button>
@@ -933,16 +1048,67 @@ def generate_visualizer_html(dataset, original_filename=None):
         
             function clearAllStates() {{
                 const total = tableData.length;
+                let clearedCount = 0;
+                
                 for (let i = 0; i < total; i++) {{
-                    localStorage.removeItem(getStateKey(i));
+                    const key = getStateKey(i);
+                    if (localStorage.getItem(key)) {{
+                        localStorage.removeItem(key);
+                        clearedCount++;
+                    }}
                 }}
+                
                 renderData(tableData);
-                alert('All review states cleared!');
+                
+                // Better user feedback
+                if (clearedCount > 0) {{
+                    alert(`✅ Cleared ${{clearedCount}} review states!`);
+                }} else {{
+                    alert('ℹ️ No review states to clear.');
+                }}
+            }}
+        
+            function getProgress() {{
+                const total = tableData.length;
+                let reviewed = 0;
+                let passed = 0;
+                let failed = 0;
+                
+                for (let i = 0; i < total; i++) {{
+                    const state = localStorage.getItem(getStateKey(i));
+                    if (state) {{
+                        reviewed++;
+                        if (state === 'Pass') passed++;
+                        if (state === 'Fail') failed++;
+                    }}
+                }}
+                
+                return {{ total, reviewed, passed, failed }};
+            }}
+            
+            function updateProgressDisplay() {{
+                const progress = getProgress();
+                const percentage = Math.round((progress.reviewed / progress.total) * 100);
+                
+                // Update the info banner with progress
+                const banner = document.querySelector('.info-banner p');
+                if (banner) {{
+                    const originalText = banner.textContent.split('•')[0] + '•';
+                    banner.innerHTML = `${{originalText}} 📊 <strong>${{progress.reviewed}}/${{progress.total}}</strong> reviewed (<strong>${{percentage}}%</strong>) • ✅ <strong>${{progress.passed}}</strong> passed • ❌ <strong>${{progress.failed}}</strong> failed`;
+                }}
             }}
         
             $(document).ready(function () {{
                 renderData(formattedData);
                 $('#clearState').click(clearAllStates);
+                
+                // Update progress on page load
+                updateProgressDisplay();
+                
+                // Update progress when states change
+                $('#myTable tbody').on('change', 'select.state-select', function () {{
+                    setTimeout(updateProgressDisplay, 100);
+                }});
             }});
     </script>
   </body>
