@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>StringZ Visualizer - German Translation Review</title>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <style>
+      :root {
+        /* Light mode colors */
+        --bg-primary: #f8f9fa;
+        --bg-secondary: white;
+        --bg-banner: #f8f9fa;
+        --text-primary: #333;
+        --text-secondary: #6c757d;
+        --text-muted: #495057;
+        --border-color: #dee2e6;
+        --table-header-bg: #f8f9fa;
+        --table-border: #dee2e6;
+        --button-bg: #6c757d;
+        --button-hover: #5a6268;
+        --input-bg: white;
+      }
+      
+      [data-theme="dark"] {
+        /* Dark mode colors */
+        --bg-primary: #1a1a1a;
+        --bg-secondary: #2d2d2d;
+        --bg-banner: #343a40;
+        --text-primary: #f8f9fa;
+        --text-secondary: #adb5bd;
+        --text-muted: #ced4da;
+        --border-color: #495057;
+        --table-header-bg: #343a40;
+        --table-border: #495057;
+        --button-bg: #495057;
+        --button-hover: #5a6268;
+        --input-bg: #343a40;
+      }
+      
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: var(--bg-primary);
+        margin: 0;
+        padding: 0;
+        color: var(--text-primary);
+        transition: background-color 0.3s ease, color 0.3s ease;
+      }
+      
+      .toggle-btn {
+        position: fixed;
+        top: 15px;
+        left: 15px;
+        z-index: 9999;
+        padding: 8px 16px;
+        background-color: var(--button-bg);
+        color: white;
+        border: 1px solid var(--button-bg);
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        font-size: 14px;
+        transition: background-color 0.2s ease;
+      }
+      
+      .toggle-btn:hover {
+        background-color: var(--button-hover);
+        border-color: var(--button-hover);
+      }
+      
+      .dark-mode-btn {
+        position: fixed;
+        top: 15px;
+        left: 120px;
+        z-index: 9999;
+        padding: 8px 16px;
+        background-color: var(--button-bg);
+        color: white;
+        border: 1px solid var(--button-bg);
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        font-size: 14px;
+        transition: background-color 0.2s ease;
+      }
+      
+      .dark-mode-btn:hover {
+        background-color: var(--button-hover);
+        border-color: var(--button-hover);
+      }
+      
+      #clearState {
+        float: left;
+        margin-right: 15px;
+        margin-bottom: 15px;
+        padding: 8px 16px;
+        background-color: #dc3545;
+        color: white;
+        border: 1px solid #dc3545;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        font-size: 14px;
+        transition: background-color 0.2s ease;
+      }
+      
+      #clearState:hover {
+        background-color: #c82333;
+        border-color: #bd2130;
+      }
+      
+      .container {
+        padding: 70px 30px 30px 30px;
+        background: var(--bg-secondary);
+        margin: 0;
+        min-height: 100vh;
+        transition: background-color 0.3s ease;
+      }
+      
+      .info-banner {
+        background-color: var(--bg-banner);
+        border: 1px solid var(--border-color);
+        color: var(--text-muted);
+        padding: 20px;
+        margin-bottom: 25px;
+        border-radius: 4px;
+        text-align: center;
+        transition: background-color 0.3s ease, border-color 0.3s ease;
+      }
+      
+      .info-banner h2 {
+        margin: 0 0 10px 0;
+        font-size: 24px;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+      
+      .info-banner p {
+        margin: 0;
+        font-size: 14px;
+        color: var(--text-secondary);
+      }
+      
+      #myTable {
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        overflow: hidden;
+        transition: border-color 0.3s ease;
+      }
+      
+      #myTable td {
+        user-select: text !important;
+        padding: 12px 8px;
+        vertical-align: top;
+        border-bottom: 1px solid var(--table-border);
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+        transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+      }
+      
+      #myTable th {
+        background-color: var(--table-header-bg);
+        border-bottom: 2px solid var(--border-color);
+        color: var(--text-muted);
+        font-weight: 600;
+        padding: 15px 8px;
+        text-align: center;
+        transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+      }
+      
+      /* Enhanced styling for different columns */
+      #myTable td:first-child {
+        font-family: 'Courier New', monospace;
+        font-size: 12px;
+        color: var(--text-secondary);
+        max-width: 120px;
+      }
+      
+      #myTable td:nth-child(2), #myTable td:nth-child(3) {
+        line-height: 1.4;
+        max-width: 300px;
+        word-wrap: break-word;
+      }
+      
+      #myTable td:nth-child(4) {
+        text-align: center;
+        font-weight: 600;
+        color: var(--text-muted);
+        font-size: 14px;
+      }
+      
+      #myTable td:nth-child(6) {
+        min-width: 150px;
+        max-width: 200px;
+      }
+      
+      select.state-select {
+        width: 100%;
+        font-weight: 500;
+        padding: 6px 8px;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        font-size: 14px;
+        background-color: var(--input-bg);
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+      }
+      
+      input.notes-input {
+        width: 100%;
+        padding: 6px 8px;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        font-size: 12px;
+        background-color: var(--input-bg);
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+      }
+      
+      input.notes-input:focus {
+        outline: none;
+        border-color: #80bdff;
+        box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+      }
+      
+      input.notes-input::placeholder {
+        color: var(--text-secondary);
+        font-style: italic;
+      }
+      
+      select.state-select:focus {
+        outline: none;
+        border-color: #80bdff;
+        box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+      }
+      
+      select.state-select.pass {
+        color: #28a745;
+        border-color: #28a745;
+      }
+      
+      select.state-select.fail {
+        color: #dc3545;
+        border-color: #dc3545;
+      }
+      
+      /* DataTables styling */
+      .dataTables_wrapper {
+        color: var(--text-primary);
+      }
+      
+      .dataTables_wrapper .dataTables_length,
+      .dataTables_wrapper .dataTables_filter,
+      .dataTables_wrapper .dataTables_info,
+      .dataTables_wrapper .dataTables_paginate {
+        margin: 15px 0;
+      }
+      
+      .dataTables_wrapper .dataTables_filter input {
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        padding: 6px 12px;
+        margin-left: 8px;
+        background-color: var(--input-bg);
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+      }
+      
+      .dataTables_wrapper .dataTables_length select {
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        padding: 4px 8px;
+        margin: 0 8px;
+        background-color: var(--input-bg);
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+      }
+      
+      .dataTables_wrapper .dataTables_paginate .paginate_button {
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        padding: 6px 12px;
+        margin: 0 2px;
+        background-color: var(--input-bg);
+        color: var(--text-primary) !important;
+        transition: all 0.3s ease;
+      }
+      
+      .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+        background-color: var(--bg-banner);
+        border-color: var(--text-secondary);
+      }
+      
+      .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+        background-color: #007bff;
+        border-color: #007bff;
+        color: white !important;
+      }
+    </style>
+  </head>
+  <body>
+    <button class="toggle-btn" onclick="toggleData()">Show Raw</button>
+    <button class="dark-mode-btn" onclick="toggleDarkMode()">🌙 Dark</button>
+    <div class="container">
+      <div class="info-banner">
+        <h2>StringZ Visualizer - German Translation Review</h2>
+        <p>📊
+          <strong>32</strong>
+          strings • 🌍
+          <strong>EN</strong>
+          →
+          <strong>German</strong>
+          • 📝
+          <strong>179</strong>
+          words • 🛠️ Generated by StringZ</p>
+      </div>
+      <button id="clearState">Clear All States</button>
+      <table id="myTable" class="display" style="width:100%"></table>
+    </div>
+    <script>
+      const headers = ["strId", "EN", "German", "Occurrences", "State", "Notes"];
+            const rawData = [["PaperworkCurse_TokenMistakeEnglish", "&lt;color&quot;#cc1430&quot;&gt;Curse of Eternal Paperwork&lt;/color&gt;", "&lt;color=&quot;#cc1430&quot;&gt;Fluch des ewigen Papierkrams&lt;/color&gt;", "1", "", ""], ["PaperworkCurse_0", "&lt;color=&quot;#cc1430&quot;&gt;Curse of Eternal Paperwork&lt;/color&gt;", "&lt;color=&quot;#cc1430&quot;&gt;Fluch des ewigen Papierkrams&lt;/color&gt;", "2", "", ""], ["PaperworkBothEnglishStrings", "&lt;color=&quot;#cc1430&quot;&gt;Curse of Eternal Paperwork&lt;/color&gt;", "&lt;color=&quot;#cc1430&quot;&gt;Curse of Eternal Paperwork&lt;/color&gt;", "1", "", ""], ["PaperworkCurse_TokenMistakeGerman", "&lt;color=&quot;#cc1430&quot;&gt;Curse of Eternal Paperwork&lt;/color&gt;", "&lt;color=&quot;#cc1430&quot;&gt;Fluch des ewigen Papierkrams&lt;color&gt;", "1", "", ""], ["PaperworkCurse_TokenMissing", "&lt;color=&quot;#cc1430&quot;&gt;Curse of Eternal Paperwork&lt;/color&gt;", "&lt;color=&quot;#cc1430&quot;&gt;Fluch des ewigen Papierkrams", "1", "", ""], ["ColorToken_ColorfulDuplicate_0", "This is a &lt;color=&quot;#1e8852&quot;&gt;colorful&lt;/color&gt; duplicate string.", "Dies ist ein &lt;color=&quot;#1e8852&quot;&gt;farbenfroher&lt;/color&gt; doppelter String.", "3", "", ""], ["ColorToken_ColorfulDuplicate_0_Incorrect", "This is a &lt;color=&quot;#1e8852&quot;&gt;colorful&lt;/color&gt; duplicate string.", "Dies ist ein &lt;color=&quot;#1e8852&gt;farbenfroher&lt;/color&gt; doppelter String.", "1", "", ""], ["Duplicate_0", "This is a duplicate string.", "Dies ist ein doppelter String.", "7", "", ""], ["Duplicate_2_AddedSpace", "This is a duplicate string.", "Dies ist ein  doppelter String.", "1", "", ""], ["SoupTokenHopefullyCorrect_0", "This soup contains {50,num}% water, {40,num}% vegetables and {10,num}% pure frustration and despair.", "Diese Suppe beinhaltet {50,num}% Wasser, {40,num}% Gemüse und {10,num}% pure Frustration and Verzweiflung.", "2", "", ""], ["TokenSoup_PercentMissing_0", "This soup contains {50,num}% water, {40,num}% vegetables and {10,num}% pure frustration and despair.", "Diese Suppe beinhaltet {60,num}% Wasser, {40,num}% Gemüse und {10,num} pure Frustration and Verzweiflung.", "2", "", ""], ["TokenSoup_NumMismatch", "This soup contains {50,num}% water, {40,num}% vegetables and {10,num}% pure frustration and despair.", "Diese Suppe beinhaltet {60,num}% Wasser, {40,num}% Gemüse und {10,num}% pure Frustration and Verzweiflung.", "1", "", ""], ["TokenSoup_SevereIssue", "This soup contains {50,num}% water, {40,num}% vegetables and {10,num}% pure frustration and despair.", "Diese Suppe beinhaltet nichts.", "1", "", ""], ["Stew_RandomSortingTestString", "&quot;Mmmmh, this stew tastes delicious! What are the ingredients?&quot;", "&quot;Mmmmh, dieser Eintopf schmeckt lecker! Was ist da alles drin?&quot;", "2", "", ""], ["Dup_Stew_RandomSortingTestString_MMissing", "&quot;Mmmmh, this stew tastes delicious! What are the ingredients?&quot;", "&quot;Mmmh, dieser Eintopf schmeckt lecker! Was ist da alles drin?&quot;", "1", "", ""], ["DayOfWeekFri_Inconsistent_0", "It&#x27;s Friday today!", "Es ist Freitag!", "2", "", ""], ["DayOfWeekFri_Consistent", "It&#x27;s Friday today!", "Heute ist Freitag!", "1", "", ""], ["CurseOfDups_0", "&lt;color=&quot;#cc1430&quot;&gt;Curse of Duplicate Strings&lt;/color&gt;", "&lt;color=&quot;#cc1430&quot;&gt;Fluch der doppelten Strings&lt;/color&gt;", "2", "", ""], ["CurseOfDupsSwappedToken", "&lt;color=&quot;#cc1430&quot;&gt;Curse of Duplicate Strings&lt;/color&gt;", "&lt;/color&gt;Fluch der doppelten Strings&lt;color=&quot;#cc1430&quot;&gt;", "1", "", ""], ["ColorToken_HopefullyCorrect", "Hopefully &lt;color=&quot;#1e8852&quot;&gt;correct&lt;/color&gt;.", "Hoffentlich &lt;color=&quot;#1e8852&quot;&gt;richtig&lt;/color&gt;.", "1", "", ""], ["ColorToken_HopefullyAlsoCorrect", "Hopefully also &lt;color=&quot;#1e8852&quot;&gt;correct&lt;/color&gt;.", "Hoffentlich auch &lt;color=&quot;#1e8852&quot;&gt;richtig&lt;/color&gt;.", "1", "", ""], ["DayOfWeekTue", "It&#x27;s Tuesday today!", "Heute ist Dienstag!", "1", "", ""], ["DayOfWeekTue_MissingSpace", "It&#x27;s Tuesday today!", "Heuteist Dienstag!", "1", "", ""], ["RandomSortingTestString_Cake", "&quot;Mmmmh, this cake tastes delicious! What are the ingredients?&quot;", "&quot;Mmmmh, dieser Kuchen schmeckt lecker! Was ist da alles drin?&quot;", "2", "", ""], ["RandomSortingTestStringCasserole", "&quot;Mmmmh, this casserole tastes delicious! What are the ingredients?&quot;", "&quot;Mmmmh, dieser Auflauf schmeckt lecker! Was ist da alles drin?&quot;", "1", "", ""], ["SortingTestStringRandom_Soup", "&quot;Mmmmh, this soup tastes delicious! What are the ingredients?&quot;", "&quot;Mmmmh, diese Suppe schmeckt lecker! Was ist da alles drin?&quot;", "1", "", ""], ["DayOfWeekMon", "It&#x27;s Monday today!", "Heute ist Montag!", "1", "", ""], ["DayOfWeekSat", "It&#x27;s Saturday today!", "Heute ist Samstag!", "1", "", ""], ["DayOfWeekSun_0", "It&#x27;s Sunday today!", "Heute ist Sonnstag!", "2", "", ""], ["DayOfWeekThu", "It&#x27;s Thursday today!", "Heute ist Donnerstag!", "1", "", ""], ["WedDayOfWeek", "It&#x27;s Wednesday today!", "Heute ist Mittwoch!", "1", "", ""], ["ThankYouMessage_0", "Thank you Leo for sharing! :D", "Danke fürs Teilen, Leo! :D", "2", "", ""]];
+            const formattedData = [["PaperworkCurse_TokenMistakeEnglish", "<span style=\"color: #cc1430;\">Curse of Eternal Paperwork</span>", "<span style=\"color: #cc1430;\">Fluch des ewigen Papierkrams</span>", "1", "", ""], ["PaperworkCurse_0", "<span style=\"color: #cc1430;\">Curse of Eternal Paperwork</span>", "<span style=\"color: #cc1430;\">Fluch des ewigen Papierkrams</span>", "2", "", ""], ["PaperworkBothEnglishStrings", "<span style=\"color: #cc1430;\">Curse of Eternal Paperwork</span>", "<span style=\"color: #cc1430;\">Curse of Eternal Paperwork</span>", "1", "", ""], ["PaperworkCurse_TokenMistakeGerman", "<span style=\"color: #cc1430;\">Curse of Eternal Paperwork</span>", "<color=\"#cc1430\">Fluch des ewigen Papierkrams<color>", "1", "", ""], ["PaperworkCurse_TokenMissing", "<span style=\"color: #cc1430;\">Curse of Eternal Paperwork</span>", "<color=\"#cc1430\">Fluch des ewigen Papierkrams", "1", "", ""], ["ColorToken_ColorfulDuplicate_0", "This is a <span style=\"color: #1e8852;\">colorful</span> duplicate string.", "Dies ist ein <span style=\"color: #1e8852;\">farbenfroher</span> doppelter String.", "3", "", ""], ["ColorToken_ColorfulDuplicate_0_Incorrect", "This is a <span style=\"color: #1e8852;\">colorful</span> duplicate string.", "Dies ist ein <span style=\"color: #1e8852;\">farbenfroher</span> doppelter String.", "1", "", ""], ["Duplicate_0", "This is a duplicate string.", "Dies ist ein doppelter String.", "7", "", ""], ["Duplicate_2_AddedSpace", "This is a duplicate string.", "Dies ist ein  doppelter String.", "1", "", ""], ["SoupTokenHopefullyCorrect_0", "This soup contains {50,num}% water, {40,num}% vegetables and {10,num}% pure frustration and despair.", "Diese Suppe beinhaltet {50,num}% Wasser, {40,num}% Gemüse und {10,num}% pure Frustration and Verzweiflung.", "2", "", ""], ["TokenSoup_PercentMissing_0", "This soup contains {50,num}% water, {40,num}% vegetables and {10,num}% pure frustration and despair.", "Diese Suppe beinhaltet {60,num}% Wasser, {40,num}% Gemüse und {10,num} pure Frustration and Verzweiflung.", "2", "", ""], ["TokenSoup_NumMismatch", "This soup contains {50,num}% water, {40,num}% vegetables and {10,num}% pure frustration and despair.", "Diese Suppe beinhaltet {60,num}% Wasser, {40,num}% Gemüse und {10,num}% pure Frustration and Verzweiflung.", "1", "", ""], ["TokenSoup_SevereIssue", "This soup contains {50,num}% water, {40,num}% vegetables and {10,num}% pure frustration and despair.", "Diese Suppe beinhaltet nichts.", "1", "", ""], ["Stew_RandomSortingTestString", "\"Mmmmh, this stew tastes delicious! What are the ingredients?\"", "\"Mmmmh, dieser Eintopf schmeckt lecker! Was ist da alles drin?\"", "2", "", ""], ["Dup_Stew_RandomSortingTestString_MMissing", "\"Mmmmh, this stew tastes delicious! What are the ingredients?\"", "\"Mmmh, dieser Eintopf schmeckt lecker! Was ist da alles drin?\"", "1", "", ""], ["DayOfWeekFri_Inconsistent_0", "It's Friday today!", "Es ist Freitag!", "2", "", ""], ["DayOfWeekFri_Consistent", "It's Friday today!", "Heute ist Freitag!", "1", "", ""], ["CurseOfDups_0", "<span style=\"color: #cc1430;\">Curse of Duplicate Strings</span>", "<span style=\"color: #cc1430;\">Fluch der doppelten Strings</span>", "2", "", ""], ["CurseOfDupsSwappedToken", "<span style=\"color: #cc1430;\">Curse of Duplicate Strings</span>", "</color>Fluch der doppelten Strings<color=\"#cc1430\">", "1", "", ""], ["ColorToken_HopefullyCorrect", "Hopefully <span style=\"color: #1e8852;\">correct</span>.", "Hoffentlich <span style=\"color: #1e8852;\">richtig</span>.", "1", "", ""], ["ColorToken_HopefullyAlsoCorrect", "Hopefully also <span style=\"color: #1e8852;\">correct</span>.", "Hoffentlich auch <span style=\"color: #1e8852;\">richtig</span>.", "1", "", ""], ["DayOfWeekTue", "It's Tuesday today!", "Heute ist Dienstag!", "1", "", ""], ["DayOfWeekTue_MissingSpace", "It's Tuesday today!", "Heuteist Dienstag!", "1", "", ""], ["RandomSortingTestString_Cake", "\"Mmmmh, this cake tastes delicious! What are the ingredients?\"", "\"Mmmmh, dieser Kuchen schmeckt lecker! Was ist da alles drin?\"", "2", "", ""], ["RandomSortingTestStringCasserole", "\"Mmmmh, this casserole tastes delicious! What are the ingredients?\"", "\"Mmmmh, dieser Auflauf schmeckt lecker! Was ist da alles drin?\"", "1", "", ""], ["SortingTestStringRandom_Soup", "\"Mmmmh, this soup tastes delicious! What are the ingredients?\"", "\"Mmmmh, diese Suppe schmeckt lecker! Was ist da alles drin?\"", "1", "", ""], ["DayOfWeekMon", "It's Monday today!", "Heute ist Montag!", "1", "", ""], ["DayOfWeekSat", "It's Saturday today!", "Heute ist Samstag!", "1", "", ""], ["DayOfWeekSun_0", "It's Sunday today!", "Heute ist Sonnstag!", "2", "", ""], ["DayOfWeekThu", "It's Thursday today!", "Heute ist Donnerstag!", "1", "", ""], ["WedDayOfWeek", "It's Wednesday today!", "Heute ist Mittwoch!", "1", "", ""], ["ThankYouMessage_0", "Thank you Leo for sharing! :D", "Danke fürs Teilen, Leo! :D", "2", "", ""]];
+            let showingRaw = false;
+            let tableData = formattedData;
+            let dataTable;
+        
+            function getStateKey(index) {
+                return "state_StringZ Visualizer - German Translation Review_row_" + index; 
+            }
+            
+            function getNotesKey(index) {
+                return "notes_StringZ Visualizer - German Translation Review_row_" + index;
+            }
+        
+            function generateRowWithState(row, idx) {
+                const savedState = localStorage.getItem(getStateKey(idx)) || "";
+                const savedNotes = localStorage.getItem(getNotesKey(idx)) || "";
+                
+                const selectHTML = '<select class="state-select ' + savedState.toLowerCase() + '">' +
+                    '<option value="" ' + (savedState === "" ? "selected" : "") + '></option>' +
+                    '<option value="Pass" ' + (savedState === "Pass" ? "selected" : "") + '>Pass</option>' +
+                    '<option value="Fail" ' + (savedState === "Fail" ? "selected" : "") + '>Fail</option>' +
+                    '</select>';
+                
+                const notesHTML = '<input type="text" class="notes-input" value="' + 
+                    savedNotes.replace(/"/g, '&quot;') + 
+                    '" placeholder="Personal notes..." maxlength="200">';
+                
+                const newRow = row.slice();
+                const stateIndex = headers.indexOf("State");
+                const notesIndex = headers.indexOf("Notes");
+                newRow[stateIndex] = selectHTML;
+                newRow[notesIndex] = notesHTML;
+                return newRow;
+            }
+        
+            function renderData(data) {
+                tableData = data;
+                const transformed = data.map((row, idx) => generateRowWithState(row, idx));
+        
+                if (!dataTable) {
+                    dataTable = $('#myTable').DataTable({
+                        data: transformed,
+                        columns: headers.map(h => ({ title: h })),
+                        scrollX: true,
+                        paging: true,
+                        searching: true,
+                        ordering: true,
+                        deferRender: true,
+                        lengthMenu: [[-1, 10, 25, 50], ["All", 10, 25, 50]],
+                        order: [],
+                        columnDefs: [
+                            {
+                                targets: headers.indexOf("State"),
+                                orderable: true
+                            }
+                        ]
+                    });
+        
+                    $('#myTable tbody').on('change', 'select.state-select', function () {
+                        const rowIdx = dataTable.row($(this).closest('tr')).index();
+                        const value = $(this).val();
+                        localStorage.setItem(getStateKey(rowIdx), value);
+                        this.className = "state-select " + value.toLowerCase();
+                    });
+                    
+                    $('#myTable tbody').on('input', 'input.notes-input', function () {
+                        const rowIdx = dataTable.row($(this).closest('tr')).index();
+                        const value = $(this).val();
+                        localStorage.setItem(getNotesKey(rowIdx), value);
+                    });
+                } else {
+                    const currentPage = dataTable.page();
+                    const currentLength = dataTable.page.len();
+                    dataTable.clear().rows.add(transformed).draw(false);
+                    dataTable.page.len(currentLength).draw();
+                    dataTable.page(currentPage).draw(false);
+                }
+            }
+        
+            function toggleData() {
+                showingRaw = !showingRaw;
+                renderData(showingRaw ? rawData : formattedData);
+                
+                // Update button text
+                const btn = document.querySelector('.toggle-btn');
+                btn.textContent = showingRaw ? 'Show Formatted' : 'Show Raw';
+            }
+        
+            function clearAllStates() {
+                const total = tableData.length;
+                let clearedCount = 0;
+                
+                for (let i = 0; i < total; i++) {
+                    const stateKey = getStateKey(i);
+                    const notesKey = getNotesKey(i);
+                    
+                    if (localStorage.getItem(stateKey)) {
+                        localStorage.removeItem(stateKey);
+                        clearedCount++;
+                    }
+                    if (localStorage.getItem(notesKey)) {
+                        localStorage.removeItem(notesKey);
+                    }
+                }
+                
+                renderData(tableData);
+                
+                // Better user feedback
+                if (clearedCount > 0) {
+                    alert(`✅ Cleared ${clearedCount} review states and all notes!`);
+                } else {
+                    alert('ℹ️ No review states to clear.');
+                }
+            }
+        
+            function getProgress() {
+                const total = tableData.length;
+                let reviewed = 0;
+                let passed = 0;
+                let failed = 0;
+                
+                for (let i = 0; i < total; i++) {
+                    const state = localStorage.getItem(getStateKey(i));
+                    if (state) {
+                        reviewed++;
+                        if (state === 'Pass') passed++;
+                        if (state === 'Fail') failed++;
+                    }
+                }
+                
+                return { total, reviewed, passed, failed };
+            }
+            
+            function updateProgressDisplay() {
+                const progress = getProgress();
+                const percentage = Math.round((progress.reviewed / progress.total) * 100);
+                
+                // Update the info banner with progress
+                const banner = document.querySelector('.info-banner p');
+                if (banner) {
+                    const originalText = banner.textContent.split('•')[0] + '•';
+                    banner.innerHTML = `${originalText} 📊 <strong>${progress.reviewed}/${progress.total}</strong> reviewed (<strong>${percentage}%</strong>) • ✅ <strong>${progress.passed}</strong> passed • ❌ <strong>${progress.failed}</strong> failed`;
+                }
+            }
+        
+            function toggleDarkMode() {
+                const body = document.body;
+                const btn = document.querySelector('.dark-mode-btn');
+                const isDark = body.getAttribute('data-theme') === 'dark';
+                
+                if (isDark) {
+                    body.removeAttribute('data-theme');
+                    btn.textContent = '🌙 Dark';
+                    localStorage.setItem('visualizer-theme', 'light');
+                } else {
+                    body.setAttribute('data-theme', 'dark');
+                    btn.textContent = '☀️ Light'; 
+                    localStorage.setItem('visualizer-theme', 'dark');
+                }
+            }
+            
+            function initializeTheme() {
+                const savedTheme = localStorage.getItem('visualizer-theme');
+                const btn = document.querySelector('.dark-mode-btn');
+                
+                if (savedTheme === 'dark') {
+                    document.body.setAttribute('data-theme', 'dark');
+                    btn.textContent = '☀️ Light';
+                } else {
+                    btn.textContent = '🌙 Dark';
+                }
+            }
+        
+            $(document).ready(function () {
+                initializeTheme();
+                renderData(formattedData);
+                $('#clearState').click(clearAllStates);
+                
+                // Update progress on page load
+                updateProgressDisplay();
+                
+                // Update progress when states change
+                $('#myTable tbody').on('change', 'select.state-select', function () {
+                    setTimeout(updateProgressDisplay, 100);
+                });
+            });
+    </script>
+  </body>
+</html>
