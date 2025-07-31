@@ -1,7 +1,7 @@
 import io
 import os
 import sys
-import streamlit_app as st
+import streamlit as st
 import time
 import re
 import pandas as pd

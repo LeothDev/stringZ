@@ -1,7 +1,5 @@
 import streamlit as st
 import pandas as pd
-import io
-import time
 import sys
 import os
 
@@ -9,11 +7,15 @@ import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 
 from stringZ.models.data_models import TranslationDataset
-from stringZ.core.processor import TranslationProcessor, ProcessingConfig
 
 from stringZ.ui.tabs.results_tab import show_results
 from stringZ.ui.tabs.review_tab import show_review_mode
 from stringZ.ui.tabs.validation_tab import show_validation_tab
+
+from stringZ.ui.components.welcome import show_welcome
+from stringZ.ui.components.preview import show_preview
+from stringZ.ui.components.file_upload import enhanced_file_upload
+from stringZ.ui.components.processing import process_file
 
 
 st.set_page_config(
@@ -112,12 +114,8 @@ def main():
             st.header("⚙️ Processing Controls")
             
             # File upload
-            uploaded_file = st.file_uploader(
-                "Upload Translation File",
-                type=['xlsx', 'xls'],
-                help="Upload Excel file with strId, EN, and target language columns"
-            )
-            
+            uploaded_file = enhanced_file_upload()
+           
             if uploaded_file:
                 # Load and analyze file
                 if st.session_state.dataset is None:
@@ -233,174 +231,6 @@ def main():
             show_preview()
         else:
             show_welcome()
-
-
-def process_file(dataset, remove_duplicates, dedup_strategy, sort_by_correlation, 
-                correlation_strategy, similarity_threshold, max_cluster_size, min_substring_length):
-    """Process the uploaded file with given settings"""
-    
-    progress_bar = st.progress(0)
-    status_text = st.empty()
-    
-    try:
-        status_text.text("⚙️ Initializing processing...")
-        progress_bar.progress(20)
-        
-        # Create processing configuration
-        config = ProcessingConfig(
-            remove_duplicates=remove_duplicates,
-            deduplication_strategy=dedup_strategy,
-            sort_by_correlation=sort_by_correlation,
-            correlation_strategy=correlation_strategy,
-            similarity_threshold=similarity_threshold,
-            max_cluster_size=max_cluster_size,
-            min_substring_length=min_substring_length
-        )
-        
-        processor = TranslationProcessor(config)
-        
-        status_text.text("🔄 Processing dataset...")
-        progress_bar.progress(60)
-        
-        processed_dataset = processor.process(dataset)
-        
-        progress_bar.progress(90)
-        status_text.text("📊 Generating statistics...")
-        
-        # Store results
-        st.session_state.processed_dataset = processed_dataset
-        st.session_state.processing_stats = processor.get_processing_stats(processed_dataset)
-        
-        progress_bar.progress(100)
-        status_text.text("✅ Processing completed!")
-        
-        # Clear progress after a moment
-        time.sleep(1)
-        progress_bar.empty()
-        status_text.empty()
-        
-        st.success("✅ Processing completed!")
-        st.rerun()
-        
-    except Exception as e:
-        progress_bar.empty()
-        status_text.empty()
-        st.error(f"Processing failed: {str(e)}")
-        st.exception(e)
-
-
-def show_welcome():
-    """Show welcome screen with instructions"""
-    
-    col1, col2 = st.columns([2, 1])
-    
-    with col1:
-        st.markdown("""
-        ## Welcome to StringZ! 🎉
-        
-        ### What this tool does:
-        - **🔄 Removes duplicate translations** automatically
-        - **🧠 Groups similar strings together** using AI
-        - **⚠️ Validates translations** for formatting errors
-        
-        ### How to get started:
-        1. **Upload your Excel file** using the sidebar
-        2. **Choose processing options** (deduplication + correlation)
-        3. **Click "Process File"** and get optimized results
-        4. **Review translations** and **validate** for errors
-        5. **Download the cleaned file** ready for translation work
-        
-        ### File Requirements:
-        - Excel format (.xlsx or .xls)
-        - Must contain: `strId`, `EN`, and target language columns
-        """)
-    
-    with col2:
-        st.markdown("""
-        ### 🎯 Benefits:
-
-        **For LQA Team:**
-        - No more duplicate work
-        - Similar strings grouped together
-        - Automated error detection
-        - Faster consistency checking
-        - Translation validation
-        """)
-
-
-def show_preview():
-    """Show preview of uploaded file before processing"""
-    
-    dataset = st.session_state.dataset
-    
-    st.subheader("📋 File Preview")
-    
-    # Quick stats
-    col1, col2, col3, col4 = st.columns(4)
-    
-    with col1:
-        st.metric("Total Entries", len(dataset))
-    
-    with col2:
-        duplicates = len(dataset.get_duplicates())
-        st.metric("Duplicate Groups", duplicates)
-    
-    with col3:
-        completion = dataset.get_completion_rate()
-        st.metric("Completion Rate", f"{completion:.1f}%")
-    
-    with col4:
-        # Calculate average string length
-        avg_length = sum(len(entry.source_text) for entry in dataset.entries) / len(dataset.entries)
-        st.metric("Avg String Length", f"{avg_length:.0f}")
-    
-    # Data preview
-    df = dataset.to_dataframe()
-    
-    # Search functionality
-    search_term = st.text_input("🔍 Search in translations", placeholder="Type to search...")
-    if search_term:
-        mask = (
-            df[dataset.source_lang].str.contains(search_term, case=False, na=False) |
-            (df[dataset.target_lang].str.contains(search_term, case=False, na=False) if dataset.target_lang in df.columns else False)
-        )
-        df_display = df[mask]
-        st.write(f"Found {len(df_display)} matches")
-    else:
-        df_display = df.head(100) 
-        if len(df) > 100:
-            st.write(f"Showing first 100 of {len(df)} entries")
-    
-    st.dataframe(df_display, use_container_width=True, height=400)
-
-def enhanced_file_upload():
-    """Enhanced file upload that remembers original filename"""
-    uploaded_file = st.file_uploader(
-        "Upload Translation File",
-        type=['xlsx', 'xls'],
-        help="Upload Excel file with strId, EN, and target language columns"
-    )
-    
-    if uploaded_file:
-        # Store original filename in session state
-        st.session_state.original_filename = uploaded_file.name
-    
-    return uploaded_file
-
-def export_dataframe(df, name):
-    """Export dataframe to Excel"""
-    buffer = io.BytesIO()
-    with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
-        df.to_excel(writer, sheet_name='Data', index=False)
-    
-    timestamp = int(time.time())
-    st.download_button(
-        label="📥 Download Excel File",
-        data=buffer.getvalue(),
-        file_name=f"stringz_{name}_{timestamp}.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
-
 
 if __name__ == "__main__":
     main()

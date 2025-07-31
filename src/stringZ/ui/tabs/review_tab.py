@@ -1,4 +1,4 @@
-import streamlit_app as st
+import streamlit as st
 
 def show_review_mode():
     """LQA-focused review interface for consistency checking"""
