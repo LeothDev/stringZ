@@ -1,0 +1,6 @@
+@echo off
+echo Installing StringZ...
+pip install -r requirements.txt
+echo Starting StringZ...
+streamlit run streamlit_app.py
+pause

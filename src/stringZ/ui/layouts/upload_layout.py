@@ -30,43 +30,75 @@ def handle_file_upload(uploaded_file):
     with st.spinner("Loading file..."):
         try:
             df = pd.read_excel(uploaded_file)
-            
+        
+            # Flexible column detection
+            str_id_col = detect_str_id_column(df)
+            source_col = detect_source_column(df)
+        
+            if not str_id_col:
+                st.error("❌ No string ID column found! Expected one of: KEY_NAME, strId, ID, strID, 字符串")
+                return
+        
+            if not source_col:
+                st.error("❌ No English source column found! Expected one of: EN, English, Source")
+                return
+        
             # Language selection
             st.subheader("🌍 Select Target Language")
-            
-            # Find potential language columns
-            lang_columns = [col for col in df.columns if col not in ["strId", "EN"]]
-            
+        
+            # Find target language columns (exclude detected ID and source columns)
+            lang_columns = [col for col in df.columns if col not in [str_id_col, source_col]]
+        
             if not lang_columns:
-                st.error("No target language columns found! Make sure your file has columns other than 'strId' and 'EN'.")
+                st.error(f"No target language columns found! Make sure your file has columns other than '{str_id_col}' and '{source_col}'.")
                 return
-            
+        
+            # Show detected columns
+            st.info(f"✅ Detected: **{str_id_col}** (ID) + **{source_col}** (Source)")
+        
             # Let user select target language
             selected_language = st.selectbox(
                 "Choose target language:",
                 options=lang_columns,
                 help="All other language columns will be removed"
             )
-            
+        
             # Button to confirm language selection and load data
             if st.button("✅ Load Data", type="primary"):
                 with st.spinner(f"Loading data with {selected_language}..."):
-                    columns_to_keep = ["strId", "EN", selected_language]
+                    columns_to_keep = [str_id_col, source_col, selected_language]
                     df_filtered = df[columns_to_keep].copy()
-                    
+                
                     st.session_state.dataset = TranslationDataset.from_dataframe(
                         df_filtered, 
-                        source_col="EN",
+                        source_col=source_col,
                         target_col=selected_language,
-                        str_id_col="strId"
+                        str_id_col=str_id_col  # Pass the detected column
                     )
-                    
+                
                     st.success(f"✅ Loaded {len(st.session_state.dataset)} entries")
                     st.rerun()
-                    
+                
         except Exception as e:
             st.error(f"Error loading file: {str(e)}")
 
+def detect_str_id_column(df):
+    """Detect string ID column with flexible naming"""
+    possible_names = ['strId', 'ID', 'strID', '字符串', 'id', 'StringID', 'string_id', 'KEY_NAME']
+
+    for col in df.columns:
+        if col in possible_names:
+            return col
+    return None
+
+def detect_source_column(df):
+    """Detect English source column with flexible naming"""
+    possible_names = ['EN', 'English', 'Source', 'en', 'english', 'source']
+
+    for col in df.columns:
+        if col in possible_names:
+            return col
+    return None
 def show_processing_options():
     """Show processing options when dataset is loaded"""
     dataset = st.session_state.dataset
