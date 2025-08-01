@@ -7,7 +7,8 @@ logger = logging.getLogger(__name__)
 
 
 class SimilarityCalculator:
-    """Calculate text similarity using TF-IDF and cosine similarity (no spaCy needed)"""
+    """Calculate text similarity using TF-IDF and cosine similarity.
+    Necessary as replacement of Spacy (too large of a model to run fast)"""
     
     def __init__(self):
         """Initialize the similarity calculator"""
@@ -16,8 +17,8 @@ class SimilarityCalculator:
             stop_words='english',
             ngram_range=(1, 2),  # Use unigrams and bigrams
             max_features=5000,   # Limit features for performance
-            min_df=1,           # Minimum document frequency
-            max_df=0.95         # Maximum document frequency
+            min_df=1,            # Minimum document frequency
+            max_df=0.95          # Maximum document frequency
         )
         logger.info("Initialized TF-IDF based similarity calculator")
     
@@ -116,7 +117,6 @@ def simple_word_overlap_similarity(text1, text2):
     if not text1 or not text2:
         return 0.0
     
-    # Convert to lowercase and split into words
     words1 = set(str(text1).lower().split())
     words2 = set(str(text2).lower().split())
     
