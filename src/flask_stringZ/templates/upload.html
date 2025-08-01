@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+  <!-- Sidebar -->
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-header">
+        <h5>⚙️ Processing Controls</h5>
+      </div>
+      <div class="card-body">
+        <form id="uploadForm" enctype="multipart/form-data">
+          <div class="mb-3">
+            <label for="file" class="form-label">Upload Translation File</label>
+            <input type="file" class="form-control" id="file" name="file" accept=".xlsx,.xls" required>
+            <div class="form-text">Upload Excel file with strId, EN, and target language columns</div>
+          </div>
+          <div id="languageSelection" style="display: none;">
+            <h6>🌍 Select Target Language</h6>
+            <div id="detectedColumns" class="alert alert-info"></div>
+            <div class="mb-3">
+              <label for="targetLanguage" class="form-label">Choose target language:</label>
+              <select class="form-select" id="targetLanguage" name="targetLanguage">
+                <!-- Options will be populated dynamically -->
+              </select>
+            </div>
+            <button type="button" class="btn btn-success" id="loadDataBtn">✅ Load Data</button>
+          </div>
+          <div id="processingOptions" style="display: none;">
+            <hr>
+            <h6>🔧 Processing Options</h6>
+            <div class="mb-3">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="removeDuplicates" name="removeDuplicates" checked>
+                <label class="form-check-label" for="removeDuplicates">Remove Duplicates</label>
+              </div>
+            </div>
+            <div class="mb-3">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="sortByCorrelation" name="sortByCorrelation" checked>
+                <label class="form-check-label" for="sortByCorrelation">Sort by Similarity</label>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label for="correlationStrategy" class="form-label">Sorting Method</label>
+              <select class="form-select" id="correlationStrategy" name="correlationStrategy">
+                <option value="hybrid" selected>Hybrid (Best of substring + semantic)</option>
+                <option value="substring">Substring</option>
+                <option value="semantic">Semantic</option>
+              </select>
+            </div>
+            <div class="accordion" id="advancedSettings">
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#advancedCollapse">
+                    ⚙️ Advanced Settings
+                  </button>
+                </h2>
+                <div id="advancedCollapse" class="accordion-collapse collapse">
+                  <div class="accordion-body">
+                    <div class="mb-3">
+                      <label for="similarityThreshold" class="form-label">Similarity Threshold:
+                        <span id="thresholdValue">0.7</span></label>
+                      <input type="range" class="form-range" id="similarityThreshold" name="similarityThreshold" min="0.5" max="0.9" step="0.1" value="0.7">
+                    </div>
+                    <div class="mb-3">
+                      <label for="maxClusterSize" class="form-label">Max Cluster Size:
+                        <span id="clusterValue">15</span></label>
+                      <input type="range" class="form-range" id="maxClusterSize" name="maxClusterSize" min="5" max="30" step="5" value="15">
+                    </div>
+                    <div class="mb-3">
+                      <label for="minSubstringLength" class="form-label">Min Substring Length:
+                        <span id="substringValue">5</span></label>
+                      <input type="range" class="form-range" id="minSubstringLength" name="minSubstringLength" min="3" max="15" step="1" value="5">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="d-grid">
+              <button type="submit" class="btn btn-primary btn-lg">🚀 Process File</button>
+            </div>
+          </div>
+        </form>
+        <div class="progress-container" id="progressContainer">
+          <div class="progress mb-3">
+            <div class="progress-bar" id="progressBar" role="progressbar" style="width: 0%"></div>
+          </div>
+          <div id="statusText" class="text-center"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Main Content -->
+  <div class="col-md-8">
+    <div id="welcomeContent">
+      <div class="row">
+        <div class="col-lg-8">
+          <h2>Welcome to StringZ! 🎉</h2>
+          <h4>What this tool does:</h4>
+          <ul>
+            <li><strong>🔄 Removes duplicate translations</strong>
+              automatically</li>
+            <li><strong>🧠 Groups similar strings together</strong>
+              using AI</li>
+            <li><strong>⚠️ Validates translations</strong>
+              for formatting errors</li>
+          </ul>
+          <h4>How to get started:</h4>
+          <ol>
+            <li><strong>Upload your Excel file</strong>
+              using the sidebar</li>
+            <li><strong>Choose processing options</strong>
+              (deduplication + correlation)</li>
+            <li><strong>Click "Process File"</strong>
+              and get optimized results</li>
+            <li><strong>Review translations</strong>
+              and
+              <strong>validate</strong>
+              for errors</li>
+            <li><strong>Download the cleaned file</strong>
+              ready for translation work</li>
+          </ol>
+          <h4>File Requirements:</h4>
+          <ul>
+            <li>Excel format (.xlsx or .xls)</li>
+            <li>Must contain:
+              <code>strId</code>,
+              <code>EN</code>, and target language columns</li>
+          </ul>
+        </div>
+        <div class="col-lg-4">
+          <div class="card bg-primary text-white">
+            <div class="card-body">
+              <h5>🎯 Benefits:</h5>
+              <h6>For LQA Team:</h6>
+              <ul class="list-unstyled">
+                <li>• No more duplicate work</li>
+                <li>• Similar strings grouped together</li>
+                <li>• Automated error detection</li>
+                <li>• Faster consistency checking</li>
+                <li>• Translation validation</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="previewContent" style="display: none;">
+      <div class="card">
+        <div class="card-header">
+          <h5>📋 File Preview</h5>
+        </div>
+        <div class="card-body">
+          <div id="fileStats" class="row mb-3"></div>
+          <div id="previewTable"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Update range sliders
+document.getElementById('similarityThreshold').addEventListener('input', function(e) {
+    document.getElementById('thresholdValue').textContent = e.target.value;
+});
+
+document.getElementById('maxClusterSize').addEventListener('input', function(e) {
+    document.getElementById('clusterValue').textContent = e.target.value;
+});
+
+document.getElementById('minSubstringLength').addEventListener('input', function(e) {
+    document.getElementById('substringValue').textContent = e.target.value;
+});
+
+// File upload handling will go here - next step!
+</script>
+{% endblock %}

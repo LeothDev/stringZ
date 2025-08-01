@@ -1,6 +1,11 @@
+__pycache__/
+*.pyc
+
 1-5-28.xlsx
 Multi5.xlsx
 
+src/stringZ/models/__pycache__/
+src/stringZ/ui/layouts/__pycache__/
 src/stringZ/__pycache__
-__pycache__/
+src/stringZ/utils/__pycache__/
 .venv/

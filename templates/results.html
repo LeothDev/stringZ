@@ -1,0 +1,499 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+  <!-- Sidebar -->
+  <div class="col-md-3" id="sidebar">
+    <div class="text-center mb-3">
+      <img src="https://cdn.moogold.com/2024/10/watcher-of-realms.jpg" alt="Game Logo" style="width: 50px; height: 50px; border-radius: 8px;">
+      <h4 class="mt-2 mb-1">StringZ</h4>
+      <small class="text-muted d-block">Translation QA Tool</small>
+    </div>
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5>🔄 Process New File</h5>
+        <button class="btn btn-sm btn-outline-secondary" id="toggleSidebar">
+          <span id="sidebarIcon">←</span>
+        </button>
+      </div>
+      <div class="card-body" id="sidebarContent">
+        <a href="/reset" class="btn btn-secondary w-100 mb-3">🆕 Start Over</a>
+        <hr>
+        <div id="quickStats">
+          <!-- Stats will be loaded here -->
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Main Content -->
+  <div class="col-md-9" id="mainContent">
+    <!-- Navigation Tabs -->
+    <ul class="nav nav-tabs" id="resultsTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="results-tab" data-bs-toggle="tab" data-bs-target="#results" type="button" role="tab">
+          📊 Results
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="review-tab" data-bs-toggle="tab" data-bs-target="#review" type="button" role="tab">
+          🔍 Review Translations
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="validation-tab" data-bs-toggle="tab" data-bs-target="#validation" type="button" role="tab">
+          ⚠️ LQA Validation
+        </button>
+      </li>
+    </ul>
+    <!-- Tab Content -->
+    <div class="tab-content" id="resultsTabContent">
+      <!-- Results Tab -->
+      <div class="tab-pane fade show active" id="results" role="tabpanel">
+        <div class="card mt-3">
+          <div class="card-header">
+            <h5>📊 Processing Results</h5>
+          </div>
+          <div class="card-body">
+            <!-- Metrics Row -->
+            <div class="row mb-4" id="metricsRow">
+              <!-- Metrics will be loaded here -->
+            </div>
+            <!-- Download Section -->
+            <h6>📥 Export Processed Results</h6>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="card">
+                  <div class="card-body text-center">
+                    <h6>📊 Interactive Visualizer</h6>
+                    <p class="text-muted">HTML file for LQA Raw/Formatted Data</p>
+                    <button class="btn btn-primary" id="downloadVisualizer">Download Visualizer</button>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="card">
+                  <div class="card-body text-center">
+                    <h6>📈 Processed Spreadsheet</h6>
+                    <p class="text-muted">Excel file with processed translations</p>
+                    <button class="btn btn-secondary" id="downloadSpreadsheet">Download Excel</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Additional Options -->
+            <hr>
+            <h6>Additional Export Options:</h6>
+            <!-- <div class="row"> -->
+            <!-- <div class="col-md-6"> -->
+            <!-- <button class="btn btn-outline-danger w-100" id="downloadMissing">❌ Missing Only</button> -->
+            <!-- </div> -->
+            <!-- <div class="col-md-6"> -->
+            <!-- <button class="btn btn-outline-warning w-100" id="downloadPriority">⭐ High Priority</button> -->
+            <!-- </div> -->
+            <!-- </div> -->
+          </div>
+        </div>
+      </div>
+      <!-- Review Tab -->
+      <div class="tab-pane fade" id="review" role="tabpanel">
+        <div class="card mt-3">
+          <div class="card-header">
+            <h5>🔍 Translation Review</h5>
+          </div>
+          <div class="card-body">
+            <p class="text-muted">Review similar strings grouped together for consistency checking</p>
+            <!-- Search and Filter Controls -->
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <input type="text" class="form-control" id="reviewSearch" placeholder="🔍 Find specific strings">
+              </div>
+              <div class="col-md-3">
+                <select class="form-select" id="reviewFilter">
+                  <option value="all">📋 All Strings</option>
+                  <option value="missing">❌ Missing Translations</option>
+                  <option value="priority">⭐ High Priority (>5 uses)</option>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <select class="form-select" id="reviewPerPage">
+                  <option value="50">50 per page</option>
+                  <option value="100" selected>100 per page</option>
+                  <option value="250">250 per page</option>
+                  <option value="all">All</option>
+                </select>
+              </div>
+            </div>
+            <!-- Review Table -->
+            <div id="reviewTableContainer" style="height: 500px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 6px;">
+              <table id="reviewTable" class="table table-sm table-striped mb-0" style="width:100%"></table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Validation Tab -->
+      <div class="tab-pane fade" id="validation" role="tabpanel">
+        <div class="card mt-3">
+          <div class="card-header">
+            <h5>⚠️ LQA Validation</h5>
+          </div>
+          <div class="card-body">
+            <p class="text-muted">Automated validation for game translation formatting and consistency</p>
+            <div class="row">
+              <div class="col-md-8">
+                <h6>This validation checks for:</h6>
+                <ul>
+                  <li>🎯
+                    <strong>Token mismatches</strong>
+                    (color tags, variables, brackets)</li>
+                  <li>🏷️
+                    <strong>Malformed game tags</strong>
+                    (extra characters, unmatched tags)</li>
+                  <li>📝
+                    <strong>Punctuation inconsistencies</strong>
+                    (missing or different endings)</li>
+                  <li>🔢
+                    <strong>Numeric value differences</strong>
+                    in color tags</li>
+                  <li>🎮
+                    <strong>Game element consistency</strong>
+                    (abilities, skills, colors)</li>
+                </ul>
+              </div>
+              <div class="col-md-4">
+                <button class="btn btn-primary w-100" id="runValidation">🔍 Run Validation</button>
+              </div>
+            </div>
+            <!-- Validation Results -->
+            <div id="validationResults" style="display: none;">
+              <!-- Results will be loaded here -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Load page data when ready
+document.addEventListener('DOMContentLoaded', function() {
+    loadPageData();
+    loadReviewData();
+});
+
+function loadPageData() {
+    fetch('/api/page_data')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                updateMetrics(data.stats);
+                updateSidebar(data.quick_stats);
+            }
+        })
+        .catch(error => console.error('Error loading page data:', error));
+}
+
+function updateMetrics(stats) {
+    const metricsHtml = `
+        <div class="col-md-3">
+            <div class="card metrics-card text-center text-white">
+                <div class="card-body">
+                    <h4>${stats.original_count}</h4>
+                    <small>Original Entries</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card metrics-card text-center text-white">
+                <div class="card-body">
+                    <h4>${stats.final_count}</h4>
+                    <small>Final Entries</small>
+                    ${stats.duplicates_removed > 0 ? `<div class="badge bg-success">-${stats.duplicates_removed}</div>` : ''}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card metrics-card text-center text-white">
+                <div class="card-body">
+                    <h4>${stats.duplicates_removed}</h4>
+                    <small>Duplicates Removed</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card metrics-card text-center text-white">
+                <div class="card-body">
+                    <h4>${stats.clusters_created}</h4>
+                    <small>Groups Created</small>
+                </div>
+            </div>
+        </div>
+    `;
+    document.getElementById('metricsRow').innerHTML = metricsHtml;
+}
+
+function updateSidebar(stats) {
+    const sidebarHtml = `
+        <p><strong>📝 ${stats.total_entries}</strong> entries</p>
+        <p><strong>🌍 ${stats.source_lang}</strong> → <strong>${stats.target_lang}</strong></p>
+        <p><strong>✅ ${stats.completion_rate}</strong> completion</p>
+    `;
+    document.getElementById('quickStats').innerHTML = sidebarHtml;
+}
+
+// Download handlers - we'll implement these next
+document.getElementById('downloadVisualizer').addEventListener('click', function() {
+    window.location.href = '/download/visualizer';
+});
+
+document.getElementById('downloadSpreadsheet').addEventListener('click', function() {
+    window.location.href = '/download/spreadsheet';
+});
+
+// Review tab functionality
+let reviewTable;
+
+function loadReviewData(search = '', filter = 'all', page = 1, perPage = '100') {
+    const params = new URLSearchParams({
+        search: search,
+        filter: filter,
+        page: page,
+        per_page: perPage
+    });
+    
+    fetch(`/api/review_data?${params}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                updateReviewTable(data);
+                updateReviewStats(data.stats);
+            } else {
+                console.error('Error loading review data:', data.error);
+            }
+        })
+        .catch(error => console.error('Error loading review data:', error));
+}
+
+function updateReviewTable(data) {
+    // Destroy existing table if it exists
+    if (reviewTable) {
+        reviewTable.destroy();
+    }
+    
+    // Create table HTML
+    const tableHtml = `
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>${data.columns.source_lang}</th>
+                <th>${data.columns.target_lang}</th>
+                <th>Occurrences</th>
+            </tr>
+        </thead>
+        <tbody>
+            ${data.data.map(row => `
+                <tr>
+                    <td><code>${row.strId}</code></td>
+                    <td>${row.source}</td>
+                    <td>${row.target}</td>
+                    <td class="text-center">
+                        <span class="badge ${row.occurrences > 5 ? 'bg-warning' : 'bg-secondary'}">
+                            ${row.occurrences}
+                        </span>
+                    </td>
+                </tr>
+            `).join('')}
+        </tbody>
+    `;
+    
+    document.getElementById('reviewTable').innerHTML = tableHtml;
+    
+    // Initialize DataTable
+    reviewTable = $('#reviewTable').DataTable({
+        paging: false,
+        searching: false,
+        ordering: false,
+        info: false,
+        columnDefs: [
+            { width: "60px", targets: 0 },
+            { width: "80px", targets: 3, className: "text-center" }
+        ]
+    });
+    
+    // Update pagination info
+    const paginationInfo = `
+        <div class="d-flex justify-content-between align-items-center mt-3">
+            <span class="text-muted">
+                Showing ${data.pagination.showing} of ${data.pagination.total_entries} strings
+            </span>
+        </div>
+    `;
+    
+    document.getElementById('reviewTableContainer').insertAdjacentHTML('afterend', paginationInfo);
+}
+
+function updateReviewStats(stats) {
+    // You can add stats display here if needed
+    console.log('Review stats:', stats);
+}
+
+// Event handlers for review controls
+document.getElementById('reviewSearch').addEventListener('input', function(e) {
+    clearTimeout(this.searchTimeout);
+    this.searchTimeout = setTimeout(() => {
+        loadReviewData(e.target.value, document.getElementById('reviewFilter').value);
+    }, 500);
+});
+
+document.getElementById('reviewFilter').addEventListener('change', function(e) {
+    loadReviewData(document.getElementById('reviewSearch').value, e.target.value);
+});
+
+document.getElementById('reviewPerPage').addEventListener('change', function(e) {
+    loadReviewData(
+        document.getElementById('reviewSearch').value,
+        document.getElementById('reviewFilter').value,
+        1,
+        e.target.value
+    );
+});
+
+// Load review data when tab is shown
+document.getElementById('review-tab').addEventListener('shown.bs.tab', function() {
+    if (!reviewTable) {
+        loadReviewData();
+    }
+});
+
+// Validation functionality
+document.getElementById('runValidation').addEventListener('click', function() {
+    const button = this;
+    const originalText = button.innerHTML;
+    
+    // Show loading state
+    button.innerHTML = '🔄 Running Validation...';
+    button.disabled = true;
+    
+    fetch('/api/run_validation', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        button.innerHTML = originalText;
+        button.disabled = false;
+        
+        if (data.success) {
+            showValidationResults(data);
+        } else {
+            alert('Validation failed: ' + data.error);
+        }
+    })
+    .catch(error => {
+        button.innerHTML = originalText;
+        button.disabled = false;
+        alert('Validation failed: ' + error);
+    });
+});
+
+function showValidationResults(data) {
+    const resultsContainer = document.getElementById('validationResults');
+    
+    if (data.summary.issues_found === 0) {
+        resultsContainer.innerHTML = `
+            <div class="alert alert-success mt-4">
+                <h5>🎉 No validation issues found!</h5>
+                <p class="mb-0">Your translations look great. All ${data.summary.total_strings} strings passed validation.</p>
+            </div>
+        `;
+    } else {
+        let resultsHtml = `
+            <div class="mt-4">
+                <h6>📊 Validation Summary</h6>
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <h5>${data.summary.total_strings}</h5>
+                                <small>Total Strings</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <h5>${data.summary.issues_found}</h5>
+                                <small>Issues Found</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center border-danger">
+                            <div class="card-body">
+                                <h5 class="text-danger">${data.summary.critical_issues}</h5>
+                                <small>Critical Issues</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center border-warning">
+                            <div class="card-body">
+                                <h5 class="text-warning">${data.summary.warnings}</h5>
+                                <small>Warnings</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <h6>🔍 Issue Details (Showing first 20)</h6>
+        `;
+        
+        data.issues.forEach((issue, index) => {
+            const severityClass = issue.severity === 'CRITICAL' ? 'danger' : 'warning';
+            const severityIcon = issue.severity === 'CRITICAL' ? '🚨' : '⚠️';
+            
+            resultsHtml += `
+                <div class="card mb-2">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <button class="btn btn-link text-${severityClass}" type="button" data-bs-toggle="collapse" data-bs-target="#issue${index}">
+                                ${severityIcon} ${issue.str_id} - ${issue.type}
+                            </button>
+                        </h6>
+                    </div>
+                    <div id="issue${index}" class="collapse ${index < 3 ? 'show' : ''}">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-2"><strong>String ID:</strong></div>
+                                <div class="col-md-10"><code>${issue.str_id}</code></div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-2"><strong>Issue:</strong></div>
+                                <div class="col-md-10">${issue.type} - ${issue.detail}</div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-2"><strong>English:</strong></div>
+                                <div class="col-md-10"><code>${issue.en_text}</code></div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-2"><strong>${data.target_lang}:</strong></div>
+                                <div class="col-md-10"><code>${issue.target_text}</code></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        resultsHtml += '</div>';
+        resultsContainer.innerHTML = resultsHtml;
+    }
+    
+    resultsContainer.style.display = 'block';
+}
+</script>
+{% endblock %}
