@@ -72,7 +72,7 @@
       .dark-mode-btn {
         position: fixed;
         top: 15px;
-        left: 120px;
+        left: 150px;
         z-index: 9999;
         padding: 8px 16px;
         background-color: var(--button-bg);
@@ -171,26 +171,45 @@
       
       /* Enhanced styling for different columns */
       #myTable td:first-child {
+        text-align: center;
         font-family: 'Courier New', monospace;
         font-size: 12px;
         color: var(--text-secondary);
-        max-width: 120px;
+        /*<!-- max-width: 120px; -->*/
+        width: 50px;
       }
       
-      #myTable td:nth-child(2), #myTable td:nth-child(3) {
+      #myTable td:nth-child(2) {
+        font-family: 'Courier New', monospace;
+        font-size: 12px;
+        color: var(--text-secondary);
+        text-align: left;
+        /*line-height: 1.4;*/
+        max-width: 120px;
+      }
+
+      #myTable td:nth-child(3), #myTable td:nth-child(4) {
         line-height: 1.4;
         max-width: 300px;
         word-wrap: break-word;
+        text-align: left;
       }
       
-      #myTable td:nth-child(4) {
+      #myTable td:nth-child(5) {
         text-align: center;
         font-weight: 600;
         color: var(--text-muted);
         font-size: 14px;
+        width: 80px;
       }
       
       #myTable td:nth-child(6) {
+        min-width: 120px;
+        max-width: 150px;
+        text-align: center;
+      }
+
+      #myTable td:nth-child(7) {
         min-width: 150px;
         max-width: 200px;
       }
@@ -297,6 +316,37 @@
         border-color: #007bff;
         color: white !important;
       }
+
+      /* Copy feature styling */
+    .copyable-cell {
+        cursor: pointer;
+        position: relative;
+        transition: background-color 0.2s ease;
+    }
+
+    .copyable-cell:hover {
+        background-color: rgba(0, 123, 255, 0.1) !important;
+    }
+
+    .copy-feedback {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #28a745;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        z-index: 1000;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .copy-feedback.show {
+        opacity: 1;
+    }
     </style>
   </head>
   <body>
@@ -349,8 +399,8 @@
                     '" placeholder="Personal notes..." maxlength="200">';
                 
                 const newRow = row.slice();
-                const stateIndex = headers.indexOf("State");
-                const notesIndex = headers.indexOf("Notes");
+                const stateIndex = headers.indexOf("State") + 1;
+                const notesIndex = headers.indexOf("Notes") + 1;
                 newRow[stateIndex] = selectHTML;
                 newRow[notesIndex] = notesHTML;
                 return newRow;
@@ -358,12 +408,16 @@
         
             function renderData(data) {
                 tableData = data;
-                const transformed = data.map((row, idx) => generateRowWithState(row, idx));
+                const transformed = data.map((row, idx) => {
+                  const rowWithNumber = [idx + 1, ...row];
+                  return generateRowWithState(rowWithNumber, idx);
+                });
         
                 if (!dataTable) {
+                    const columnsWithNumber = [{ title: '#' }, ...headers.map(h => ({ title: h }))];
                     dataTable = $('#myTable').DataTable({
                         data: transformed,
-                        columns: headers.map(h => ({ title: h })),
+                        columns: columnsWithNumber,
                         scrollX: true,
                         paging: true,
                         searching: true,
@@ -493,7 +547,43 @@
                     btn.textContent = '🌙 Dark';
                 }
             }
-        
+
+            // New copyToClipboard function to copy ONLY the rawText
+            // Can be updated to copy depending on the Formatting/Raw toggle
+            function copyToClipboard(text, element) {
+                const rowIndex = dataTable.row(element).index();
+                const cellIndex = $(element).index();
+
+                let rawText = text;
+                if (!showingRaw && rawData[rowIndex]) {
+                    rawText = rawData[rowIndex][cellIndex - 1];
+                }
+    
+                // Decode HTML entities to get original text
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = rawText;
+                const decodedText = tempDiv.textContent || tempDiv.innerText || rawText;
+
+                navigator.clipboard.writeText(decodedText).then(() => {
+                    // Show feedback
+                    const feedback = document.createElement('div');
+                    feedback.className = 'copy-feedback show';
+                    feedback.textContent = 'Copied!';
+                    element.style.position = 'relative';
+                    element.appendChild(feedback);
+
+                    setTimeout(() => {
+                        feedback.classList.remove('show');
+                        setTimeout(() => {
+                            if (feedback.parentNode) {
+                                feedback.parentNode.removeChild(feedback);
+                            }
+                            $(element).removeClass('copyable-cell');
+                        }, 300);
+                    }, 1000);
+                });
+            }        
+
             $(document).ready(function () {
                 initializeTheme();
                 renderData(formattedData);
@@ -505,6 +595,19 @@
                 // Update progress when states change
                 $('#myTable tbody').on('change', 'select.state-select', function () {
                     setTimeout(updateProgressDisplay, 100);
+                });
+
+                $('#myTable tbody').on('mouseenter', 'td:nth-child(2), td:nth-child(3), td:nth-child(4)', function() {
+                  $(this).addClass('copyable-cell');
+                }).on('mouseleave', 'td:nth-child(2), td:nth-child(3), td:nth-child(4)', function() {
+                  if (!$(this).find('.copy-feedback').length) {
+                    $(this).removeClass('copyable-cell');
+                  }
+                }).on('click', 'td:nth-child(2), td:nth-child(3), td:nth-child(4)', function() {
+                  const text = $(this).text().trim();
+                  if (text) {
+                    copyToClipboard(text, this);
+                  }
                 });
             });
     </script>

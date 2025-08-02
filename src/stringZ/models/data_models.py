@@ -86,12 +86,18 @@ class TranslationDataset:
         entries = []
         for _, row in df.iterrows():
             if pd.notna(row[str_id_col]) and pd.notna(row[source_col]):
+                # CHECK FOR OCCURRENCES COLUMN PLEASEEEEEE
+                occurrences = 1
+                if 'Occurrences' in df.columns and pd.notna(row['Occurrences']):
+                    occurrences = int(row['Occurrences'])
+
                 entry = TranslationEntry(
                     str_id=str(row[str_id_col]),
                     source_text=str(row[source_col]),
                     target_text=str(row[target_col]) if target_col and pd.notna(row[target_col]) else None,
                     source_lang=source_col,
-                    target_lang=target_col
+                    target_lang=target_col,
+                    occurrences=occurrences
                 )
                 entries.append(entry)
         

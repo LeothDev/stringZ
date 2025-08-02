@@ -321,6 +321,9 @@ def download_visualizer():
         
         # Load processed dataframe and convert back to dataset
         df_processed = pd.read_pickle(processed_file)
+        print("DEBUG - Processed DataFrame columns:", df_processed.columns.tolist())
+        print("DEBUG - Occurrences column sample:", df_processed['Occurrences'].head(10).tolist() if 'Occurrences' in df_processed.columns else "No Occurrences column")
+        print("DEBUG - Occurrences value counts:", df_processed['Occurrences'].value_counts() if 'Occurrences' in df_processed.columns else "No data")
         
         # Get session info to recreate dataset
         source_col = session.get('source_col')
@@ -334,7 +337,7 @@ def download_visualizer():
             target_col=target_language,
             str_id_col=str_id_col
         )
-        
+
         # Generate visualizer HTML
         original_filename = session.get('original_filename', 'processed')
         visualizer_html = generate_visualizer_html(processed_dataset, original_filename)

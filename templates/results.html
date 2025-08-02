@@ -10,11 +10,14 @@
       <small class="text-muted d-block">Translation QA Tool</small>
     </div>
     <div class="card">
-      <div class="card-header d-flex justify-content-between align-items-center">
+      <!-- <div class="card-header d-flex justify-content-between align-items-center"> -->
+      <!-- <h5>🔄 Process New File</h5> -->
+      <!-- <button class="btn btn-sm btn-outline-secondary" id="toggleSidebar"> -->
+      <!-- <span id="sidebarIcon">←</span> -->
+      <!-- </button> -->
+      <!-- </div> -->
+      <div class="card-header">
         <h5>🔄 Process New File</h5>
-        <button class="btn btn-sm btn-outline-secondary" id="toggleSidebar">
-          <span id="sidebarIcon">←</span>
-        </button>
       </div>
       <div class="card-body" id="sidebarContent">
         <a href="/reset" class="btn btn-secondary w-100 mb-3">🆕 Start Over</a>
@@ -55,16 +58,16 @@
           </div>
           <div class="card-body">
             <!-- Metrics Row -->
-            <div class="row mb-4" id="metricsRow">
-              <!-- Metrics will be loaded here -->
+            <div class="mb-4" id="metricsRow">
+              <!-- Simple text Metrics will be loaded here -->
             </div>
             <!-- Download Section -->
-            <h6>📥 Export Processed Results</h6>
+            <h4>📥 Export Processed Results</h4>
             <div class="row">
               <div class="col-md-6">
                 <div class="card">
                   <div class="card-body text-center">
-                    <h6>📊 Interactive Visualizer</h6>
+                    <h5>📊 Interactive Visualizer</h5>
                     <p class="text-muted">HTML file for LQA Raw/Formatted Data</p>
                     <button class="btn btn-primary" id="downloadVisualizer">Download Visualizer</button>
                   </div>
@@ -73,7 +76,7 @@
               <div class="col-md-6">
                 <div class="card">
                   <div class="card-body text-center">
-                    <h6>📈 Processed Spreadsheet</h6>
+                    <h5>📈 Processed Spreadsheet</h5>
                     <p class="text-muted">Excel file with processed translations</p>
                     <button class="btn btn-secondary" id="downloadSpreadsheet">Download Excel</button>
                   </div>
@@ -83,6 +86,7 @@
             <!-- Additional Options -->
             <hr>
             <h6>Additional Export Options:</h6>
+            <h5>WIP - Stay Tuned!</h5>
             <!-- <div class="row"> -->
             <!-- <div class="col-md-6"> -->
             <!-- <button class="btn btn-outline-danger w-100" id="downloadMissing">❌ Missing Only</button> -->
@@ -124,7 +128,7 @@
               </div>
             </div>
             <!-- Review Table -->
-            <div id="reviewTableContainer" style="height: 500px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 6px;">
+            <div id="reviewTableContainer" style="height: 550px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 6px;">
               <table id="reviewTable" class="table table-sm table-striped mb-0" style="width:100%"></table>
             </div>
           </div>
@@ -197,36 +201,29 @@ function loadPageData() {
 
 function updateMetrics(stats) {
     const metricsHtml = `
-        <div class="col-md-3">
-            <div class="card metrics-card text-center text-white">
-                <div class="card-body">
-                    <h4>${stats.original_count}</h4>
-                    <small>Original Entries</small>
+        <div class="row text-center">
+            <div class="col-md-3">
+                <div class="metric-item">
+                    <div class="metric-label">Original Entries</div>
+                    <div class="metric-value">${stats.original_count}</div>
                 </div>
             </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card metrics-card text-center text-white">
-                <div class="card-body">
-                    <h4>${stats.final_count}</h4>
-                    <small>Final Entries</small>
-                    ${stats.duplicates_removed > 0 ? `<div class="badge bg-success">-${stats.duplicates_removed}</div>` : ''}
+            <div class="col-md-3">
+                <div class="metric-item">
+                    <div class="metric-label">Final Entries</div>
+                    <div class="metric-value">${stats.final_count}</div>
                 </div>
             </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card metrics-card text-center text-white">
-                <div class="card-body">
-                    <h4>${stats.duplicates_removed}</h4>
-                    <small>Duplicates Removed</small>
+            <div class="col-md-3">
+                <div class="metric-item">
+                    <div class="metric-label">Duplicates Removed</div>
+                    <div class="metric-value">${stats.duplicates_removed}</div>
                 </div>
             </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card metrics-card text-center text-white">
-                <div class="card-body">
-                    <h4>${stats.clusters_created}</h4>
-                    <small>Groups Created</small>
+            <div class="col-md-3">
+                <div class="metric-item">
+                    <div class="metric-label">Groups Created</div>
+                    <div class="metric-value">${stats.clusters_created}</div>
                 </div>
             </div>
         </div>
@@ -320,18 +317,7 @@ function updateReviewTable(data) {
             { width: "60px", targets: 0 },
             { width: "80px", targets: 3, className: "text-center" }
         ]
-    });
-    
-    // Update pagination info
-    const paginationInfo = `
-        <div class="d-flex justify-content-between align-items-center mt-3">
-            <span class="text-muted">
-                Showing ${data.pagination.showing} of ${data.pagination.total_entries} strings
-            </span>
-        </div>
-    `;
-    
-    document.getElementById('reviewTableContainer').insertAdjacentHTML('afterend', paginationInfo);
+    });   
 }
 
 function updateReviewStats(stats) {
@@ -448,45 +434,57 @@ function showValidationResults(data) {
                         </div>
                     </div>
                 </div>
-                
-                <h6>🔍 Issue Details (Showing first 20)</h6>
-        `;
         
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <h6>🔍 Issue Details</h6>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <button class="btn btn-sm btn-outline-secondary me-2" onclick="filterValidationIssues('all')">All Issues</button>
+                        <button class="btn btn-sm btn-outline-danger me-2" onclick="filterValidationIssues('critical')">Critical Only</button>
+                        <button class="btn btn-sm btn-outline-warning" onclick="filterValidationIssues('warning')">Warnings Only</button>
+                    </div>
+                </div>
+                <div id="validationIssuesList">
+        `;        
+
         data.issues.forEach((issue, index) => {
             const severityClass = issue.severity === 'CRITICAL' ? 'danger' : 'warning';
             const severityIcon = issue.severity === 'CRITICAL' ? '🚨' : '⚠️';
+            const severityBadge = issue.severity === 'CRITICAL' ? 'bg-danger' : 'bg-warning';
             
-            resultsHtml += `
-                <div class="card mb-2">
-                    <div class="card-header">
-                        <h6 class="mb-0">
-                            <button class="btn btn-link text-${severityClass}" type="button" data-bs-toggle="collapse" data-bs-target="#issue${index}">
-                                ${severityIcon} ${issue.str_id} - ${issue.type}
-                            </button>
-                        </h6>
-                    </div>
-                    <div id="issue${index}" class="collapse ${index < 3 ? 'show' : ''}">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-2"><strong>String ID:</strong></div>
-                                <div class="col-md-10"><code>${issue.str_id}</code></div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-2"><strong>Issue:</strong></div>
-                                <div class="col-md-10">${issue.type} - ${issue.detail}</div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-2"><strong>English:</strong></div>
-                                <div class="col-md-10"><code>${issue.en_text}</code></div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-2"><strong>${data.target_lang}:</strong></div>
-                                <div class="col-md-10"><code>${issue.target_text}</code></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
+          resultsHtml += `
+              <div class="card mb-2 validation-issue" data-severity="${issue.severity.toLowerCase()}">
+                  <div class="card-header d-flex justify-content-between align-items-center">
+                      <h6 class="mb-0">
+                          <button class="btn btn-link text-${severityClass}" type="button" data-bs-toggle="collapse" data-bs-target="#issue${index}">
+                              ${severityIcon} ${issue.str_id} - ${issue.type}
+                          </button>
+                      </h6>
+                      <span class="badge ${severityBadge}">${issue.severity}</span>
+                  </div>
+                  <div id="issue${index}" class="collapse">
+                      <div class="card-body">
+                          <div class="row">
+                              <div class="col-md-2"><strong>String ID:</strong></div>
+                              <div class="col-md-10"><code>${issue.str_id}</code></div>
+                          </div>
+                          <div class="row">
+                              <div class="col-md-2"><strong>Issue:</strong></div>
+                              <div class="col-md-10">${issue.type} - ${issue.detail}</div>
+                          </div>
+                          <div class="row">
+                              <div class="col-md-2"><strong>English:</strong></div>
+                              <div class="col-md-10"><code>${issue.en_text}</code></div>
+                          </div>
+                          <div class="row">
+                              <div class="col-md-2"><strong>${data.target_lang}:</strong></div>
+                              <div class="col-md-10"><code>${issue.target_text}</code></div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          `;
         });
         
         resultsHtml += '</div>';
@@ -494,6 +492,17 @@ function showValidationResults(data) {
     }
     
     resultsContainer.style.display = 'block';
+}
+
+function filterValidationIssues(type) {
+    const issues = document.querySelectorAll('.validation-issue');
+    issues.forEach(issue => {
+        if (type === 'all' || issue.dataset.severity === type) {
+            issue.style.display = 'block';
+        } else {
+            issue.style.display = 'none';
+        }
+    });
 }
 </script>
 {% endblock %}

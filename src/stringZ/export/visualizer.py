@@ -55,8 +55,9 @@ def generate_visualizer_html(dataset, original_filename=None):
 
     # Generate title for the Visualizer
     if original_filename:
-        clean_filename = re.sub(r'\.[^.]+$', '', original_filename)
-        title = f"StringZ Visualizer - {clean_filename}"
+        # clean_filename = re.sub(r'\.[^.]+$', '', original_filename)
+        # title = f"StringZ Visualizer - {clean_filename}"
+        title = "StringZ Visualizer"
     else:
         title = f"StringZ Visualizer - {target_lang} Translation Review"
 
@@ -91,13 +92,21 @@ def _prepare_data_rows(df, dataset, target_lang):
     """Prepare raw and formatted data rows for the visualizer"""
     raw_data_rows = []
     formatted_data_rows = []
+
+    # DEBUG
+    print("DataFrame columns:", df.columns.tolist())
     
-    for _, row in df.iterrows():
+    for idx, (_,row) in enumerate(df.iterrows()):
         # Extract values
         str_id = str(row.get('strId', ''))
         en_text = str(row.get(dataset.source_lang, ''))
         target_text = str(row.get(target_lang, '')) if target_lang in df.columns else ''
-        occurrences = int(row.get('Occurrences', 1))
+
+        # DEBUG occurrences
+        occurrences_raw = row.get('Occurrences')
+        print(f"Row {idx}: Occurrences raw = {occurrences_raw}, type = {type(occurrences_raw)}")
+        # occurrences = int(row.get('Occurrences', 1))
+        occurrences = int(occurrences_raw) if occurrences_raw is not None else 1
         
         # Format text for both views
         raw_en, formatted_en = format_text_for_visualizer(en_text)

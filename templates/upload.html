@@ -4,6 +4,11 @@
 <div class="row">
   <!-- Sidebar -->
   <div class="col-md-4">
+    <div class="text-center mb-3 mt-4">
+      <img src="https://cdn.moogold.com/2024/10/watcher-of-realms.jpg" alt="Game Logo" style="width: 50px; height: 50px; border-radius: 8px;">
+      <h4 class="mt-2 mb-1">StringZ</h4>
+      <small class="text-muted d-block">Translation QA Tool</small>
+    </div>
     <div class="card">
       <div class="card-header">
         <h5>⚙️ Processing Controls</h5>
@@ -93,54 +98,42 @@
   </div>
   <!-- Main Content -->
   <div class="col-md-8">
-    <div id="welcomeContent">
-      <div class="row">
-        <div class="col-lg-8">
-          <h2>Welcome to StringZ! 🎉</h2>
-          <h4>What this tool does:</h4>
-          <ul>
-            <li><strong>🔄 Removes duplicate translations</strong>
-              automatically</li>
-            <li><strong>🧠 Groups similar strings together</strong>
-              using AI</li>
-            <li><strong>⚠️ Validates translations</strong>
-              for formatting errors</li>
-          </ul>
-          <h4>How to get started:</h4>
-          <ol>
-            <li><strong>Upload your Excel file</strong>
-              using the sidebar</li>
-            <li><strong>Choose processing options</strong>
-              (deduplication + correlation)</li>
-            <li><strong>Click "Process File"</strong>
-              and get optimized results</li>
-            <li><strong>Review translations</strong>
-              and
-              <strong>validate</strong>
-              for errors</li>
-            <li><strong>Download the cleaned file</strong>
-              ready for translation work</li>
-          </ol>
-          <h4>File Requirements:</h4>
-          <ul>
-            <li>Excel format (.xlsx or .xls)</li>
-            <li>Must contain:
-              <code>strId</code>,
-              <code>EN</code>, and target language columns</li>
-          </ul>
+    <div id="welcomeContent" style="min-height: 70vh; display: flex; align-items: center; justify-content: center;">
+      <div class="w-100 mt-4">
+        <div class="row align-items-start">
+          <div class="col-md-4 mb-4">
+            <div class="info-card">
+              <h5>🔄 Smart Deduplication</h5>
+              <p class="text-muted mb-0">Removes duplicate translations and tracks occurrence counts for efficient workflow.</p>
+            </div>
+          </div>
+          <div class="col-md-4 mb-4">
+            <div class="info-card">
+              <h5>🧠 AI-Powered Grouping</h5>
+              <p class="text-muted mb-0">Groups similar strings using semantic analysis for faster consistency checking.</p>
+            </div>
+          </div>
+          <div class="col-md-4 mb-4">
+            <div class="info-card">
+              <h5>⚠️ Translation Validation</h5>
+              <p class="text-muted mb-0">Validates color tags, variables, and game-specific formatting automatically.</p>
+            </div>
+          </div>
         </div>
-        <div class="col-lg-4">
-          <div class="card benefits-card">
-            <div class="card-body">
-              <h5>🎯 Benefits:</h5>
-              <h6>For LQA Team:</h6>
-              <ul class="list-unstyled">
-                <li>• No more duplicate work</li>
-                <li>• Similar strings grouped together</li>
-                <li>• Automated error detection</li>
-                <li>• Faster consistency checking</li>
-                <li>• Translation validation</li>
-              </ul>
+        <div class="workflow-card mt-4">
+          <h5 class="mb-3">Workflow</h5>
+          <div class="row">
+            <div class="col-md-6">
+              <p class="mb-2"><strong>1. Upload Excel file</strong>
+                with strId, EN, and target language columns</p>
+              <p class="mb-2"><strong>2. Configure processing</strong>
+                options for deduplication and similarity sorting</p>
+            </div>
+            <div class="col-md-6">
+              <p class="mb-2"><strong>3. Review translations</strong>
+                and run LQA validation</p>
+              <p class="mb-0"><strong>4. Download results</strong>
+                as Excel file and HTML visualizer</p>
             </div>
           </div>
         </div>
@@ -300,40 +293,36 @@ document.getElementById('loadDataBtn').addEventListener('click', function() {
 
 function showDataPreview(data) {
     // Hide welcome content and show preview
+    <!-- console.log('Hiding welcome content...') -->
     document.getElementById('welcomeContent').style.display = 'none';
+    <!-- console.log('Showing preview content...') -->
     document.getElementById('previewContent').style.display = 'block';
     
     // Show stats
     const statsHtml = `
-        <div class="col-md-3">
-            <div class="card text-center">
-                <div class="card-body">
-                    <h5 class="card-title">${data.stats.total_entries}</h5>
-                    <p class="card-text">Total Entries</p>
+        <div class="row text-center">
+            <div class="col-md-3">
+                <div class="metric-item">
+                    <div class="metric-label">Total Entries</div>
+                    <div class="metric-value">${data.stats.total_entries}</div>
                 </div>
             </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card text-center">
-                <div class="card-body">
-                    <h5 class="card-title">${data.stats.duplicate_groups}</h5>
-                    <p class="card-text">Duplicate Groups</p>
+            <div class="col-md-3">
+                <div class="metric-item">
+                    <div class="metric-label">Duplicate Groups</div>
+                    <div class="metric-value">${data.stats.duplicate_groups}</div>
                 </div>
             </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card text-center">
-                <div class="card-body">
-                    <h5 class="card-title">${data.stats.completion_rate}</h5>
-                    <p class="card-text">Completion Rate</p>
+            <div class="col-md-3">
+                <div class="metric-item">
+                    <div class="metric-label">Completion Rate</div>
+                    <div class="metric-value">${data.stats.completion_rate}</div>
                 </div>
             </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card text-center">
-                <div class="card-body">
-                    <h5 class="card-title">${data.stats.avg_length}</h5>
-                    <p class="card-text">Avg String Length</p>
+            <div class="col-md-3">
+                <div class="metric-item">
+                    <div class="metric-label">Avg Length</div>
+                    <div class="metric-value">${data.stats.avg_length}</div>
                 </div>
             </div>
         </div>
