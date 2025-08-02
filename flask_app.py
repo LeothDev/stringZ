@@ -5,7 +5,7 @@ import io
 import os
 import re
 import tempfile
-from flask import Flask, render_template, request, session, jsonify, url_for, flash, redirect, send_file
+from flask import Flask, render_template, request, session, jsonify, url_for, flash, redirect, send_file, send_from_directory
 import pandas as pd
 from werkzeug.utils import secure_filename
 
@@ -34,6 +34,10 @@ def index():
         return render_template('results.html')
     else:
         return render_template('upload.html')
+
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory('static', 'favicon.ico')
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
