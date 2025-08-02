@@ -3,19 +3,13 @@
 {% block content %}
 <div class="row">
   <!-- Sidebar -->
-  <div class="col-md-3" id="sidebar">
+  <div class="col-md-3 mt-4" id="sidebar">
     <div class="text-center mb-3">
       <img src="https://cdn.moogold.com/2024/10/watcher-of-realms.jpg" alt="Game Logo" style="width: 50px; height: 50px; border-radius: 8px;">
       <h4 class="mt-2 mb-1">StringZ</h4>
       <small class="text-muted d-block">Translation QA Tool</small>
     </div>
     <div class="card">
-      <!-- <div class="card-header d-flex justify-content-between align-items-center"> -->
-      <!-- <h5>🔄 Process New File</h5> -->
-      <!-- <button class="btn btn-sm btn-outline-secondary" id="toggleSidebar"> -->
-      <!-- <span id="sidebarIcon">←</span> -->
-      <!-- </button> -->
-      <!-- </div> -->
       <div class="card-header">
         <h5>🔄 Process New File</h5>
       </div>
@@ -32,19 +26,28 @@
   <div class="col-md-9" id="mainContent">
     <!-- Navigation Tabs -->
     <ul class="nav nav-tabs" id="resultsTabs" role="tablist">
+      <!-- Results Tab-->
       <li class="nav-item" role="presentation">
         <button class="nav-link active" id="results-tab" data-bs-toggle="tab" data-bs-target="#results" type="button" role="tab">
           📊 Results
         </button>
       </li>
+      <!-- Review Translations Tab -->
       <li class="nav-item" role="presentation">
         <button class="nav-link" id="review-tab" data-bs-toggle="tab" data-bs-target="#review" type="button" role="tab">
           🔍 Review Translations
         </button>
       </li>
+      <!-- Validator Tab -->
       <li class="nav-item" role="presentation">
         <button class="nav-link" id="validation-tab" data-bs-toggle="tab" data-bs-target="#validation" type="button" role="tab">
           ⚠️ LQA Validation
+        </button>
+      </li>
+      <!-- Strings Equality Check Tab -->
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="comparison-tab" data-bs-toggle="tab" data-bs-target="#comparison" type="button" role="tab">
+          🔍 String Comparison
         </button>
       </li>
     </ul>
@@ -174,6 +177,36 @@
           </div>
         </div>
       </div>
+      <!-- String Comparison Tab -->
+      <div class="tab-pane fade" id="comparison" role="tabpanel">
+        <div class="card mt-3">
+          <div class="card-header">
+            <h5>🔍 String Comparison Tool</h5>
+          </div>
+          <div class="card-body">
+            <p class="text-muted">Compare two strings to check for equality (Differences highlighting will be implemented in the future)</p>
+            <div class="row">
+              <div class="col-md-6">
+                <label for="string1" class="form-label">String 1:</label>
+                <textarea class="form-control" id="string1" rows="4" placeholder="Paste first string here..."></textarea>
+              </div>
+              <div class="col-md-6">
+                <label for="string2" class="form-label">String 2:</label>
+                <textarea class="form-control" id="string2" rows="4" placeholder="Paste second string here..."></textarea>
+              </div>
+            </div>
+            <div class="row mt-3">
+              <div class="col-md-12 text-center">
+                <button class="btn btn-primary" id="compareStrings">🔍 Compare Strings</button>
+                <button class="btn btn-secondary ms-2" id="clearComparison">🗑️ Clear</button>
+              </div>
+            </div>
+            <div id="comparisonResults" class="mt-4" style="display: none;">
+              <!-- Results will be shown here -->
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -240,7 +273,7 @@ function updateSidebar(stats) {
     document.getElementById('quickStats').innerHTML = sidebarHtml;
 }
 
-// Download handlers - we'll implement these next
+// Download handlers
 document.getElementById('downloadVisualizer').addEventListener('click', function() {
     window.location.href = '/download/visualizer';
 });
@@ -274,7 +307,7 @@ function loadReviewData(search = '', filter = 'all', page = 1, perPage = '100') 
 }
 
 function updateReviewTable(data) {
-    // Destroy existing table if it exists
+    // Destroy existing table if it exists to keep localStorage clean
     if (reviewTable) {
         reviewTable.destroy();
     }
@@ -321,7 +354,7 @@ function updateReviewTable(data) {
 }
 
 function updateReviewStats(stats) {
-    // You can add stats display here if needed
+    // For future self: use this for debugs on the reviews
     console.log('Review stats:', stats);
 }
 
@@ -448,6 +481,7 @@ function showValidationResults(data) {
                 <div id="validationIssuesList">
         `;        
 
+        // LQA Validation "categorization"
         data.issues.forEach((issue, index) => {
             const severityClass = issue.severity === 'CRITICAL' ? 'danger' : 'warning';
             const severityIcon = issue.severity === 'CRITICAL' ? '🚨' : '⚠️';
@@ -503,6 +537,61 @@ function filterValidationIssues(type) {
             issue.style.display = 'none';
         }
     });
+}
+
+// String Comparison
+document.getElementById('compareStrings').addEventListener('click', function() {
+    const string1 = document.getElementById('string1').value;
+    const string2 = document.getElementById('string2').value;
+    
+    if (!string1 || !string2) {
+        alert('Please enter both strings to compare');
+        return;
+    }
+    
+    compareStrings(string1, string2);
+});
+
+document.getElementById('clearComparison').addEventListener('click', function() {
+    document.getElementById('string1').value = '';
+    document.getElementById('string2').value = '';
+    document.getElementById('comparisonResults').style.display = 'none';
+});
+
+function compareStrings(str1, str2) {
+    const areEqual = str1 === str2;
+    
+    let html = `
+        <div class="alert ${areEqual ? 'alert-success' : 'alert-danger'}">
+            <h5>${areEqual ? '✅ Strings are EQUAL' : '❌ Strings are NOT equal'}</h5>
+        </div>
+    `;
+    
+    <!-- Note for future self: -->
+    <!-- This part should be improved to properly highlight the differences -->
+    if (!areEqual) {
+        html += `
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>String 1 (${str1.length} chars)</h6>
+                    <!-- <div class="border p-2" style="background-color: var(--bg-secondary); font-family: monospace; white-space: pre-wrap; word-break: break-all;">${escapeHtml(str1)}</div> -->
+                </div>
+                <div class="col-md-6">
+                    <h6>String 2 (${str2.length} chars)</h6>
+                    <!-- <div class="border p-2" style="background-color: var(--bg-secondary); font-family: monospace; white-space: pre-wrap; word-break: break-all;">${escapeHtml(str2)}</div> -->
+                </div>
+            </div>
+        `;
+    }
+    
+    document.getElementById('comparisonResults').innerHTML = html;
+    document.getElementById('comparisonResults').style.display = 'block';
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 </script>
 {% endblock %}

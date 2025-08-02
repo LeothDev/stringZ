@@ -134,7 +134,7 @@ def load_data():
         completion = dataset.get_completion_rate()
         avg_length = sum(len(entry.source_text) for entry in dataset.entries) / len(dataset.entries)
         
-        # Get preview data (first 10 rows)
+        # Get preview data for a quick glance at the spreadsheet (first 10 rows)
         preview_data = []
         for entry in dataset.entries[:10]:
             preview_data.append({
@@ -211,17 +211,16 @@ def process_file():
         processor = TranslationProcessor(config)
         processed_dataset = processor.process(dataset)
         
-        # NEW: Store the EXACT processed dataframe for consistent use
         processed_df = processed_dataset.to_dataframe()
         processed_file = os.path.join(app.config['UPLOAD_FOLDER'], f"processed_{id(session)}.pkl")
         processed_df.to_pickle(processed_file)
         
         # Store everything in session
         session['processed_dataset'] = processed_dataset
-        session['processed_file'] = processed_file  # NEW: Store processed file path
+        session['processed_file'] = processed_file 
         session['processing_stats'] = processor.get_processing_stats(processed_dataset)
         
-        # Calculate final stats
+        # Calculate final stats for metrics
         target_word_count = 0
         if target_language in processed_df.columns:
             target_word_count = processed_df[target_language].dropna().astype(str).apply(lambda x: len(x.split())).sum()
@@ -272,7 +271,7 @@ def get_page_data():
         return jsonify({'error': 'No processed data found'}), 400
     
     try:
-        # Get the processed dataset (we'll need to recreate it from session)
+        # Get the processed dataset stored in the current session
         temp_file = session.get('temp_file')
         if not temp_file or not os.path.exists(temp_file):
             return jsonify({'error': 'Original data not found'}), 400
@@ -283,7 +282,7 @@ def get_page_data():
         str_id_col = session.get('str_id_col')
         source_col = session.get('source_col')
         
-        # Calculate completion rate from processed dataset
+        # Calculate completion rate (Indicates whether all the rows were processed)
         df = pd.read_pickle(temp_file)
         columns_to_keep = [str_id_col, source_col, target_language]
         df_filtered = df[columns_to_keep].copy()
@@ -313,7 +312,7 @@ def get_page_data():
 def download_visualizer():
     """Download the HTML visualizer"""
     try:
-        # NEW: Use the stored processed file to recreate dataset
+        # Use the stored processed file to recreate dataset
         processed_file = session.get('processed_file')
         if not processed_file or not os.path.exists(processed_file):
             flash('No processed data found. Please process file first.', 'error')
@@ -370,7 +369,7 @@ def download_visualizer():
 def download_spreadsheet():
     """Download the processed Excel spreadsheet"""
     try:
-        # NEW: Use the stored processed file directly
+        # Use the stored processed file directly
         processed_file = session.get('processed_file')
         if not processed_file or not os.path.exists(processed_file):
             flash('No processed data found. Please process file first.', 'error')
@@ -405,9 +404,8 @@ def download_spreadsheet():
 def get_review_data():
     """API endpoint to get review data for the table"""
     try:
-        print("=== DEBUG: Starting get_review_data ===")
         
-        # NEW: Use the stored processed dataframe directly
+        # Use the stored processed dataframe directly
         processed_file = session.get('processed_file')
         if not processed_file or not os.path.exists(processed_file):
             print("ERROR: No processed file found")
@@ -415,9 +413,7 @@ def get_review_data():
         
         # Load the EXACT same processed dataframe used for downloads
         df_display = pd.read_pickle(processed_file)
-        print(f"DEBUG: Loaded processed dataframe with {len(df_display)} rows")
-        print(f"DEBUG: Columns: {list(df_display.columns)}")
-        
+
         # Get language info from session
         source_col = session.get('source_col')
         target_language = session.get('target_language')
@@ -425,8 +421,6 @@ def get_review_data():
         # Get search and filter parameters
         search = request.args.get('search', '').strip()
         filter_type = request.args.get('filter', 'all')
-        
-        print(f"DEBUG: search='{search}', filter_type='{filter_type}'")
         
         # Apply filtering
         filtered_df = df_display.copy()
@@ -437,19 +431,15 @@ def get_review_data():
                 lambda x: x.str.contains(search, case=False, na=False)
             ).any(axis=1)
             filtered_df = filtered_df[mask]
-            print(f"DEBUG: After search filter: {len(filtered_df)} rows")
         
         # Type filters
         if filter_type == 'missing' and target_language in filtered_df.columns:
             filtered_df = filtered_df[filtered_df[target_language].isna()]
-            print(f"DEBUG: After missing filter: {len(filtered_df)} rows")
         elif filter_type == 'priority' and 'Occurrences' in filtered_df.columns:
             filtered_df = filtered_df[filtered_df['Occurrences'] > 5]
-            print(f"DEBUG: After priority filter: {len(filtered_df)} rows")
         
         # Get first 100 rows for display
         display_df = filtered_df.head(100)
-        print(f"DEBUG: Showing {len(display_df)} rows")
         
         # Convert to records
         records = []
@@ -466,7 +456,7 @@ def get_review_data():
             }
             records.append(record)
         
-        # Calculate stats
+        # Calculate metrics
         missing_count = 0
         high_priority_count = 0
         
@@ -475,8 +465,6 @@ def get_review_data():
         
         if 'Occurrences' in filtered_df.columns:
             high_priority_count = int((filtered_df['Occurrences'] > 5).sum())
-        
-        print(f"DEBUG: Created {len(records)} records")
         
         return jsonify({
             'success': True,
@@ -505,9 +493,7 @@ def get_review_data():
 @app.route('/api/run_validation', methods=['POST'])
 def run_validation_api():
     """API endpoint to run LQA validation"""
-    try:
-        print("=== DEBUG: Starting validation ===")
-        
+    try:       
         # Recreate the processed dataset (using the same logic as review)
         temp_file = session.get('temp_file')
         if not temp_file or not os.path.exists(temp_file):
@@ -540,12 +526,8 @@ def run_validation_api():
         processor = TranslationProcessor(config)
         processed_dataset = processor.process(dataset)
         
-        print(f"DEBUG: Running validation on {len(processed_dataset)} entries")
-        
         # Run validation
         validation_results = run_validation(processed_dataset)
-        
-        print(f"DEBUG: Validation found {validation_results['issues_found']} issues")
         
         # Format results for frontend
         formatted_issues = []
@@ -604,8 +586,7 @@ def recreate_processed_dataset():
             str_id_col=str_id_col
         )
         
-        # We need to reprocess to get the same results
-        # Get the last processing config from session (we should store this)
+        # Use the Config stored in the current session
         config = ProcessingConfig(
             remove_duplicates=True,
             deduplication_strategy="keep_first_with_occurrences",
@@ -624,7 +605,7 @@ def recreate_processed_dataset():
 
 def detect_str_id_column(df):
     """Detect string ID column with flexible naming"""
-    possible_names = ['strId', 'ID', 'strID', '字符串', 'id', 'StringID', 'string_id', 'KEY_NAME']
+    possible_names = ['strId', 'ID', 'strID', '字符串', 'id', 'StringID', 'string_id', 'KEY_NAME', "SOURCE"]
     for col in df.columns:
         if col in possible_names:
             return col
