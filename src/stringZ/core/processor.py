@@ -1,5 +1,3 @@
-# src/stringZ/core/processor.py
-
 import logging
 import time
 from typing import Optional, Dict, Any
@@ -107,10 +105,9 @@ class TranslationProcessor:
             duplicates_removed = 0
             clusters_found = 0
             
-            # DEBUG: Log initial state
             self.logger.info(f"Initial dataset has {len(processed_dataset.entries)} entries")
             
-            # Step 1: Deduplication
+            # Deduplication
             if self.config.remove_duplicates:
                 self.logger.info("Step 1: Removing duplicates...")
                 self.logger.info(f"Using deduplication strategy: {self.config.deduplication_strategy}")
@@ -118,7 +115,6 @@ class TranslationProcessor:
                 before_dedup = len(processed_dataset)
                 self.logger.info(f"Before deduplication: {before_dedup} entries")
                 
-                # Apply deduplication
                 processed_dataset = self.deduplicator.process(processed_dataset)
                 
                 after_dedup = len(processed_dataset)
@@ -127,7 +123,6 @@ class TranslationProcessor:
                 self.logger.info(f"After deduplication: {after_dedup} entries")
                 self.logger.info(f"Duplicates removed: {duplicates_removed}")
                 
-                # DEBUG: Check if deduplication actually happened
                 if duplicates_removed == 0:
                     self.logger.warning("⚠️ NO DUPLICATES WERE REMOVED!")
                     self.logger.warning("This might indicate:")
@@ -142,7 +137,7 @@ class TranslationProcessor:
             else:
                 self.logger.info("Step 1: Skipping deduplication (disabled)")
             
-            # Step 2: Correlation Sorting
+            # Correlation Sorting
             if self.config.sort_by_correlation:
                 self.logger.info(f"Step 2: Applying {self.config.correlation_strategy} correlation sorting...")
                 processed_dataset = self.correlator.process(processed_dataset)
@@ -286,6 +281,7 @@ class TranslationProcessor:
 
 
 # Convenience functions for common processing scenarios
+# I yet have to use it lol
 def quick_process(dataset: TranslationDataset, remove_duplicates: bool = True, sort_by_correlation: bool = True) -> TranslationDataset:
     """Quick processing with improved default settings"""
     config = ProcessingConfig(

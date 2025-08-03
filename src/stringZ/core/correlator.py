@@ -195,16 +195,16 @@ class HybridCorrelationStrategy(CorrelationStrategy):
         
         logger.info(f"Computing simple hybrid correlation for {len(entries)} entries")
         
-        # Step 1: Find substring clusters (fast)
+        # Find substring clusters (fast)
         substring_clusters, clustered_ids = self._create_substring_clusters(entries)
         logger.info(f"Found {len(substring_clusters)} substring clusters")
         
-        # Step 2: Find semantic clusters from remaining entries (slower)
+        # Find semantic clusters from remaining entries (slower)
         unclustered_entries = [e for e in entries if e.str_id not in clustered_ids]
         semantic_clusters = self._create_semantic_clusters(unclustered_entries)
         logger.info(f"Found {len(semantic_clusters)} semantic clusters")
         
-        # Step 3: Simple ordering - substring clusters first, then semantic
+        # Simple ordering - substring clusters first, then semantic
         all_clusters = substring_clusters + semantic_clusters
         sorted_entries = self._create_simple_order(entries, all_clusters)
         
@@ -268,13 +268,12 @@ class HybridCorrelationStrategy(CorrelationStrategy):
         if len(entries) <= 1:
             return []
         
-        # This is the slow part - only run on remaining entries
         texts = [entry.source_text for entry in entries]
         similarity_matrix = self.similarity_calc.calculate_similarity_matrix(texts)
         
         clusters = []
         used_indices = set()
-        cluster_id = 1000  # Different ID range
+        cluster_id = 1000
         
         for i in range(len(entries)):
             if i in used_indices:

@@ -18,11 +18,10 @@ class KeepFirstWithOccurrencesStrategy(DeduplicationStrategy):
     """Keep first occurrence and add occurrences count - following your original logic exactly"""
     
     def deduplicate(self, entries: List[TranslationEntry]) -> Tuple[List[TranslationEntry], List[DuplicateGroup]]:
-        # Group by EN + target language combination (your original logic)
+        # Group by EN + target language combination
         groups = defaultdict(list)
         
         for entry in entries:
-            # Create key from EN + target text (like your original script)
             en_text = entry.source_text.strip() if entry.source_text else ""
             target_text = entry.target_text.strip() if entry.target_text else ""
             
@@ -51,12 +50,11 @@ class KeepFirstWithOccurrencesStrategy(DeduplicationStrategy):
                 target_text=first_entry.target_text,
                 source_lang=first_entry.source_lang,
                 target_lang=first_entry.target_lang,
-                occurrences=occurrences_count  # This is the key difference!
+                occurrences=occurrences_count
             )
             
             unique_entries.append(new_entry)
             
-            # Log what we're doing
             if occurrences_count > 1:
                 logger.info(f"Duplicate found: '{en_text[:30]}...' + '{target_text[:20]}...' appears {occurrences_count} times")
             
@@ -69,11 +67,11 @@ class KeepFirstWithOccurrencesStrategy(DeduplicationStrategy):
                 )
                 duplicate_groups.append(duplicate_group)
         
-        # Sort by occurrences (descending) like your original script
+        # Sort by occurrences (descending)
         unique_entries.sort(key=lambda e: e.occurrences, reverse=True)
         
         duplicates_removed = len(entries) - len(unique_entries)
-        logger.info(f"Deduplication results:")
+        logger.info("Deduplication results:")
         logger.info(f"  Original entries: {len(entries)}")
         logger.info(f"  Unique EN+target combinations: {len(unique_entries)}")
         logger.info(f"  Duplicates removed: {duplicates_removed}")
@@ -171,7 +169,7 @@ class Deduplicator:
     """Main deduplication engine"""
     
     def __init__(self, strategy: DeduplicationStrategy = None):
-        self.strategy = strategy or KeepFirstWithOccurrencesStrategy()  # Default to your original logic
+        self.strategy = strategy or KeepFirstWithOccurrencesStrategy()
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
     
     def process(self, dataset: TranslationDataset) -> TranslationDataset:

@@ -118,16 +118,11 @@ class TranslationDataset:
             if entry.target_lang and entry.target_text:
                 row[entry.target_lang] = entry.target_text
         
-            # ADD THIS LINE TO YOUR ACTUAL FILE:
             row['Occurrences'] = getattr(entry, 'occurrences', 1)
         
             data.append(row)
     
         df = pd.DataFrame(data)
-    
-        # ADD THIS SORTING TO YOUR ACTUAL FILE:
-        # if 'Occurrences' in df.columns:
-        #     df = df.sort_values('Occurrences', ascending=False).reset_index(drop=True)
     
         return df    
 
