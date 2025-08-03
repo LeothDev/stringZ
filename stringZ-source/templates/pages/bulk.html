@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+  <!-- Sidebar -->
+  <div class="col-md-4">
+    <div class="text-center mb-3 mt-4">
+      <img src="https://cdn.moogold.com/2024/10/watcher-of-realms.jpg" alt="Game Logo" style="width: 50px; height: 50px; border-radius: 8px;">
+      <h4 class="mt-2 mb-1">StringZ PM Dashboard</h4>
+      <small class="text-muted d-block">PM & Team Productivity Tools</small>
+      <span class="badge bg-primary mt-1">PM Tools</span>
+    </div>
+    <div class="mb-3">
+      <a href="/" class="btn btn-outline-secondary btn-sm w-100">
+        ← Back to StringZ Main
+      </a>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <h5>📦 Bulk Generation</h5>
+      </div>
+      <div class="card-body">
+        <form id="bulkUploadForm" enctype="multipart/form-data">
+          <div class="mb-3">
+            <label for="bulkFile" class="form-label">Upload Multi-Language File</label>
+            <input type="file" class="form-control" id="bulkFile" name="file" accept=".xlsx,.xls" required>
+            <div class="form-text">Upload Excel file with strId, EN, and multiple target language columns</div>
+          </div>
+          <div id="bulkLanguageSelection" style="display: none;">
+            <h6>🌍 Detected Languages</h6>
+            <div id="bulkDetectedInfo" class="alert alert-info"></div>
+            <div class="mb-3">
+              <label class="form-label">Select languages to generate:</label>
+              <div id="languageCheckboxes">
+                <!-- Checkboxes will be populated dynamically -->
+              </div>
+              <div class="form-text">
+                <small>
+                  <button type="button" class="btn btn-link btn-sm p-0" id="selectAll">Select All</button>
+                  |
+                  <button type="button" class="btn btn-link btn-sm p-0" id="selectNone">Select None</button>
+                </small>
+              </div>
+            </div>
+            <div class="d-grid">
+              <button type="button" class="btn btn-success btn-lg" id="generateBulkBtn">
+                🚀 Generate Visualizers
+              </button>
+            </div>
+          </div>
+        </form>
+        <div class="progress-container" id="bulkProgressContainer" style="display: none;">
+          <div class="progress mb-3">
+            <div class="progress-bar" id="bulkProgressBar" role="progressbar" style="width: 0%"></div>
+          </div>
+          <div id="bulkStatusText" class="text-center"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Main Content -->
+  <div class="col-md-8">
+    <div id="bulkWelcomeContent" style="min-height: 70vh; display: flex; align-items: center; justify-content: center;">
+      <div class="w-100 mt-4">
+        <div class="row align-items-start">
+          <div class="col-md-4 mb-4">
+            <div class="info-card">
+              <h5>🎯 Task Distribution</h5>
+              <p class="text-muted mb-0">Generate Visualizers for each language to distribute to LQA Members.</p>
+            </div>
+          </div>
+          <div class="col-md-4 mb-4">
+            <div class="info-card">
+              <h5>⚡ More features WIP</h5>
+              <p class="text-muted mb-0">
+                Actively analysing PM workflow for further improvements.
+              </p>
+            </div>
+          </div>
+          <div class="col-md-4 mb-4">
+            <div class="info-card">
+              <h5>📊 Project Overview</h5>
+              <p class="text-muted mb-0">See all languages at once and select which ones need immediate attention.</p>
+            </div>
+          </div>
+        </div>
+        <div class="workflow-card mt-4">
+          <h5 class="mb-3">PM Workflow for Team Distribution</h5>
+          <div class="row">
+            <div class="col-md-6">
+              <p class="mb-2"><strong>1. Upload master file</strong>
+                containing all language columns from your localization system</p>
+              <p class="mb-2"><strong>2. Select priority languages</strong>
+                based on release timeline and team availability</p>
+            </div>
+            <div class="col-md-6">
+              <p class="mb-2"><strong>3. Generate team-ready visualizers</strong>
+                without complex processing - ready for task assignment</p>
+              <!-- <p class="mb-0"><strong>4. Distribute to team</strong> -->
+              <!-- via task management system or direct assignment</p> -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="bulkPreviewContent" style="display: none;" class="mt-4">
+      <div class="card">
+        <div class="card-header">
+          <h5>📋 Multi-Language File Preview</h5>
+        </div>
+        <div class="card-body">
+          <div id="bulkFileStats" class="row mb-3"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/bulk.js')}}"></script>
+{% endblock %}

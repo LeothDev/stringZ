@@ -80,13 +80,56 @@ def generate_visualizer_html(dataset, original_filename=None):
         '{{SOURCE_LANG}}': dataset.source_lang,
         '{{TARGET_LANG}}': target_lang,
         '{{WORD_COUNT}}': f"{target_word_count:,}",
-        '{{CLEAN_TITLE}}': html.escape(title.replace(' ', '_'))
+        '{{CLEAN_TITLE}}': html.escape(title.replace(' ', '_')) # Not currently used
     }
 
     result = template
     for placeholder, value in replacements.items():
         result = result.replace(placeholder, value)
     return result
+
+def generate_bulk_visualizer_html(dataset, original_filename=None):
+    """Generate Visualizer HTML for bulk generation (Without Occurrences column)"""
+    template = load_template()
+
+    df = dataset.to_dataframe()
+    target_lang = dataset.target_lang or "Target"
+
+    target_word_count = 0
+    if target_lang in df.columns:
+        target_word_count = df[target_lang].dropna().astype(str).apply(lambda x: len(x.split())).sum()
+
+    if original_filename:
+        title = f"StringZ Visualizer - {target_lang}"
+    else:
+        title = f"StringZ Visualizer - {target_lang} Translation Review"
+
+    # IMPORTANT DIFFERENCE THAN STANDARD VISUALIZER - No Occurrences for bulk!
+    headers = ["strId", dataset.source_lang, target_lang, "State", "Notes"]
+
+    # Parse data rows without Occurrences
+    raw_data_rows, formatted_data_rows = _prepare_bulk_data_rows(df, dataset, target_lang)
+
+    headers_js = '[' + ', '.join(f'"{h}"' for h in headers) + ']'
+    raw_data_js = _python_list_to_js_array(raw_data_rows)
+    formatted_data_js = _python_list_to_js_array(formatted_data_rows)
+
+    # Replace placeholders
+    replacements = {
+        '{{TITLE}}': html.escape(title),
+        '{{HEADERS_JS}}': headers_js,
+        '{{RAW_DATA_JS}}': raw_data_js,
+        '{{FORMATTED_DATA_JS}}': formatted_data_js,
+        '{{ENTRY_COUNT}}': str(len(df)),
+        '{{SOURCE_LANG}}': dataset.source_lang,
+        '{{TARGET_LANG}}': target_lang,
+        '{{WORD_COUNT}}': f"{target_word_count:,}",
+        '{{CLEAN_TITLE}}': html.escape(title.replace(' ', '_'))
+    }
+
+    for placeholder, value in replacements.items():
+        template = template.replace(placeholder, value)
+    return template
 
 def _prepare_data_rows(df, dataset, target_lang):
     """Prepare raw and formatted data rows for the visualizer"""
@@ -126,6 +169,34 @@ def _prepare_data_rows(df, dataset, target_lang):
         raw_data_rows.append(raw_row)
         formatted_data_rows.append(formatted_row)
     
+    return raw_data_rows, formatted_data_rows
+
+def _prepare_bulk_data_rows(df, dataset, target_lang):
+    """Prepare data rows for bulk visualizer (without Occurrences column)"""
+    raw_data_rows = []
+    formatted_data_rows = []
+
+    for idx, (_, row) in enumerate(df.iterrows()):
+        str_id = str(row.get('strId', ''))
+        en_text = str(row.get(dataset.source_lang, ''))
+        target_text = str(row.get(target_lang, '')) if target_lang in df.columns else ''
+
+        raw_en, formatted_en = format_text_for_visualizer(en_text)
+        raw_target, formatted_target = format_text_for_visualizer(target_text)
+
+        # Create data WITHOUT Occurrences
+        raw_row = [str_id, raw_en, raw_target, "", ""]
+        formatted_row = [
+            html.escape(str_id),
+            formatted_en,
+            formatted_target,
+            "", # State
+            ""  # Notes
+        ]
+
+        raw_data_rows.append(raw_row)
+        formatted_data_rows.append(formatted_row)
+
     return raw_data_rows, formatted_data_rows
 
 def _python_list_to_js_array(data_rows):
