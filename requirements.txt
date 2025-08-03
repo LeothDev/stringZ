@@ -1,7 +1,7 @@
-pandas
-openpyxl
-scikit-learn
-numpy
-Flask
-Flask-Session
-werkzeug
+Flask==3.0.3
+Flask-Session==0.8.0
+pandas==2.2.3
+openpyxl==3.1.5
+scikit-learn==1.5.2
+numpy==1.26.4
+werkzeug==3.0.4
