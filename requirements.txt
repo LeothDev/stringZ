@@ -1,7 +1,0 @@
-pandas
-openpyxl
-scikit-learn
-numpy
-Flask
-Flask-Session
-werkzeug
