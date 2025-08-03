@@ -5,9 +5,13 @@ import io
 import os
 import re
 import tempfile
+import logging
 from flask import Flask, render_template, request, session, jsonify, url_for, flash, redirect, send_file, send_from_directory
+from flask_session import Session
 import pandas as pd
 from werkzeug.utils import secure_filename
+
+logging.getLogger('werkzeug').setLevel(logging.WARNING)
 
 # Add the src directory to Python path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
@@ -18,9 +22,15 @@ from stringZ.validation.validators import run_validation
 from stringZ.export.visualizer import generate_visualizer_html
 
 app = Flask(__name__)
-app.secret_key = 'your-secret-key-change-this-in-production'
 app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024  # 500MB max file size
 app.config['UPLOAD_FOLDER'] = tempfile.gettempdir()
+
+# IMPORTANT SERVER-SIDE SESSION, OTHERWISE THE COOKIE SESSION WOULD EXCEED THE ALLOWED LIMIT
+app.config['SESSION_TYPE'] = 'filesystem'
+app.config['SESSION_FILE_DIR'] = tempfile.gettempdir()
+app.config['SESSION_PERMANENT'] = False
+app.config['SESSION_USE_SIGNER'] = False
+Session(app)
 
 ALLOWED_EXTENSIONS = {'xlsx', 'xls'}
 
@@ -324,9 +334,6 @@ def download_visualizer():
         
         # Load processed dataframe and convert back to dataset
         df_processed = pd.read_pickle(processed_file)
-        print("DEBUG - Processed DataFrame columns:", df_processed.columns.tolist())
-        print("DEBUG - Occurrences column sample:", df_processed['Occurrences'].head(10).tolist() if 'Occurrences' in df_processed.columns else "No Occurrences column")
-        print("DEBUG - Occurrences value counts:", df_processed['Occurrences'].value_counts() if 'Occurrences' in df_processed.columns else "No data")
         
         # Get session info to recreate dataset
         source_col = session.get('source_col')
@@ -391,7 +398,8 @@ def download_spreadsheet():
         
         # Create filename
         current_time = int(time.time())
-        filename = f"StringZ-Processed-{current_time}.xlsx"
+        original_filename = session.get('original_filename', 'processed')
+        filename = f"{original_filename}_Processed.xlsx"
         
         return send_file(
             output,
@@ -498,44 +506,42 @@ def get_review_data():
 def run_validation_api():
     """API endpoint to run LQA validation"""
     try:       
-        # Recreate the processed dataset (using the same logic as review)
-        temp_file = session.get('temp_file')
-        if not temp_file or not os.path.exists(temp_file):
-            return jsonify({'error': 'No data found to validate'}), 400
-        
+        processed_file = session.get('processed_file')
+        if not processed_file or not os.path.exists(processed_file):
+            return jsonify({'error': 'No processed data found to validate'}), 400
+
+        df_processed = pd.read_pickle(processed_file)
+        print(f"DEBUG: Loaded processed DataFrame with {len(df_processed)} rows")
+       
         # Get stored session info
         str_id_col = session.get('str_id_col')
         source_col = session.get('source_col')
         target_language = session.get('target_language')
-        
-        # Load and create dataset
-        df = pd.read_pickle(temp_file)
-        columns_to_keep = [str_id_col, source_col, target_language]
-        df_filtered = df[columns_to_keep].copy()
-        
-        dataset = TranslationDataset.from_dataframe(
-            df_filtered,
+
+        # Create dataset from the PROCESSED dataframe
+        processed_dataset = TranslationDataset.from_dataframe(
+            df_processed,
             source_col=source_col,
             target_col=target_language,
             str_id_col=str_id_col
         )
+
+        print(f"DEBUG: Created dataset with {len(processed_dataset)} entries")
+        if processed_dataset.entries:
+            sample = processed_dataset.entries[0]
+            print(f"DEBUG: Sample entry for validation:")
+            print(f"  str_id: {sample.str_id}")
+            print(f"  source_text: {sample.source_text[:100]}...")
+            print(f"  target_text: {sample.target_text[:100] if sample.target_text else 'None'}...")
         
-        # Simple processing for validation
-        config = ProcessingConfig(
-            remove_duplicates=True,
-            deduplication_strategy="keep_first_with_occurrences",
-            sort_by_correlation=False
-        )
-        
-        processor = TranslationProcessor(config)
-        processed_dataset = processor.process(dataset)
-        
-        # Run validation
+        # Run validation directly on the processed dataset
         validation_results = run_validation(processed_dataset)
+        
+        print(f"DEBUG: Validation found {validation_results['issues_found']} issues")
         
         # Format results for frontend
         formatted_issues = []
-        for issue in validation_results['detailed_issues'][:20]:  # Limit to first 20 for display
+        for issue in validation_results['detailed_issues']:  # Show ALL issues, not just 20
             formatted_issues.append({
                 'str_id': issue['str_id'],
                 'type': issue['type'],
@@ -562,7 +568,7 @@ def run_validation_api():
         import traceback
         print(f"TRACEBACK: {traceback.format_exc()}")
         return jsonify({'error': f'Validation failed: {str(e)}'}), 400
-
+        
 def recreate_processed_dataset():
     """Helper function to recreate processed dataset from session data"""
     try:
@@ -622,6 +628,28 @@ def detect_source_column(df):
         if col in possible_names:
             return col
     return None
-
 if __name__ == '__main__':
-    app.run(debug=True)
+    import webbrowser
+    import threading
+    import time
+
+    browser_opened = False
+    
+    def open_browser():
+        """Open browser after a short delay to ensure server is running"""
+        global browser_opened
+        if not browser_opened:
+            time.sleep(5)  # Wait for Flask to start
+            webbrowser.open('http://127.0.0.1:5000')
+            browser_opened = True
+    
+    # Start browser opening in a separate thread
+    threading.Thread(target=open_browser, daemon=True).start()
+    
+    print("StringZ is starting...")
+    print("Translation QA Tool")
+    print("Opening browser automatically...")
+    print("If browser doesn't open, visit: http://127.0.0.1:5000")
+    print("Press Ctrl+C to stop")
+    
+    app.run(debug=False, host='127.0.0.1', port=5000, threaded=True)

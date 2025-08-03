@@ -265,7 +265,9 @@ function updateMetrics(stats) {
 }
 
 function updateSidebar(stats) {
+    const filename = ' {{ session.get("original_filename", "Unknown") }}' || 'Unknown';
     const sidebarHtml = `
+        <p><strong>${filename}</strong></p>
         <p><strong>📝 ${stats.total_entries}</strong> entries</p>
         <p><strong>🌍 ${stats.source_lang}</strong> → <strong>${stats.target_lang}</strong></p>
         <p><strong>✅ ${stats.completion_rate}</strong> completion</p>
@@ -425,8 +427,8 @@ function showValidationResults(data) {
     if (data.summary.issues_found === 0) {
         resultsContainer.innerHTML = `
             <div class="alert alert-success mt-4">
-                <h5>🎉 No validation issues found!</h5>
-                <p class="mb-0">Your translations look great. All ${data.summary.total_strings} strings passed validation.</p>
+                <h5>No validation issues found!</h5>
+                <p class="mb-0">All ${data.summary.total_strings} strings passed validation.</p>
             </div>
         `;
     } else {

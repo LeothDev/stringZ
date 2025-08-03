@@ -13,3 +13,6 @@ src/stringZ/ui/layouts/__pycache__/
 src/stringZ/__pycache__
 src/stringZ/utils/__pycache__/
 .venv/
+
+build/
+dist/
