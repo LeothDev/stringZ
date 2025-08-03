@@ -5,7 +5,9 @@ import tempfile
 
 def create_app(config_class=DevelopmentConfig):
     """Flask Application factory"""
-    app = Flask(__name__)
+    app = Flask(__name__,
+                template_folder="../templates",
+                static_folder="static")
     app.config.from_object(config_class)
 
 

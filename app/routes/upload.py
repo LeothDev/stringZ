@@ -30,7 +30,7 @@ def upload_file():
         session['original_filename'] = secure_filename(file.filename)
         
         # Detect columns
-        str_id_col, source_col = FileService.detect_str_id_column(df)
+        str_id_col, source_col = FileService.detect_columns(df)
         
         if not str_id_col:
             return jsonify({'error': 'No string ID column found! Expected one of: KEY_NAME, strId, ID, strID, 字符串'}), 400

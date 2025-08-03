@@ -3,8 +3,6 @@ import html
 import pandas as pd
 from flask import Blueprint, request, session, jsonify
 
-from stringZ.models.data_models import TranslationDataset
-
 api_bp = Blueprint('api', __name__, url_prefix='/api')
 
 @api_bp.route('/page_data')
@@ -44,7 +42,8 @@ def get_page_data():
                 'total_entries': stats['final_count'],
                 'source_lang': source_col,
                 'target_lang': target_language,
-                'completion_rate': f"{completion_rate:.1f}%"
+                'completion_rate': f"{completion_rate:.1f}%",
+                'original_filename': session.get('original_filename', 'Unknown')
             }
         })
         
@@ -141,10 +140,13 @@ def get_review_data():
         return jsonify({'error': f'Error loading review data: {str(e)}'}), 400
 
 
-api_bp.route('/run_validation', methods=['POST'])
-def run_validation():
+@api_bp.route('/run_validation', methods=['POST'])
+def run_validations():
     """API endpoint to run LQA Validation"""
     try:       
+        from stringZ.models.data_models import TranslationDataset
+        from stringZ.validation.validators import run_validation
+       
         processed_file = session.get('processed_file')
         if not processed_file or not os.path.exists(processed_file):
             return jsonify({'error': 'No processed data found to validate'}), 400
