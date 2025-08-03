@@ -24,10 +24,12 @@ def create_app(config_class=DevelopmentConfig):
     from app.routes.upload import upload_bp
     from app.routes.download import download_bp
     from app.routes.api import api_bp
+    from app.routes.bulk import bulk_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(upload_bp)
     app.register_blueprint(download_bp)
     app.register_blueprint(api_bp)
+    app.register_blueprint(bulk_bp)
 
     return app
