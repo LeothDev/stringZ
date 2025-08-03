@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+  <!-- Sidebar -->
+  <div class="col-md-4">
+    <div class="text-center mb-3 mt-4">
+      <img src="https://cdn.moogold.com/2024/10/watcher-of-realms.jpg" alt="Game Logo" style="width: 50px; height: 50px; border-radius: 8px;">
+      <h4 class="mt-2 mb-1">StringZ</h4>
+      <small class="text-muted d-block">Translation QA Tool</small>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <h5>⚙️ Processing Controls</h5>
+      </div>
+      <div class="card-body">
+        <form id="uploadForm" enctype="multipart/form-data">
+          <div class="mb-3">
+            <label for="file" class="form-label">Upload Translation File</label>
+            <input type="file" class="form-control" id="file" name="file" accept=".xlsx,.xls" required>
+            <div class="form-text">Upload Excel file with strId, EN, and target language columns</div>
+          </div>
+          <div id="languageSelection" style="display: none;">
+            <h6>🌍 Select Target Language</h6>
+            <div id="detectedColumns" class="alert alert-info"></div>
+            <div class="mb-3">
+              <label for="targetLanguage" class="form-label">Choose target language:</label>
+              <select class="form-select" id="targetLanguage" name="targetLanguage">
+                <!-- Options will be populated dynamically -->
+              </select>
+            </div>
+            <button type="button" class="btn btn-success" id="loadDataBtn">✅ Load Data</button>
+          </div>
+          <div id="processingOptions" style="display: none;">
+            <hr>
+            <h6>🔧 Processing Options</h6>
+            <div class="mb-3">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="removeDuplicates" name="removeDuplicates" checked>
+                <label class="form-check-label" for="removeDuplicates">Remove Duplicates</label>
+              </div>
+            </div>
+            <div class="mb-3">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="sortByCorrelation" name="sortByCorrelation" checked>
+                <label class="form-check-label" for="sortByCorrelation">Sort by Similarity</label>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label for="correlationStrategy" class="form-label">Sorting Method</label>
+              <select class="form-select" id="correlationStrategy" name="correlationStrategy">
+                <option value="hybrid" selected>Hybrid (Best of substring + semantic)</option>
+                <option value="substring">Substring</option>
+                <option value="semantic">Semantic</option>
+              </select>
+            </div>
+            <div class="accordion" id="advancedSettings">
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#advancedCollapse">
+                    ⚙️ Advanced Settings
+                  </button>
+                </h2>
+                <div id="advancedCollapse" class="accordion-collapse collapse">
+                  <div class="accordion-body">
+                    <div class="mb-3">
+                      <label for="similarityThreshold" class="form-label">Similarity Threshold:
+                        <span id="thresholdValue">0.7</span></label>
+                      <input type="range" class="form-range" id="similarityThreshold" name="similarityThreshold" min="0.5" max="0.9" step="0.1" value="0.7">
+                    </div>
+                    <div class="mb-3">
+                      <label for="maxClusterSize" class="form-label">Max Cluster Size:
+                        <span id="clusterValue">15</span></label>
+                      <input type="range" class="form-range" id="maxClusterSize" name="maxClusterSize" min="5" max="30" step="5" value="15">
+                    </div>
+                    <div class="mb-3">
+                      <label for="minSubstringLength" class="form-label">Min Substring Length:
+                        <span id="substringValue">5</span></label>
+                      <input type="range" class="form-range" id="minSubstringLength" name="minSubstringLength" min="3" max="15" step="1" value="5">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="d-grid">
+              <button type="submit" class="btn btn-primary btn-lg">🚀 Process File</button>
+            </div>
+          </div>
+        </form>
+        <div class="progress-container" id="progressContainer">
+          <div class="progress mb-3">
+            <div class="progress-bar" id="progressBar" role="progressbar" style="width: 0%"></div>
+          </div>
+          <div id="statusText" class="text-center"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Main Content -->
+  <div class="col-md-8">
+    <div id="welcomeContent" style="min-height: 70vh; display: flex; align-items: center; justify-content: center;">
+      <div class="w-100 mt-4">
+        <div class="row align-items-start">
+          <div class="col-md-4 mb-4">
+            <div class="info-card">
+              <h5>🔄 Smart Deduplication</h5>
+              <p class="text-muted mb-0">Removes duplicate translations and tracks occurrence counts for efficient workflow.</p>
+            </div>
+          </div>
+          <div class="col-md-4 mb-4">
+            <div class="info-card">
+              <h5>🧠 AI-Powered Grouping</h5>
+              <p class="text-muted mb-0">Groups similar strings using semantic analysis for faster consistency checking.</p>
+            </div>
+          </div>
+          <div class="col-md-4 mb-4">
+            <div class="info-card">
+              <h5>⚠️ Translation Validation</h5>
+              <p class="text-muted mb-0">Validates color tags, variables, and game-specific formatting automatically.</p>
+            </div>
+          </div>
+        </div>
+        <div class="workflow-card mt-4">
+          <h5 class="mb-3">Workflow</h5>
+          <div class="row">
+            <div class="col-md-6">
+              <p class="mb-2"><strong>1. Upload Excel file</strong>
+                with strId, EN, and target language columns</p>
+              <p class="mb-2"><strong>2. Configure processing</strong>
+                options for deduplication and similarity sorting</p>
+            </div>
+            <div class="col-md-6">
+              <p class="mb-2"><strong>3. Review translations</strong>
+                and run LQA validation</p>
+              <p class="mb-0"><strong>4. Download results</strong>
+                as Excel file and HTML visualizer</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="previewContent" style="display: none;">
+      <div class="card">
+        <div class="card-header">
+          <h5>📋 File Preview</h5>
+        </div>
+        <div class="card-body">
+          <div id="fileStats" class="row mb-3"></div>
+          <div id="previewTable"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/upload.js')}}"></script>
+{% endblock %}

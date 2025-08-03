@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+  <!-- Sidebar -->
+  <div class="col-md-3 mt-4" id="sidebar">
+    <div class="text-center mb-3">
+      <img src="https://cdn.moogold.com/2024/10/watcher-of-realms.jpg" alt="Game Logo" style="width: 50px; height: 50px; border-radius: 8px;">
+      <h4 class="mt-2 mb-1">StringZ</h4>
+      <small class="text-muted d-block">Translation QA Tool</small>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <h5>🔄 Process New File</h5>
+      </div>
+      <div class="card-body" id="sidebarContent">
+        <a href="/reset" class="btn btn-secondary w-100 mb-3">🆕 Start Over</a>
+        <hr>
+        <div id="quickStats">
+          <!-- Stats will be loaded here -->
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Main Content -->
+  <div class="col-md-9" id="mainContent">
+    <!-- Navigation Tabs -->
+    <ul class="nav nav-tabs" id="resultsTabs" role="tablist">
+      <!-- Results Tab-->
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="results-tab" data-bs-toggle="tab" data-bs-target="#results" type="button" role="tab">
+          📊 Results
+        </button>
+      </li>
+      <!-- Review Translations Tab -->
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="review-tab" data-bs-toggle="tab" data-bs-target="#review" type="button" role="tab">
+          🔍 Review Translations
+        </button>
+      </li>
+      <!-- Validator Tab -->
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="validation-tab" data-bs-toggle="tab" data-bs-target="#validation" type="button" role="tab">
+          ⚠️ LQA Validation
+        </button>
+      </li>
+      <!-- Strings Equality Check Tab -->
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="comparison-tab" data-bs-toggle="tab" data-bs-target="#comparison" type="button" role="tab">
+          🔍 String Comparison
+        </button>
+      </li>
+    </ul>
+    <!-- Tab Content -->
+    <div class="tab-content" id="resultsTabContent">
+      <!-- Results Tab -->
+      <div class="tab-pane fade show active" id="results" role="tabpanel">
+        <div class="card mt-3">
+          <div class="card-header">
+            <h5>📊 Processing Results</h5>
+          </div>
+          <div class="card-body">
+            <!-- Metrics Row -->
+            <div class="mb-4" id="metricsRow">
+              <!-- Simple text Metrics will be loaded here -->
+            </div>
+            <!-- Download Section -->
+            <h4>📥 Export Processed Results</h4>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="card">
+                  <div class="card-body text-center">
+                    <h5>📊 Interactive Visualizer</h5>
+                    <p class="text-muted">HTML file for LQA Raw/Formatted Data</p>
+                    <button class="btn btn-primary" id="downloadVisualizer">Download Visualizer</button>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="card">
+                  <div class="card-body text-center">
+                    <h5>📈 Processed Spreadsheet</h5>
+                    <p class="text-muted">Excel file with processed translations</p>
+                    <button class="btn btn-secondary" id="downloadSpreadsheet">Download Excel</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Additional Options -->
+            <hr>
+            <h6>Additional Export Options:</h6>
+            <h5>WIP - Stay Tuned!</h5>
+            <!-- <div class="row"> -->
+            <!-- <div class="col-md-6"> -->
+            <!-- <button class="btn btn-outline-danger w-100" id="downloadMissing">❌ Missing Only</button> -->
+            <!-- </div> -->
+            <!-- <div class="col-md-6"> -->
+            <!-- <button class="btn btn-outline-warning w-100" id="downloadPriority">⭐ High Priority</button> -->
+            <!-- </div> -->
+            <!-- </div> -->
+          </div>
+        </div>
+      </div>
+      <!-- Review Tab -->
+      <div class="tab-pane fade" id="review" role="tabpanel">
+        <div class="card mt-3">
+          <div class="card-header">
+            <h5>🔍 Translation Review</h5>
+          </div>
+          <div class="card-body">
+            <p class="text-muted">Review similar strings grouped together for consistency checking</p>
+            <!-- Search and Filter Controls -->
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <input type="text" class="form-control" id="reviewSearch" placeholder="🔍 Find specific strings">
+              </div>
+              <div class="col-md-3">
+                <select class="form-select" id="reviewFilter">
+                  <option value="all">📋 All Strings</option>
+                  <option value="missing">❌ Missing Translations</option>
+                  <option value="priority">⭐ High Priority (>5 uses)</option>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <select class="form-select" id="reviewPerPage">
+                  <option value="50">50 per page</option>
+                  <option value="100" selected>100 per page</option>
+                  <option value="250">250 per page</option>
+                  <option value="all">All</option>
+                </select>
+              </div>
+            </div>
+            <!-- Review Table -->
+            <div id="reviewTableContainer" style="height: 550px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 6px;">
+              <table id="reviewTable" class="table table-sm table-striped mb-0" style="width:100%"></table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Validation Tab -->
+      <div class="tab-pane fade" id="validation" role="tabpanel">
+        <div class="card mt-3">
+          <div class="card-header">
+            <h5>⚠️ LQA Validation</h5>
+          </div>
+          <div class="card-body">
+            <p class="text-muted">Automated validation for game translation formatting and consistency<br>Use alongside Smartcat! No validator is perfect, so please still pay attention to tags.</p>
+            <div class="row">
+              <div class="col-md-8">
+                <h6>This validation checks for:</h6>
+                <ul>
+                  <li>🎯
+                    <strong>Token mismatches</strong>
+                    (color tags, variables, brackets)</li>
+                  <li>🏷️
+                    <strong>Malformed game tags</strong>
+                    (extra characters, unmatched tags)</li>
+                  <li>📝
+                    <strong>Punctuation inconsistencies</strong>
+                    (missing or different endings)</li>
+                  <li>🔢
+                    <strong>Numeric value differences</strong>
+                    in color tags</li>
+                  <li>🎮
+                    <strong>Game element consistency</strong>
+                    (abilities, skills, colors)</li>
+                </ul>
+              </div>
+              <div class="col-md-4">
+                <button class="btn btn-primary w-100" id="runValidation">🔍 Run Validation</button>
+              </div>
+            </div>
+            <!-- Validation Results -->
+            <div id="validationResults" style="display: none;">
+              <!-- Results will be loaded here -->
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- String Comparison Tab -->
+      <div class="tab-pane fade" id="comparison" role="tabpanel">
+        <div class="card mt-3">
+          <div class="card-header">
+            <h5>🔍 String Comparison Tool</h5>
+          </div>
+          <div class="card-body">
+            <p class="text-muted">Compare two strings to check for equality (Differences highlighting will be implemented in the future)</p>
+            <div class="row">
+              <div class="col-md-6">
+                <label for="string1" class="form-label">String 1:</label>
+                <textarea class="form-control" id="string1" rows="4" placeholder="Paste first string here..."></textarea>
+              </div>
+              <div class="col-md-6">
+                <label for="string2" class="form-label">String 2:</label>
+                <textarea class="form-control" id="string2" rows="4" placeholder="Paste second string here..."></textarea>
+              </div>
+            </div>
+            <div class="row mt-3">
+              <div class="col-md-12 text-center">
+                <button class="btn btn-primary" id="compareStrings">🔍 Compare Strings</button>
+                <button class="btn btn-secondary ms-2" id="clearComparison">🗑️ Clear</button>
+              </div>
+            </div>
+            <div id="comparisonResults" class="mt-4" style="display: none;">
+              <!-- Results will be shown here -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/results.js')}}"></script>
+{% endblock %}
