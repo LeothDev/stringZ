@@ -20,14 +20,23 @@ def open_browser():
 if __name__ == '__main__':
     import webbrowser
     import threading
-
-    if os.environ.get("WERKZEUG_RUN_MAIN") != "true":
-        threading.Thread(target=open_browser, daemon=True).start()
+    
+    if not os.environ.get('DOCKER_CONTAINER'):
+        if os.environ.get("WERKZEUG_RUN_MAIN") != "true":
+            threading.Thread(target=open_browser, daemon=True).start()
     
     print("StringZ is starting...")
     print("Translation QA Tool")
-    print("Opening browser automatically...")
-    print("If browser doesn't open, visit: http://127.0.0.1:5000")
+
+    if os.environ.get('DOCKER_CONTAINER'):
+        print("Running in Docker container")
+        print("Visit: http://localhost:5000")
+    else:
+        print("Opening browser automatically...")
+        print("If browser doesn't open, visit: http://127.0.0.1:5000")
+
     print("Press Ctrl+C to stop")
+
+    host = '0.0.0.0' if os.environ.get('DOCKER_CONTAINER') else '127.0.0.1'
     
-    app.run(debug=True, host='127.0.0.1', port=5000, threaded=True)
+    app.run(debug=True, host=host, port=5000, threaded=True)
