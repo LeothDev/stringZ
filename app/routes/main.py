@@ -1,5 +1,5 @@
 import os
-from flask import Blueprint, render_template, session, redirect, url_for, flash, send_from_directory
+from flask import Blueprint, render_template, session, redirect, url_for, flash, send_from_directory, jsonify
 
 main_bp = Blueprint('main', __name__)
 
@@ -10,6 +10,12 @@ def index():
         return render_template('pages/results.html')
     else:
         return render_template('pages/upload.html')
+
+@main_bp.route('/test')
+def test():
+    return jsonify({
+                       'status':'server is alive'
+                   })
 
 @main_bp.route('/results')
 def results():

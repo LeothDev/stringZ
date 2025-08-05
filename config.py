@@ -5,7 +5,8 @@ class Config:
 
     # File upload settings
     MAX_CONTENT_LENGTH = 500 * 1024 * 1024 # 500MB
-    UPLOAD_FOLDER = tempfile.gettempdir()
+    # UPLOAD_FOLDER = tempfile.gettempdir()
+    UPLOAD_FOLDER = './uploads'
 
     ALLOWED_EXTENSIONS = {'xlsx', 'xls'}
 

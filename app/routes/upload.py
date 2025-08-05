@@ -9,13 +9,18 @@ upload_bp = Blueprint('upload', __name__)
     
 @upload_bp.route('/upload', methods=['POST'])
 def upload_file():
-    """Handle file upload and column detection"""
+    print("=== FLASK UPLOAD ROUTE HIT ===")
+    print(f"Request method: {request.method}")
+    print(f"Files in request: {list(request.files.keys())}")
+    
     from flask import current_app
     
     if 'file' not in request.files:
+        print("ERROR: No file in request")
         return jsonify({'error': 'No file selected'}), 400
     
     file = request.files['file']
+    print(f"File received: {file.filename}, size: {file.content_length}")
     if file.filename == '':
         return jsonify({'error': 'No file selected'}), 400
     

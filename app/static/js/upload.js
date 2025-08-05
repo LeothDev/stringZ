@@ -35,12 +35,19 @@ function uploadFile(file) {
       return;
   }
 
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 60000)
   fetch('/upload', {
       method: 'POST',
-      body: formData
+      body: formData,
+      signal: controller.signal
   })
   .then(response => {
+      clearTimeout(timeoutId);
       console.log('Response received:', response);
+      if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
       return response.json();
   })
   .then(data => {
@@ -53,9 +60,19 @@ function uploadFile(file) {
       }
   })
   .catch(error => {
+      clearTimeout(timeoutId);
       console.error('Fetch error details:', error);
       hideProgress();
-      alert('Upload failed: ' + error.message);
+
+      let errorMessage = 'Upload failed: ';
+      if (error.name === 'AbortError') {
+          errorMessage += 'Request timed out';
+      } else if (error.message.includes('Failed to fetch')) {
+          errorMessage += 'Cannot connect to server';
+      } else {
+          errorMessage += error.message;
+      }
+      alert(errorMessage);
   });
 }
 
