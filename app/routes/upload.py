@@ -196,6 +196,8 @@ def process_file():
         processed_dataset = processor.process(dataset)
         
         processed_df = processed_dataset.to_dataframe()
+        print(f"DEBUG - After to_dataframe(), columns: {processed_df.columns.tolist()}")
+        print(f"DEBUG - Dataset str_id_col: {processed_dataset.str_id_col}")
         processed_file = os.path.join(current_app.config['UPLOAD_FOLDER'], f"processed_{id(session)}.pkl")
         processed_df.to_pickle(processed_file)
         

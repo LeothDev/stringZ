@@ -22,11 +22,29 @@ def download_visualizer():
 
         # Load processed dataframe
         df_processed = pd.read_pickle(processed_file)
-
+        
         # Session info to properly recreate the dataset as DataFrame
         source_col = session.get('source_col')
         target_language = session.get('target_language')
         str_id_col = session.get('str_id_col')
+        print(str_id_col)
+
+        # Check if we need to rename the column
+        if str_id_col in df_processed.columns:
+            # Column already has correct name
+            pass
+        elif 'strId' in df_processed.columns and str_id_col != 'strId':
+            # Rename strId back to original name
+            df_processed = df_processed.rename(columns={'strId': str_id_col})
+            print(f"DEBUG - Renamed 'strId' back to '{str_id_col}'")
+
+        print(f"DEBUG - Final DataFrame columns: {df_processed.columns.tolist()}")
+
+        print(f"DEBUG - About to create dataset with columns:")
+        print(f"  str_id_col: {str_id_col}")
+        print(f"  source_col: {source_col}")  
+        print(f"  target_language: {target_language}")
+        print(f"  DataFrame columns: {df_processed.columns.tolist()}")
 
         # Finally create the dataset
         processed_dataset = TranslationDataset.from_dataframe(

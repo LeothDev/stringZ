@@ -62,6 +62,7 @@ class ProcessingResult:
 class TranslationDataset:
     """Main container for translation data"""
     entries: List[TranslationEntry] = field(default_factory=list)
+    str_id_col: str = "strId"
     source_lang: str = "EN"
     target_lang: Optional[str] = None
     result: Optional[ProcessingResult] = None
@@ -103,6 +104,7 @@ class TranslationDataset:
         
         return cls(
             entries=entries,
+            str_id_col=str_id_col,
             source_lang=source_col,
             target_lang=target_col
         )
@@ -112,7 +114,7 @@ class TranslationDataset:
         data = []
         for entry in self.entries:
             row = {
-                'strId': entry.str_id,
+                self.str_id_col: entry.str_id,
                 entry.source_lang: entry.source_text,
             }
             if entry.target_lang and entry.target_text:

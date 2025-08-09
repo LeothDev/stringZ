@@ -451,7 +451,10 @@
                             }
                         ]
                     });
-        
+
+                    console.log('DataTable columns:', dataTable.settings()[0].aoColumns.map((col, idx) => `${idx}: ${col.sTitle}`));
+                    console.log('Headers array:', headers);
+                    console.log('State column should be at index:', headers.indexOf("State") + 1);        
                     $('#myTable tbody').on('change', 'select.state-select', function () {
                         const rowIdx = dataTable.row($(this).closest('tr')).index();
                         const value = $(this).val();
@@ -659,7 +662,8 @@
                 const table = $('#myTable').DataTable();
                 const totalRows = table.rows().count();
 
-                switch(e.key.toLowerCase()) {
+                switch(e.key) {
+                  // Actions (lowercase)
                   case 'p':
                     e.preventDefault();
                     markCurrentRow('Pass');
@@ -672,27 +676,59 @@
                     e.preventDefault();
                     clearCurrentRow();
                     break;
-                  case 'arrowdown':
+
+                  // Filters (UPPERCASE)
+                  case 'P':
+                    e.preventDefault();
+                    filterByState('pass');
+                    break;
+                  case 'F':
+                    e.preventDefault();
+                    filterByState('fail');
+                    break;
+                  case 'A':
+                    e.preventDefault();
+                    filterByState('all');
+                    break;
+                  case 'U':
+                    e.preventDefault();
+                    filterByState('unreviewed');
+                    break;
+
+                  // Navigation
+                  case 'ArrowDown':
                   case 'j':
                     e.preventDefault();
                     navigateRow(1);
                     break;
-                  case 'arrowup':
+                  case 'ArrowUp':
                   case 'k':
                     e.preventDefault();
                     navigateRow(-1);
                     break;
-                  case 'enter':
-                    e.preventDefault();
-                    focusNotes();
-                    break;
-                  case 'escape':
+
+                  // Modes
+                  case 'Escape':
                     e.preventDefault();
                     exitKeyboardMode();
                     break;
                   case ' ':
                     e.preventDefault();
                     enterKeyboardMode();
+                    break;
+                  case 'Enter':
+                    e.preventDefault();
+                    focusNotes();
+                    break;
+
+                  // Other shortcuts
+                  case 'D':
+                    e.preventDefault();
+                    toggleDarkMode();
+                    break;
+                  case 'T':
+                    e.preventDefault();
+                    toggleData();
                     break;
                 }
               });
@@ -793,7 +829,8 @@
                         border: 1px solid var(--border-color);
                         box-shadow: 0 2px 8px rgba(0,0,0,0.1);
                     ">
-                        Press <kbd>Space</kbd> to start keyboard navigation
+                        Press <kbd>Space</kbd> to start keyboard navigation<br>
+                        <small><kbd>p</kbd>/<kbd>f</kbd> mark • <kbd>P</kbd>/<kbd>F</kbd> filter</small>
                     </div>
                 `);
 
@@ -843,11 +880,14 @@
                   box-shadow: 0 2px 8px rgba(0,0,0,0.2);
                   font-family: monospace;
               ">
-                  <kbd style="background: rgba(255,255,255,0.2);">P</kbd>ass 
-                  <kbd style="background: rgba(255,255,255,0.2);">F</kbd>ail 
-                  <kbd style="background: rgba(255,255,255,0.2);">C</kbd>lear 
-                  <kbd style="background: rgba(255,255,255,0.2);">↑↓</kbd>Nav 
-                  <kbd style="background: rgba(255,255,255,0.2);">⏎</kbd>Notes
+                  <!-- <kbd style="background: rgba(255,255,255,0.2);">P</kbd>ass --> 
+                  <!-- <kbd style="background: rgba(255,255,255,0.2);">F</kbd>ail --> 
+                  <!-- <kbd style="background: rgba(255,255,255,0.2);">C</kbd>lear --> 
+                  <!-- <kbd style="background: rgba(255,255,255,0.2);">↑↓</kbd>Nav --> 
+                  <!-- <kbd style="background: rgba(255,255,255,0.2);">⏎</kbd>Notes -->
+                  <strong>Actions:</strong> <kbd>p</kbd>ass <kbd>f</kbd>ail <kbd>c</kbd>lear<br>
+                  <strong>Filters:</strong> <kbd>P</kbd>ass <kbd>F</kbd>ail <kbd>A</kbd>ll <kbd>U</kbd>nreviewed<br>
+                  <strong>Other:</strong> <kbd>↑↓</kbd>Nav <kbd>⏎</kbd>Notes <kbd>D</kbd>ark <kbd>T</kbd>oggle
               </div>
             `);
 
@@ -862,6 +902,57 @@
               $('#keyboard-hint').remove();
               $('.shortcut-summary').remove();
               showInitialHint();
+            }
+
+            function filterByState(filterType) {
+              console.log(`Filtering by: ${filterType}`);
+  
+              if (filterType === 'all') {
+                // Show all rows
+                $('#myTable tbody tr').show();
+              } else {
+                // Hide all rows first
+                $('#myTable tbody tr').hide();
+    
+                // Show only matching rows
+                $('#myTable tbody tr').each(function() {
+                  const $row = $(this);
+                  const $select = $row.find('.state-select');
+                  const currentValue = $select.val();
+      
+                  let shouldShow = false;
+      
+                  if (filterType === 'pass' && currentValue === 'Pass') {
+                    shouldShow = true;
+                  } else if (filterType === 'fail' && currentValue === 'Fail') {
+                    shouldShow = true;
+                  } else if (filterType === 'unreviewed' && (!currentValue || currentValue === '')) {
+                    shouldShow = true;
+                  }
+      
+                  if (shouldShow) {
+                    $row.show();
+                  }
+                });
+              }
+  
+              showFilterFeedback(filterType);
+            }            
+            
+            function showFilterFeedback(filterType) {
+              const messages = {
+                'all': 'Showing all entries',
+                'pass': 'Showing only passed entries',
+                'fail': 'Showing only failed entries',
+                'unreviewed': 'Showing only unreviewed entries'
+              };
+
+              const feedback = $(`<div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #007bff; color: white; padding: 8px 16px; border-radius: 4px; z-index: 10000;">${messages[filterType]}</div>`);
+              $('body').append(feedback);
+
+              setTimeout(() => {
+                feedback.fadeOut(300, function() { $(this).remove(); });
+              }, 1500);
             }
     </script>
   </body>

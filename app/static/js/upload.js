@@ -42,14 +42,17 @@ function uploadFile(file) {
       body: formData,
       signal: controller.signal
   })
-  .then(response => {
-      clearTimeout(timeoutId);
-      console.log('Response received:', response);
-      if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-      return response.json();
-  })
+    .then(response => {
+        clearTimeout(timeoutId);
+        console.log('Response received:', response);
+        if (!response.ok) {
+            // Get the actual error message from server
+            return response.json().then(errorData => {
+                throw new Error(`HTTP ${response.status}: ${errorData.error || response.statusText}`);
+            });
+        }
+        return response.json();
+    })
   .then(data => {
       console.log('Data received:', data);
       hideProgress();

@@ -18,6 +18,14 @@ class FileService:
                 str_id_col = col
                 break
 
+        # If no named column is found check for empty header
+        if  str_id_col is None:
+            for col in df.columns:
+                if col.startswith('Unnamed:'):
+                    df.rename(columns={col: 'strId'}, inplace=True)
+                    str_id_col = 'strId'
+                    break
+
         # Source column detection  
         source_names = ['EN', 'English', 'Source', 'en', 'english', 'source']
         source_col = None

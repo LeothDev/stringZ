@@ -66,6 +66,7 @@ def get_review_data():
         # Get language info from session
         source_col = session.get('source_col')
         target_language = session.get('target_language')
+        str_id_col = session.get('str_id_col')
         
         # Get search and filter parameters
         search = request.args.get('search', '').strip()
@@ -98,7 +99,7 @@ def get_review_data():
                 occurrences_val = 1
             
             record = {
-                'strId': str(row.get('strId', '')),
+                'strId': str(row.get(str_id_col, '')),
                 'source': str(row.get(source_col, '')),
                 'target': str(row.get(target_language, '') if target_language in row else ''),
                 'occurrences': int(occurrences_val)
@@ -159,6 +160,11 @@ def run_validations():
         source_col = session.get('source_col')
         target_language = session.get('target_language')
 
+        if str_id_col in df_processed.columns:
+            pass
+        elif 'strId' in df_processed.columns and str_id_col != 'strId':
+            df_processed = df_processed.rename(columns={'strId': str_id_col})
+        
         # Create dataset from the PROCESSED dataframe
         processed_dataset = TranslationDataset.from_dataframe(
             df_processed,
@@ -166,6 +172,7 @@ def run_validations():
             target_col=target_language,
             str_id_col=str_id_col
         )
+
 
         # Run validation directly on the processed dataset
         validation_results = run_validation(processed_dataset)
