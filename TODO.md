@@ -1,0 +1,4 @@
+- [x] Go to next/previous unreviewed also in normal mode
+- [ ] Search for string in Zen Mode
+- [x] Help Shortcut window pop-up in normal mode too
+- [x] Register number keys, and if you hit space right after, jumps to the entry number
