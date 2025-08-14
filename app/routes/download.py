@@ -40,7 +40,7 @@ def download_visualizer():
 
         print(f"DEBUG - Final DataFrame columns: {df_processed.columns.tolist()}")
 
-        print(f"DEBUG - About to create dataset with columns:")
+        print("DEBUG - About to create dataset with columns:")
         print(f"  str_id_col: {str_id_col}")
         print(f"  source_col: {source_col}")  
         print(f"  target_language: {target_language}")
@@ -50,6 +50,7 @@ def download_visualizer():
         processed_dataset = TranslationDataset.from_dataframe(
             df_processed,
             source_col=source_col,
+            # supplementary_col=supplementary_col,
             target_col=target_language,
             str_id_col=str_id_col
         )

@@ -32,8 +32,9 @@ def bulk_upload():
         df = pd.read_excel(file)
 
 
-        str_id_col, source_col = FileService.detect_columns(df)
-        if not str_id_col:
+        str_id_col, source_col, detected_supplementary_lang = FileService.detect_columns(df)
+        print(f"DETECTEDSUPPLEMENTARY FROM BULK UPLOAD??: {str_id_col} | {source_col} | {detected_supplementary_lang}")
+        if not str_id_col: 
             return jsonify({'error': 'No string ID column found! Expected one of KEY_NAME, strId, strID, 字符串, etc'}), 400
 
         if not source_col:
@@ -57,6 +58,7 @@ def bulk_upload():
                        'success': True,
                        'str_id_col': str_id_col,
                        'source_col': source_col,
+                       'supplementary_col': detected_supplementary_lang,
                        'target_languages': target_lang_columns,
                        'total_entries': len(df),
                        'languages_count': len(target_lang_columns)
@@ -82,9 +84,10 @@ def bulk_generate():
             return jsonify({'error': 'No uploaded file found. Please upload again.'}), 400
 
         df = FileService.load_temp_file(temp_file)
+        print(f"DF: {df.columns}")
 
         str_id_col = session.get('bulk_str_id_col')
-        source_col = session.get('bulk_source_col')
+        # source_col = session.get('bulk_source_col')
         original_filename = session.get('bulk_original_filename', 'bulk_visualizers')
 
         # ZIP in memory
@@ -92,28 +95,58 @@ def bulk_generate():
 
         with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
             for target_lang in selected_languages:
-                # NO DEDUPLICATION OR CLUSTERING
-                columns_to_keep = [str_id_col, source_col, target_lang]
+                # Check for Chinese mode
+                is_chinese_target = target_lang in ['CNTraditional', 'CNSimplified']
+                has_en_column = 'EN' in df.columns.tolist()
+                has_chinese_base = any(col in ['base', 'CN'] for col in df.columns)
+                
+                if is_chinese_target and has_en_column and has_chinese_base:
+                    # Chinese mode: strId, base/CN, EN, target
+                    base_col = 'base' if 'base' in df.columns else 'CN'
+                    supplementary_col = 'EN'
+                    columns_to_keep = [str_id_col, base_col, 'EN', target_lang]
+                    actual_source_col = 'CN'
+                else:
+                    # Normal mode: strId, EN, target
+                    supplementary_col = None
+                    columns_to_keep = [str_id_col, 'EN', target_lang]
+                    actual_source_col = 'EN'
+                    
                 df_lang = df[columns_to_keep].copy()
+                print(f"LANGS: {columns_to_keep}")
+
+                if is_chinese_target and 'base' in df_lang.columns:
+                    df.lang = df_lang.rename(columns={'base': 'CN'})
+                    actual_source_col = 'CN'
 
                 dataset = TranslationDataset.from_dataframe(
                     df_lang,
-                    source_col=source_col,
+                    source_col=actual_source_col,
+                    supplementary_col=supplementary_col,
                     target_col=target_lang,
                     str_id_col=str_id_col
                 )
 
+                print("DEBUG: Created dataset with:")
+                print(f"  source_col: {actual_source_col}")
+                print(f"  supplementary_col: {supplementary_col}")
+                print(f"  target_col: {target_lang}")
+
+                test_df = dataset.to_dataframe()
+                print(f"DEBUG: DataFrame after to_dataframe(): {test_df.columns.tolist()}")
+
+                # print(f"SUPPPP: {supplementary_col}")
+                # print(f"HELLOOOO???{dataset}")
                 # Generate Visualizers without occurrences column
                 visualizer_html = generate_bulk_visualizer_html(dataset, original_filename)
-                viz_filename = f"Visualizer-{target_lang}.html"
+                clean_name = re.sub(r'\.[^.]+$', '', original_filename)
+                viz_filename = f"{clean_name}-Visualizer-{target_lang}.html"
 
                 zip_file.writestr(viz_filename, visualizer_html.encode('utf-8'))
 
         zip_buffer.seek(0)    
 
-        clean_name = re.sub(r'\.[^.]+$', '', original_filename)
         zip_filename = f"{clean_name}-Visualizers.zip"
-
         return send_file(
             zip_buffer,
             as_attachment=True,

@@ -35,16 +35,23 @@ def upload_file():
         session['original_filename'] = secure_filename(file.filename)
         
         # Detect columns
-        str_id_col, source_col = FileService.detect_columns(df)
+        str_id_col, source_col, detected_source_lang = FileService.detect_columns(df)
         
         if not str_id_col:
             return jsonify({'error': 'No string ID column found! Expected one of: KEY_NAME, strId, ID, strID, 字符串'}), 400
         
         if not source_col:
             return jsonify({'error': 'No English source column found! Expected one of: EN, English, Source'}), 400
-        
+
+        print(f"DEBUG: Detected - str_id: {str_id_col}, source: {source_col}, lang: {detected_source_lang}")
+        session['detected_source_lang'] = detected_source_lang
+
+        excluded_columns = [str_id_col, source_col, "max", "Status"]
+        if detected_source_lang == "CN" and 'EN' in df.columns:
+            excluded_columns.append('EN')
         # Find target language columns
-        lang_columns = [col for col in df.columns if col not in [str_id_col, source_col]]
+        lang_columns = [col for col in df.columns if col not in excluded_columns]
+        print(f"DEBUG: Target language columns: {lang_columns}")
         
         if not lang_columns:
             return jsonify({'error': f'No target language columns found! Make sure your file has columns other than {str_id_col} and {source_col}'}), 400
@@ -79,6 +86,7 @@ def load_data():
         target_language = request.json.get('targetLanguage')
         if not target_language:
             return jsonify({'error': 'No target language selected'}), 400
+        print(f"DEBUG: Selected target language: {target_language}")
         
         # Load the temporary dataframe
         temp_file = session.get('temp_file')
@@ -86,23 +94,63 @@ def load_data():
             return jsonify({'error': 'No uploaded file found. Please upload again.'}), 400
         
         df = FileService.load_temp_file(temp_file)
+        print(f"DEBUG: Loaded DataFrame columns: {df.columns.tolist()}")
         
         # Get column info from session
         str_id_col = session.get('str_id_col')
         source_col = session.get('source_col')
+        detected_source_lang = session.get('detected_source_lang', 'EN')
         
-        # Create filtered dataframe with only needed columns
-        columns_to_keep = [str_id_col, source_col, target_language]
+        print(f"DEBUG: Session data - str_id: {str_id_col}, source: {source_col}, detected_lang: {detected_source_lang}")
+
+        # Determine which columns to keep
+        is_chinese_target = target_language in ['CNTraditional', 'CNSimplified']
+        has_en_column = 'EN' in df.columns.tolist()
+        source_is_chinese = detected_source_lang == 'CN' or source_col in ['base', 'CN']
+
+        print("DEBUG: Chinese mode checks:")
+        print(f"  - is_chinese_target: {is_chinese_target}")
+        print(f"  - has_en_column: {has_en_column}")
+        print(f"  - source_is_chinese: {source_is_chinese}")
+        
+        if is_chinese_target and has_en_column and source_is_chinese:
+            columns_to_keep = [str_id_col, source_col, 'EN', target_language]
+            print(f"DEBUG: Chinese mode detected - columns: {columns_to_keep}")
+        else:
+            columns_to_keep = [str_id_col, source_col, target_language]
+            print(f"DEBUG: Normal mode - columns: {columns_to_keep}")
+        
+        # Validate columns exist
+        missing_cols = [col for col in columns_to_keep if col not in df.columns]
+        if missing_cols:
+            return jsonify({'error': f'Missing columns: {", ".join(missing_cols)}'}), 400
+        
         df_filtered = df[columns_to_keep].copy()
-        
+        print(f"DEBUG: Filtered DataFrame shape: {df_filtered.shape}")
+        print(f"DEBUG: Filtered DataFrame columns: {df_filtered.columns.tolist()}")
+
+        actual_source_col = source_col
+        if 'base' in df_filtered.columns:
+            df_filtered = df_filtered.rename(columns={'base': 'CN'})
+            if source_col == 'base':
+                actual_source_col = 'CN'
+
+        # Check for None values before creating dataset
+        for col in df_filtered.columns:
+            none_count = df_filtered[col].isnull().sum()
+            if none_count > 0:
+                print(f"DEBUG: Column '{col}' has {none_count} null values")        
+
+
+        df_filtered = df_filtered.fillna('')
         # Create TranslationDataset
         dataset = TranslationDataset.from_dataframe(
             df_filtered,
-            source_col=source_col,
+            source_col=actual_source_col,
             target_col=target_language,
             str_id_col=str_id_col
-        )
-        
+        )        
+
         # Store dataset info in session
         session['dataset_loaded'] = True
         session['target_language'] = target_language
@@ -166,6 +214,7 @@ def process_file():
         # Get stored info
         str_id_col = session.get('str_id_col')
         source_col = session.get('source_col')
+        # target_language = request.json.get('targetLanguage')
         target_language = session.get('target_language')
         
         # Create filtered dataframe

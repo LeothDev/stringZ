@@ -183,32 +183,40 @@
         font-size: 12px;
         color: var(--text-secondary);
         text-align: left;
-        /*line-height: 1.4;*/
-        max-width: 120px;
+        max-width: 80px;
+        min-width: 60px;
+        width: 80px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
 
-      #myTable td:nth-child(3), #myTable td:nth-child(4) {
+      #myTable td.text-column {
         line-height: 1.4;
-        max-width: 300px;
+        max-width: 200px;
         word-wrap: break-word;
         text-align: left;
+        font-weight: normal;
       }
-      
-      #myTable td:nth-child(5) {
-        text-align: center;
+
+      /* Occurrences Column */
+      #myTable td.occurrences-column {
         font-weight: 600;
-        color: var(--text-muted);
         font-size: 14px;
         width: 80px;
+        text-align: center;
+        color: var(--text-muted);
       }
-      
-      #myTable td:nth-child(6) {
+
+      /* State Column */
+      #myTable td.state-column {
         min-width: 120px;
         max-width: 150px;
         text-align: center;
       }
 
-      #myTable td:nth-child(7) {
+      /* Notes Column */
+      #myTable td.notes-column {
         min-width: 150px;
         max-width: 200px;
       }
@@ -384,6 +392,8 @@
     .zen-container {
       max-width: 800px;
       width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
       background: var(--bg-secondary);
       border-radius: 12px;
       padding: 40px;
@@ -446,6 +456,8 @@
       margin: 20px 0;
       padding: 20px;
       border-radius: 8px;
+      max-height: 200px;
+      overflow-y: auto;
     }
 
     .zen-source {
@@ -644,8 +656,13 @@
       function generateRowWithState(row, idx) {
           const savedState = localStorage.getItem(getStateKey(idx)) || "";
           const savedNotes = localStorage.getItem(getNotesKey(idx)) || "";
+
+          let stateClass = '';
+          if (savedState) {
+            stateClass = savedState.toLowerCase();
+          }
           
-          const selectHTML = '<select class="state-select ' + savedState.toLowerCase() + '">' +
+          const selectHTML = '<select class="state-select ' + stateClass + '">' +
               '<option value="" ' + (savedState === "" ? "selected" : "") + '></option>' +
               '<option value="Pass" ' + (savedState === "Pass" ? "selected" : "") + '>Pass</option>' +
               '<option value="Fail" ' + (savedState === "Fail" ? "selected" : "") + '>Fail</option>' +
@@ -697,7 +714,10 @@
                   const rowIdx = dataTable.row($(this).closest('tr')).index();
                   const value = $(this).val();
                   localStorage.setItem(getStateKey(rowIdx), value);
-                  this.className = "state-select " + value.toLowerCase();
+                  $(this).removeClass('pass fail');
+                  if (value) {
+                    $(this).addClass(value.toLowerCase());
+                  }
               });
 
               
@@ -727,6 +747,10 @@
               dataTable.page.len(currentLength).draw();
               dataTable.page(currentPage).draw(false);
           }
+
+          setTimeout(() => {
+            applyColumnClasses();
+          }, 100);
       }
   
       function toggleData() {
@@ -872,13 +896,13 @@
             setTimeout(updateProgressDisplay, 100);
         });
 
-        $('#myTable tbody').on('mouseenter', 'td:nth-child(2), td:nth-child(3), td:nth-child(4)', function() {
+        $('#myTable tbody').on('mouseenter', 'td.text-column', function() {
           $(this).addClass('copyable-cell');
-        }).on('mouseleave', 'td:nth-child(2), td:nth-child(3), td:nth-child(4)', function() {
+        }).on('mouseleave', 'td.text-column', function() {
           if (!$(this).find('.copy-feedback').length) {
             $(this).removeClass('copyable-cell');
           }
-        }).on('click', 'td:nth-child(2), td:nth-child(3), td:nth-child(4)', function() {
+        }).on('click', 'td.text-column', function() {
           const text = $(this).text().trim();
           if (text) {
             copyToClipboard(text, this);
@@ -1291,7 +1315,7 @@
           $('.shortcut-summary').fadeOut(800, function() {
             $(this).remove();
           });
-        }, 5000);
+        }, 2000);
       }            
 
       function hideKeyboardHint() {
@@ -1579,10 +1603,25 @@
 
         const dataToShow = zenShowingRaw ? rawCurrentData : currentData;
 
-        // Update content
+        // const isChineseMode = headers.length >= 6 && headers.includes('CN') && headers.includes('CNTraditional');
+        const isChineseMode = headers.includes('CN') && headers.includes('EN') && headers.length >= 6;
+ 
+        // Update string ID
         $('#zenStringId').text(dataToShow[0]);
-        $('#zenSource').html(`${dataToShow[1]}`);
-        $('#zenTarget').html(`${dataToShow[2]}`);
+
+        if (isChineseMode) {
+          // Chinese mode: Show CN, CNTraditional
+          $('#zenSource').html(`<strong style="color: #007bff;">Source - ${headers[1]}</strong><br>
+            ${dataToShow[1]}`);
+          $('#zenTarget').html(`<strong style="color: #28a745;">Target - ${headers[3]}</strong><br>
+            ${dataToShow[3]}`);
+        } else {
+          // Normal mode: Source & Target
+          $('#zenSource').html(`<strong style="color: #007bff;">Source - ${headers[1]}</strong><br>
+            ${dataToShow[1]}`);
+          $('#zenTarget').html(`<strong style="color: #28a745;">Target - ${headers[2]}</strong><br>
+            ${dataToShow[2]}`);
+        }               
 
         const savedState = localStorage.getItem(getStateKey(zenCurrentIndex));
         const stateIndicator = $('#zenStateIndicator');
@@ -1594,7 +1633,7 @@
         } else {
           stateIndicator.text('Unreviewed').removeClass().addClass('zen-state-indicator zen-state-unreviewed');
         }
-  
+
         // Update raw/formatted indicator
         const rawIndicator = $('#zenRawIndicator');
         if (zenShowingRaw) {
@@ -1683,22 +1722,33 @@
       function zenCopyText(element, type) {
         const currentData = tableData[zenCurrentIndex];
         const rawCurrentData = rawData[zenCurrentIndex];
-  
+
+        // const isChineseMode = headers.length >= 6 && headers.includes('CN') && headers.includes('CNTraditional');
+        const isChineseMode = headers.includes('CN') && headers.includes('EN') && headers.length >= 6;
+
         let textToCopy = '';
-        let sourceData = zenShowingRaw ? rawCurrentData : currentData;
-  
+
         switch(type) {
           case 'id':
             textToCopy = rawCurrentData[0]; // Always copy raw ID
             break;
           case 'source':
-            textToCopy = rawCurrentData[1]; // Always copy raw source
+            if (isChineseMode) {
+              // Chinese mode, copy only CN
+              textToCopy = rawCurrentData[1];
+            } else {
+              textToCopy = rawCurrentData[1];
+            }
             break;
           case 'target':
-            textToCopy = rawCurrentData[2]; // Always copy raw target
+            if (isChineseMode) {
+              textToCopy = rawCurrentData[3];
+            } else {
+              textToCopy = rawCurrentData[2];
+            }
             break;
-        }
-  
+        }  
+
         // Decode HTML entities
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = textToCopy;
@@ -1816,6 +1866,36 @@
           return true;
         }
         return false;
+      }
+
+      // Function to handle dynamic CSS classes, due to Chinese mode case
+      function applyColumnClasses() {
+        const isChineseMode = headers.includes('CN') && headers.includes('EN') && headers.length >= 6;
+
+        $('#myTable tbody tr').each(function() {
+          const $row = $(this);
+          const $cells = $row.find('td');
+
+          // To avoid conflicts, remove any prior column classes
+          $cells.removeClass('text-column occurrences-column state-column notes-column');
+
+          if (isChineseMode) {
+            // Chinese Mode: #, strId, CN, EN, CNTraditional, Occurrences, State, Notes
+            $cells.eq(2).addClass('text-column'); // CN
+            $cells.eq(3).addClass('text-column'); // EN
+            $cells.eq(4).addClass('text-column'); // CNTraditional
+            $cells.eq(5).addClass('occurrences-column');
+            $cells.eq(6).addClass('state-column');
+            $cells.eq(7).addClass('notes-column');
+          } else {
+            // Normal Mode: #, strId, EN, TargetLang, Occurrences, State, Notes
+            $cells.eq(2).addClass('text-column'); // EN
+            $cells.eq(3).addClass('text-column'); // TargetLang
+            $cells.eq(4).addClass('occurrences-column'); // Occurrences
+            $cells.eq(5).addClass('state-column'); // State
+            $cells.eq(6).addClass('notes-column'); // Notes
+          }
+        });
       }
     </script>
   </body>

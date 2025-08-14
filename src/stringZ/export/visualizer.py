@@ -61,9 +61,20 @@ def generate_visualizer_html(dataset, original_filename=None):
     else:
         title = f"StringZ Visualizer - {target_lang}"
 
+    is_chinese_mode = (
+        target_lang in ['CNTraditional', 'CNSimplified'] and
+        'EN' in df.columns and
+        (dataset.source_lang in ['CN', 'base'] or 'CN' in df.columns)
+    )
+
     # Headers and Data from the Spreadsheet
-    headers = ["strId", dataset.source_lang, target_lang, "Occurrences", "State", "Notes"]
-    raw_data_rows, formatted_data_rows = _prepare_data_rows(df, dataset, target_lang)
+    if is_chinese_mode:
+        print("DEBUG: - CHINESE DETECTED")
+        headers = ["strId", "CN", "EN", target_lang, "Occurrences", "State", "Notes"]
+        raw_data_rows, formatted_data_rows = _prepare_chinese_data_rows(df, dataset, target_lang)
+    else:
+        headers = ["strId", dataset.source_lang, target_lang, "Occurrences", "State", "Notes"]
+        raw_data_rows, formatted_data_rows = _prepare_data_rows(df, dataset, target_lang)
 
     # Convert to JS arrays to be properly injected in the HTML template
     headers_js = '[' + ', '.join(f'"{h}"' for h in headers) + ']'
@@ -90,9 +101,13 @@ def generate_visualizer_html(dataset, original_filename=None):
 
 def generate_bulk_visualizer_html(dataset, original_filename=None):
     """Generate Visualizer HTML for bulk generation (Without Occurrences column)"""
+    print("IN GENERATE BULK")
     template = load_template()
+    print("AFTER LOADING BULK TEMPLATE???")
+
 
     df = dataset.to_dataframe()
+    print(f"BULK: {df.columns}")
     target_lang = dataset.target_lang or "Target"
 
     target_word_count = 0
@@ -100,17 +115,31 @@ def generate_bulk_visualizer_html(dataset, original_filename=None):
         target_word_count = df[target_lang].dropna().astype(str).apply(lambda x: len(x.split())).sum()
 
     if original_filename:
-        title = f"StringZ Visualizer - {target_lang}"
+        title = f"{original_filename} Visualizer - {target_lang}"
     else:
         title = f"StringZ Visualizer - {target_lang} Translation Review"
 
-    # IMPORTANT DIFFERENCE THAN STANDARD VISUALIZER - No Occurrences for bulk!
-    headers = ["strId", dataset.source_lang, target_lang, "State", "Notes"]
+    print(f"Source Lang: {dataset.source_lang}")
+    print(f"Target lang: {target_lang}")
+    is_chinese_mode = (
+        dataset.source_lang == 'CN' and
+        'EN' in df.columns and
+        target_lang in ['CNTraditional', 'CNSimplified'] 
+    )
 
-    # Parse data rows without Occurrences
-    raw_data_rows, formatted_data_rows = _prepare_bulk_data_rows(df, dataset, target_lang)
+    # IMPORTANT DIFFERENT FROM STANDARD VISUALIZER - No Occurrences for bulk!
+    if is_chinese_mode:
+        print("YES CHINESE MODE")
+        headers = ["strId", "CN", "EN", target_lang, "State", "Notes"]
+        raw_data_rows, formatted_data_rows = _prepare_chinese_bulk_data_rows(df, dataset, target_lang)
+    else:
+        headers = ["strId", dataset.source_lang, target_lang, "State", "Notes"]
+
+        # Parse data rows without Occurrences
+        raw_data_rows, formatted_data_rows = _prepare_bulk_data_rows(df, dataset, target_lang)
 
     headers_js = '[' + ', '.join(f'"{h}"' for h in headers) + ']'
+    print(f"Headers: {headers_js}")
     raw_data_js = _python_list_to_js_array(raw_data_rows)
     formatted_data_js = _python_list_to_js_array(formatted_data_rows)
 
@@ -130,6 +159,43 @@ def generate_bulk_visualizer_html(dataset, original_filename=None):
     for placeholder, value in replacements.items():
         template = template.replace(placeholder, value)
     return template
+
+def _prepare_chinese_data_rows(df, dataset, target_lang):
+    """Prepare raw and formatted data rows for Chinese Visualizer (CN - EN - CNTraditional)"""
+    raw_data_rows = []
+    formatted_data_rows = []
+
+    for idx, (_, row) in enumerate(df.iterrows()):
+        str_id_col = dataset.str_id_col or 'strId'
+        str_id = str(row.get(str_id_col, ''))
+
+        cn_col = 'CN' if 'CN' in df.columns else 'base'
+        cn_text = str(row.get(cn_col, ''))
+        en_text = str(row.get('EN', ''))
+        target_text = str(row.get(target_lang, '')) if target_lang in df.columns else ''
+
+        occurrences_raw = row.get('Occurrences')
+        occurrences = int(occurrences_raw) if occurrences_raw is not None else 1
+
+        raw_cn, formatted_cn = format_text_for_visualizer(cn_text)
+        raw_en, formatted_en = format_text_for_visualizer(en_text)
+        raw_target, formatted_target = format_text_for_visualizer(target_text)
+
+        raw_row = [str_id, raw_cn, raw_en, raw_target, str(occurrences), "", ""]
+        formatted_row = [
+            html.escape(str_id),
+            formatted_cn,
+            formatted_en,
+            formatted_target,
+            str(occurrences),
+            "",
+            ""
+        ]
+
+        raw_data_rows.append(raw_row)
+        formatted_data_rows.append(formatted_row)
+
+    return raw_data_rows, formatted_data_rows
 
 def _prepare_data_rows(df, dataset, target_lang):
     """Prepare raw and formatted data rows for the visualizer"""
@@ -170,6 +236,38 @@ def _prepare_data_rows(df, dataset, target_lang):
         raw_data_rows.append(raw_row)
         formatted_data_rows.append(formatted_row)
     
+    return raw_data_rows, formatted_data_rows
+
+def _prepare_chinese_bulk_data_rows(df, dataset, target_lang):
+    """Prepare data rows for Chinese bulk visualizer (Without Occurrences column)"""
+    raw_data_rows = []
+    formatted_data_rows = []
+
+    for idx, (_, row) in enumerate(df.iterrows()):
+        str_id_col = dataset.str_id_col or 'strId'
+        str_id = str(row.get(str_id_col, ''))
+
+        cn_text = str(row.get('CN', ''))
+        en_text = str(row.get('EN', ''))
+        target_text = str(row.get(target_lang, '')) if target_lang in df.columns else ''
+
+        raw_cn, formatted_cn = format_text_for_visualizer(cn_text)
+        raw_en, formatted_en =format_text_for_visualizer(en_text)
+        raw_target, formatted_target =format_text_for_visualizer(target_text)
+
+        raw_row = [str_id, raw_cn, raw_en, raw_target, "", ""]
+        formatted_row =[
+            html.escape(str_id),
+            formatted_cn,
+            formatted_en,
+            formatted_target,
+            "",
+            ""
+        ]
+
+        raw_data_rows.append(raw_row)
+        formatted_data_rows.append(formatted_row)
+
     return raw_data_rows, formatted_data_rows
 
 def _prepare_bulk_data_rows(df, dataset, target_lang):

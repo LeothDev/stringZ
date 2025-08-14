@@ -41,3 +41,6 @@ README.md
 # Test files
 test_files/
 tests/
+
+# Extra files
+src/stringZ/export/templates/visualizer_template_testing-features.html

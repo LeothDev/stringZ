@@ -10,8 +10,10 @@ class TranslationEntry:
     """Single translation string with metadata"""
     str_id: str
     source_text: str
+    supplementary_text: Optional[str] = None
     target_text: Optional[str] = None
     source_lang: str = "EN"
+    supplementary_lang: Optional[str] = None
     target_lang: Optional[str] = None
     occurrences: int = 1
     
@@ -63,6 +65,7 @@ class TranslationDataset:
     """Main container for translation data"""
     entries: List[TranslationEntry] = field(default_factory=list)
     str_id_col: str = "strId"
+    supplementary_col: Optional[str] = None
     source_lang: str = "EN"
     target_lang: Optional[str] = None
     result: Optional[ProcessingResult] = None
@@ -72,10 +75,12 @@ class TranslationDataset:
         cls, 
         df: pd.DataFrame, 
         source_col: str = "EN",
+        supplementary_col: Optional[str] = None,
         target_col: Optional[str] = None,
         str_id_col: str = "strId"
     ) -> "TranslationDataset":
         """Create dataset from pandas DataFrame"""
+        print("I WAS CALLED - FROM_DATAFRAME")
         
         # Auto-detect target language
         if target_col is None:
@@ -84,31 +89,43 @@ class TranslationDataset:
             if possible_targets:
                 target_col = possible_targets[0]
         
+        print(f"SUPPLEMENTARY COL IN DATAFRAME: {supplementary_col}")
         entries = []
         for _, row in df.iterrows():
+            print(f"ROW??: {row}")
             if pd.notna(row[str_id_col]) and pd.notna(row[source_col]):
                 # CHECK FOR OCCURRENCES COLUMN PLEASEEEEEE
                 occurrences = 1
-                if 'Occurrences' in df.columns and pd.notna(row['Occurrences']):
+                has_occurrences = 'Occurrences' in df.columns.tolist()
+                if has_occurrences and pd.notna(row.get('Occurrences')):
                     occurrences = int(row['Occurrences'])
 
                 entry = TranslationEntry(
                     str_id=str(row[str_id_col]),
                     source_text=str(row[source_col]),
+                    supplementary_text=str(row[supplementary_col]) if supplementary_col and pd.notna(row.get(supplementary_col)) else None,
                     target_text=str(row[target_col]) if target_col and pd.notna(row[target_col]) else None,
                     source_lang=source_col,
+                    supplementary_lang=supplementary_col,
                     target_lang=target_col,
                     occurrences=occurrences
                 )
+                print("OK I'M AFTER ENTRY TRANSLATIONENTRY")
                 entries.append(entry)
+        print("ENTRIES:", entries)
         
+        display_source_lang = 'CN' if source_col == 'base' else source_col
         return cls(
             entries=entries,
             str_id_col=str_id_col,
-            source_lang=source_col,
+            source_lang=display_source_lang,
             target_lang=target_col
         )
-    
+    def is_chinese_target(self) -> bool:
+        """Check if this is a Chinese translation scenario"""
+        return (self.target_lang in ['CNTraditional', 'CNSimplified'] and
+                self.source_lang in ['base', 'CN'])
+
     def to_dataframe(self) -> pd.DataFrame:
         """Convert back to pandas DataFrame"""
         data = []
@@ -117,6 +134,9 @@ class TranslationDataset:
                 self.str_id_col: entry.str_id,
                 entry.source_lang: entry.source_text,
             }
+            if entry.supplementary_text and entry.supplementary_lang:
+                row[entry.supplementary_lang] = entry.supplementary_text
+
             if entry.target_lang and entry.target_text:
                 row[entry.target_lang] = entry.target_text
         

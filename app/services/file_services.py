@@ -9,13 +9,14 @@ class FileService:
 
     @staticmethod
     def detect_columns(df):
-        """Detect string ID and source columns, return both"""
+        """Detect string ID, source column and Supplementary LANG, return both"""
         # String ID column detection
         str_id_names = ['strId', 'ID', 'strID', '字符串', 'id', 'StringID', 'string_id', 'KEY_NAME', "SOURCE"]
         str_id_col = None
         for col in df.columns:
             if col in str_id_names:
                 str_id_col = col
+                print(f"DEBUG: Found string ID column: {str_id_col}")
                 break
 
         # If no named column is found check for empty header
@@ -26,15 +27,28 @@ class FileService:
                     str_id_col = 'strId'
                     break
 
-        # Source column detection  
-        source_names = ['EN', 'English', 'Source', 'en', 'english', 'source']
         source_col = None
+        detected_supplementary_lang = None
+
+        chinese_patterns = ['base', 'CN', 'Chinese', 'zh', 'ZH', 'chinese']
         for col in df.columns:
-            if col in source_names:
+            if col in chinese_patterns:
                 source_col = col
+                detected_source_lang = 'CN'
+                print(f"DEBUG: Found Chinese source column: {source_col}")
                 break
 
-        return str_id_col, source_col
+        if source_col is None:
+            english_patterns = ['EN', 'English', 'Source', 'en', 'english', 'source']
+            for col in df.columns:
+                if col in english_patterns:
+                    source_col = col
+                    detected_source_lang = 'EN'
+                    print(f"DEBUG: Found English source column: {source_col}")
+                    break
+
+        print(f"DEBUG: Final detection - str_id: {str_id_col}, source: {source_col}, lang: {detected_source_lang}")
+        return str_id_col, source_col, detected_source_lang
 
     @staticmethod
     def save_temp_file(df, session_id, upload_folder):
