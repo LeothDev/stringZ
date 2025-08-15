@@ -1710,6 +1710,8 @@
         $('#zenNotes').on('input', function() {
           const notes = $(this).val();
           localStorage.setItem(getNotesKey(zenCurrentIndex), notes);
+          // Important: Update the main table row immediately for efficiency
+          updateMainTableNotes(zenCurrentIndex, notes);
         }).on('keydown', function(e) {
           if (e.key === 'Enter') {
             e.preventDefault();
@@ -1718,8 +1720,19 @@
         });
       }
 
+      function updateMainTableNotes(rowIndex, notes) {
+        if (dataTable && dataTable.row(rowIndex).node()) {
+          const row = $(dataTable.row(rowIndex).node());
+          const notesTextarea = row.find('.notes-textarea');
+          if (notesTextarea.length) {
+            notesTextarea.val(notes);
+          }
+        }
+      }
+
       function exitZenMode() {
         clearZenSpaces();
+
         zenMode = false;
         $('#zenMode').fadeOut(200, function() {
           $(this).remove();
