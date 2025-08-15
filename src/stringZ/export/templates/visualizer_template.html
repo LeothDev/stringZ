@@ -646,6 +646,46 @@
       color: var(--text-secondary);
       font-style: italic;
     }
+
+    /* Row Spaces Mode */
+    .spaces-active {
+      position: relative;
+    }
+
+    .spaces-active::before {
+      content: "•";
+      position: absolute;
+      left: -5px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #ffc107;
+      font-weight: bold;
+      font-size: 16px;
+      z-index: 1;
+    }
+
+    [data-theme="dark"] .spaces-active::before {
+      color: #ffd43b;
+    }
+
+    .zen-spaces-active {
+      position: relative;
+      border-left: 4px solid #ffc107 !important;
+    }
+
+    .zen-spaces-active::after {
+      content: "SPACES";
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background: #ffc107;
+      color: #000;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 10px;
+      font-weight: bold;
+      font-family: monospace;
+    }
     </style>
   </head>
   <body>
@@ -1181,7 +1221,14 @@
                 enterZenMode();
               }
               break;
-
+            case '.': // Spaces Mode
+              e.preventDefault();
+              if (zenMode) {
+                toggleZenSpaces();
+              } else if (isKeyboardMode) {
+                toggleCurrentRowSpaces();
+              }
+              break;
 
             // Other shortcuts
             case 'D':
@@ -1240,6 +1287,8 @@
       function navigateRow(direction) {
         if (!isKeyboardMode) return;
 
+        clearCurrentRowSpaces();
+
         const table = $('#myTable').DataTable();
         const totalRows = table.rows().count();
 
@@ -1288,6 +1337,7 @@
 
       function exitKeyboardMode() {
         isKeyboardMode = false;
+        clearCurrentRowSpace();
         $('#myTable tbody tr').removeClass('keyboard-focus')
         hideKeyboardHint();
       }
@@ -1432,12 +1482,17 @@
           'nextunreviewed': '→ Next unreviewed',
           'prevunreviewed': '← Previous unreviewed',
           'noprevunreviewed': 'No previous unreviewed strings',
-          'goto': `→ Row ${Math.min(parseInt(numberBuffer || '0'), $('#myTable').DataTable().rows().count())}`
+          'goto': `→ Row ${Math.min(parseInt(numberBuffer || '0'), $('#myTable').DataTable().rows().count())}`,
+          '• Row spaces visible': '• Row spaces visible',
+          'Row spaces hidden': 'Row spaces hidden',
+          '• Zen spaces visible': '• Zen spaces visible',
+          'Zen spaces hidden': 'Zen spaces hidden'
         };
 
         const feedbackColor = (() => {
           if (filterType.includes('unreviewed') && !filterType.includes('no')) return '#007bff';
           if (filterType === 'goto') return '#28a745';
+          if (filterType.includes('spaces')) return '#ffc107';
           return '#6c757d';
         })();
 
@@ -1516,6 +1571,7 @@
                   <kbd>p</kbd> Mark current row as Pass<br>
                   <kbd>f</kbd> Mark current row as Fail<br>
                   <kbd>c</kbd> Clear current row state<br>
+                  <kbd>.</kbd> Visualize spaces<br>
                 </div>
                 <div>
                   <strong style="color: #dc3545;">Quick Filters:</strong><br>
@@ -1572,7 +1628,7 @@
               <strong>Navigate:</strong> <kbd>→</kbd><kbd>←</kbd> or <kbd>h</kbd> <kbd>j</kbd> <kbd>k</kbd> <kbd>l</kbd> or <kbd>Space</kbd><br>
               <strong> Go To:</strong> <kbd>0-9</kbd> + <kbd>g</kbd> Jump to string number<br>
               <strong>Smart Nav:</strong> <kbd>Ctrl+→</kbd> Next unreviewed, <kbd>Ctrl+←</kbd> Prev unreviewed<br>
-              <strong>Other:</strong> <kbd>Enter</kbd> Notes, <kbd>R</kbd> Raw toggle, <kbd>D</kbd> Dark mode<br>
+              <strong>Other:</strong> <kbd>Enter</kbd> Notes, <kbd>R</kbd> Raw toggle, <kbd>D</kbd> Dark mode, <kbd>.</kbd> Spaces visualization<br>
               <strong>Exit:</strong> <kbd>Esc</kbd><br><br>
               <strong>Copy:</strong> Click on any text to copy raw content
             </div>
@@ -1648,6 +1704,7 @@
       }
 
       function exitZenMode() {
+        clearZenSpaces();
         zenMode = false;
         $('#zenMode').fadeOut(200, function() {
           $(this).remove();
@@ -1711,6 +1768,7 @@
       }
 
       function zenNext() {
+        clearZenSpaces();
         if (zenCurrentIndex < tableData.length - 1) {
           zenCurrentIndex++;
           updateZenDisplay();
@@ -1718,6 +1776,7 @@
       }
 
       function zenPrevious() {
+        clearZenSpaces();
         if (zenCurrentIndex > 0) {
           zenCurrentIndex--;
           updateZenDisplay();
@@ -1960,6 +2019,139 @@
             $cells.eq(6).addClass('notes-column'); // Notes
           }
         });
+      }
+
+      // Row-specific Spaces Visualization
+      let currentRowSpacesMode = false;
+      let originalRowContent = {};
+
+      function toggleCurrentRowSpaces() {
+        if (!isKeyboardMode) return;
+
+        const currentRow = getCurrentRow();
+        if (!currentRow.length) return;
+
+        currentRowSpacesMode = !currentRowSpacesMode;
+
+        if (currentRowSpacesMode) {
+          showCurrentRowSpaces(currentRow);
+        } else {
+          hideCurrentRowSpaces(currentRow);
+        }
+      }
+
+      function showCurrentRowSpaces(row) {
+        row.find('td.text-column').each(function() {
+          const $cell = $(this);
+          const cellKey = 'current_row_' + $cell.index();
+
+          originalRowContent[cellKey] = $cell.html();
+
+          const originalText = $cell.text();
+          const spacedText = originalText.replace(/ /g, '•');
+          $cell.text(spacedText);
+
+          $cell.addClass('spaces-active');
+        });
+      }
+
+      function hideCurrentRowSpaces(row) {
+        row.find('td.text-column').each(function() {
+          const $cell = $(this);
+          const cellKey = 'current_row_' + $cell.index();
+
+          const originalContent = originalRowContent[cellKey];
+          if (originalContent) {
+            $cell.html(originalContent);
+            delete originalRowContent[cellKey];
+          }
+
+          $cell.removeClass('spaces-active');
+        });
+      }
+
+      function clearCurrentRowSpaces() {
+        if (currentRowSpacesMode) {
+          const currentRow = getCurrentRow();
+          if (currentRow.length) {
+            hideCurrentRowSpaces(currentRow);
+          }
+          currentRowSpaceMode = false;
+          originalRowContent = {};
+        }
+      }
+
+      let zenSpacesMode = false;
+      let originalZenContent = {};
+
+      function toggleZenSpaces() {
+        if (!zenMode) return;
+
+        zenSpacesMode = !zenSpacesMode;
+
+        if (zenSpacesMode) {
+          showZenSpaces();
+        } else {
+          hideZenSpaces();
+        }
+      }
+
+      function showZenSpaces() {
+        const sourceEl = document.getElementById('zenSource');
+        const targetEl = document.getElementById('zenTarget');
+  
+        if (!sourceEl || !targetEl) return;
+
+        // Store original content
+        originalZenContent.source = sourceEl.innerHTML;
+        originalZenContent.target = targetEl.innerHTML;
+  
+        // Extract text content and replace spaces, preserving headers
+        const sourceLines = sourceEl.innerHTML.split('<br>');
+        const targetLines = targetEl.innerHTML.split('<br>');
+  
+        if (sourceLines.length >= 2) {
+          const sourceHeader = sourceLines[0];
+          const sourceText = sourceEl.textContent.replace(sourceEl.querySelector('strong').textContent, '').trim();
+          sourceEl.innerHTML = sourceHeader + '<br>' + sourceText.replace(/ /g, '•');
+        }
+  
+        if (targetLines.length >= 2) {
+          const targetHeader = targetLines[0];
+          const targetText = targetEl.textContent.replace(targetEl.querySelector('strong').textContent, '').trim();
+          targetEl.innerHTML = targetHeader + '<br>' + targetText.replace(/ /g, '•');
+        }
+  
+        // Add visual indicator
+        sourceEl.classList.add('zen-spaces-active');
+        targetEl.classList.add('zen-spaces-active');
+      }
+
+      function hideZenSpaces() {
+        const sourceEl = document.getElementById('zenSource');
+        const targetEl = document.getElementById('zenTarget');
+  
+        if (!sourceEl || !targetEl) return;
+
+        // Restore original content
+        if (originalZenContent.source) {
+          sourceEl.innerHTML = originalZenContent.source;
+          targetEl.innerHTML = originalZenContent.target;
+        }
+  
+        // Remove visual indicator
+        sourceEl.classList.remove('zen-spaces-active');
+        targetEl.classList.remove('zen-spaces-active');
+  
+        // Clear stored content
+        originalZenContent = {};
+      }
+
+      function clearZenSpaces() {
+        if (zenSpacesMode) {
+          hideZenSpaces();
+          zenSpacesMode = false;
+        }
       }
     </script>
   </body>
