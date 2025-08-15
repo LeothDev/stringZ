@@ -80,7 +80,6 @@ class TranslationDataset:
         str_id_col: str = "strId"
     ) -> "TranslationDataset":
         """Create dataset from pandas DataFrame"""
-        print("I WAS CALLED - FROM_DATAFRAME")
         
         # Auto-detect target language
         if target_col is None:
@@ -89,10 +88,8 @@ class TranslationDataset:
             if possible_targets:
                 target_col = possible_targets[0]
         
-        print(f"SUPPLEMENTARY COL IN DATAFRAME: {supplementary_col}")
         entries = []
         for _, row in df.iterrows():
-            print(f"ROW??: {row}")
             if pd.notna(row[str_id_col]) and pd.notna(row[source_col]):
                 # CHECK FOR OCCURRENCES COLUMN PLEASEEEEEE
                 occurrences = 1
@@ -110,9 +107,7 @@ class TranslationDataset:
                     target_lang=target_col,
                     occurrences=occurrences
                 )
-                print("OK I'M AFTER ENTRY TRANSLATIONENTRY")
                 entries.append(entry)
-        print("ENTRIES:", entries)
         
         display_source_lang = 'CN' if source_col == 'base' else source_col
         return cls(

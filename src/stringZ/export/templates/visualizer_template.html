@@ -188,7 +188,8 @@
         width: 80px;
         overflow: hidden;
         text-overflow: ellipsis;
-        white-space: nowrap;
+        white-space: normal;
+        word-break: break-all;
       }
 
       #myTable td.text-column {
@@ -896,13 +897,13 @@
             setTimeout(updateProgressDisplay, 100);
         });
 
-        $('#myTable tbody').on('mouseenter', 'td.text-column', function() {
+        $('#myTable tbody').on('mouseenter', 'td:nth-child(2), td.text-column', function() {
           $(this).addClass('copyable-cell');
-        }).on('mouseleave', 'td.text-column', function() {
+        }).on('mouseleave', 'td:nth-child(2), td.text-column', function() {
           if (!$(this).find('.copy-feedback').length) {
             $(this).removeClass('copyable-cell');
           }
-        }).on('click', 'td.text-column', function() {
+        }).on('click', 'td:nth-child(2), td.text-column', function() {
           const text = $(this).text().trim();
           if (text) {
             copyToClipboard(text, this);
