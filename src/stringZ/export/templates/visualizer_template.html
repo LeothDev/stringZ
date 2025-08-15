@@ -606,7 +606,7 @@
       z-index: 9999;
     }
 
-    /* Zen mode: bottom-right */
+    /* Zen mode: bottom-right for go-to numbers */
     .number-buffer-display.zen {
       position: absolute;
       bottom: 15px;
@@ -616,6 +616,33 @@
 
     .number-buffer-display.show {
       opacity: 1;
+    }
+
+    /* Zen mode: bottom-left for occurrences numbers */
+    .notes-textarea {
+      width: 100%;
+      padding: 6px 8px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      font-size: 12px;
+      background-color: var(--input-bg);
+      color: var(--text-primary);
+      transition: all 0.3s ease;
+      min-height: 40px;
+      max-height: 80px;
+      resize: vertically;
+      font-family: inherit;
+    }
+
+    .notes-textarea:focus {
+      outline: none;
+      border-color: #80bdff;
+      box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+    }
+
+    .notes-textarea:placeholder {
+      color: var(--text-secondary);
+      font-style: italic;
     }
     </style>
   </head>
@@ -669,10 +696,10 @@
               '<option value="Fail" ' + (savedState === "Fail" ? "selected" : "") + '>Fail</option>' +
               '</select>';
           
-          const notesHTML = '<input type="text" class="notes-input" value="' + 
-              savedNotes.replace(/"/g, '&quot;') + 
-              '" placeholder="Personal notes..." maxlength="200">';
-          
+          const notesHTML = '<textarea class="notes-textarea" placeholder="Personal notes..." maxlength="200" rows="2">' + 
+              savedNotes.replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + 
+              '</textarea>';          
+
           const newRow = row.slice();
           const stateIndex = headers.indexOf("State") + 1;
           const notesIndex = headers.indexOf("Notes") + 1;
@@ -724,21 +751,20 @@
               
               // Little debounce feature to avoid storing every letter one by one
               let notesTimeout;
-              $('#myTable tbody').on('input', 'input.notes-input', function () {
+              $('#myTable tbody').on('input', 'textarea.notes-textarea', function () {
                   const rowIdx = dataTable.row($(this).closest('tr')).index();
                   const value = $(this).val();
 
                   clearTimeout(notesTimeout);
-
                   notesTimeout = setTimeout(() => {
                     localStorage.setItem(getNotesKey(rowIdx), value);
                   }, 300);
               });
 
-              $('#myTable tbody').on('keydown', 'input.notes-input', function(e) {
-                if (e.key === 'Enter') {
+              $('#myTable tbody').on('keydown', 'textarea.notes-textarea', function(e) {
+                if (e.key === 'Enter' && e.ctrlKey) {
                   e.preventDefault();
-                  $(this).blur(); // Remove focus from notes
+                  $(this).blur();
                 }
               });
           } else {
@@ -926,7 +952,7 @@
       function initKeyboardNavigation() {
         $(document).keydown(function(e) {
           // Important, don't interfere when typing in inputs
-          if (e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT') {
+          if (e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
             if (e.key != 'Escape') return;
           }
 
@@ -1211,7 +1237,7 @@
         if (!isKeyboardMode) return;
 
         const currentRow = getCurrentRow();
-        const notesInput = currentRow.find('.notes-input');
+        const notesInput = currentRow.find('.notes-textarea');
         if (notesInput.length) {
           notesInput.focus();
         }
