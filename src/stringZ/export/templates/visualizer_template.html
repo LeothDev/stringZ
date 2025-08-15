@@ -183,13 +183,15 @@
         font-size: 12px;
         color: var(--text-secondary);
         text-align: left;
-        max-width: 80px;
-        min-width: 60px;
-        width: 80px;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        max-width: 80px !important;
+        min-width: 80px !important;
+        width: 80px !important;
         white-space: normal;
         word-break: break-all;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        hyphens: auto;
+        line-height: 1.2;
       }
 
       #myTable td.text-column {
@@ -204,21 +206,21 @@
       #myTable td.occurrences-column {
         font-weight: 600;
         font-size: 14px;
-        width: 80px;
+        /* width: 80px; */
         text-align: center;
         color: var(--text-muted);
       }
 
       /* State Column */
       #myTable td.state-column {
-        min-width: 120px;
+        /* min-width: 120px; */
         max-width: 150px;
         text-align: center;
       }
 
       /* Notes Column */
       #myTable td.notes-column {
-        min-width: 150px;
+        /* min-width: 150px; */
         max-width: 200px;
       }
       
@@ -725,14 +727,46 @@
                   searching: true,
                   ordering: true,
                   deferRender: true,
-                  lengthMenu: [[-1, 10, 25, 50], ["All", 10, 25, 50]],
+                  lengthMenu: [[-1, 10, 25, 50, 100], ["All", 10, 25, 50, 100]],
                   order: [],
-                  columnDefs: [
-                      {
-                          targets: headers.indexOf("State"),
-                          orderable: true
-                      }
-                  ]
+                  autoWidth: false,
+                  columnDefs: (() => {
+                    const isChineseMode = headers.includes('CN') && headers.includes('EN') && headers.length >= 6;
+
+                    let defs = [
+                        { targets: 0, width: "50px", className: "text-center" },    // #
+                        { targets: 1, width: "80px", className: "text-left" },     // strId
+                    ];
+
+                    if (isChineseMode) {
+                        // Chinese Mode: #, strId, CN, EN, CNTraditional, Occurrences, State, Notes
+                        defs.push(
+                            { targets: 2, width: "200px", className: "text-left" },     // CN
+                            { targets: 3, width: "200px", className: "text-left" },     // EN  
+                            { targets: 4, width: "200px", className: "text-left" },     // CNTraditional
+                            { targets: 5, width: "30px", className: "text-center" },    // Occurrences
+                            { targets: 6, width: "40px", className: "text-center" },   // State
+                            { targets: 7, width: "80px", className: "text-center" }    // Notes
+                        );
+                    } else {
+                        // Normal Mode: #, strId, EN, TargetLang, Occurrences, State, Notes
+                        defs.push(
+                            { targets: 2, width: "200px", className: "text-left" },     // EN
+                            { targets: 3, width: "200px", className: "text-left" },     // Target Lang
+                            { targets: 4, width: "30px", className: "text-center" },    // Occurrences
+                            { targets: 5, width: "40px", className: "text-center" },   // State
+                            { targets: 6, width: "80px", className: "text-center" }    // Notes
+                        );
+                    }
+
+                    // Add the orderable state column
+                    defs.push({
+                        targets: headers.indexOf("State") + 1,
+                        orderable: true
+                    });
+
+                    return defs;
+                  })()
               });
 
               console.log('DataTable columns:', dataTable.settings()[0].aoColumns.map((col, idx) => `${idx}: ${col.sTitle}`));
