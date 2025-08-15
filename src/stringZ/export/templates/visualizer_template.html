@@ -1680,6 +1680,21 @@
                 <button class="zen-btn zen-btn-nav" onclick="zenNext()">Next →</button>
               </div>
 
+              <div class="zen-occurrences" id="zenOccurrences" style="
+                position: absolute; 
+                bottom: 20px; 
+                left: 20px; 
+                background: var(--bg-banner); 
+                color: var(--text-secondary); 
+                padding: 6px 12px; 
+                border-radius: 4px; 
+                font-size: 12px; 
+                font-family: 'Courier New', monospace;
+                border: 1px solid var(--border-color);
+                display: none;">
+                Occurrences: <span id="zenOccurrencesCount">1</span>
+              </div>
+
               <input type="text" class="zen-notes" id="zenNotes" placeholder="Add your notes here..." maxlength="200">
             </div>
           </div>
@@ -1765,6 +1780,16 @@
 
         const savedNotes = localStorage.getItem(getNotesKey(zenCurrentIndex));
         $('#zenNotes').val(savedNotes || '');
+
+        // Update occurrences IFF "Occurrences" column exists
+        const occurrencesIndex = headers.indexOf('Occurrences');
+        if (occurrencesIndex !== -1) {
+          const occurrences = dataToShow[occurrencesIndex];
+          $('#zenOccurrencesCount').text(occurrences);
+          $('#zenOccurrences').show();
+        } else {
+          $('#zenOccurrences').hide();
+        }
       }
 
       function zenNext() {
