@@ -837,15 +837,18 @@
       function updateProgressDisplay() {
           const progress = getProgress();
           const percentage = Math.round((progress.reviewed / progress.total) * 100);
-          
+    
           // Update the info banner with progress
           const banner = document.querySelector('.info-banner p');
           if (banner) {
-              const originalText = banner.textContent.split('•')[0] + '•';
-              banner.innerHTML = `${originalText} 📊 <strong>${progress.reviewed}/${progress.total}</strong> reviewed (<strong>${percentage}%</strong>) • ✅ <strong>${progress.passed}</strong> passed • ❌ <strong>${progress.failed}</strong> failed`;
+              // Keep the original header up to the first 4 dots
+              const originalParts = banner.textContent.split('•');
+              const baseText = originalParts.slice(0, 4).join('•') + '•';
+        
+              banner.innerHTML = `${baseText} 📊 <strong>${progress.reviewed}/${progress.total}</strong> reviewed (<strong>${percentage}%</strong>) • ✅ <strong>${progress.passed}</strong> passed • ❌ <strong>${progress.failed}</strong> failed`;
           }
-      }
-  
+      }  
+
       function toggleDarkMode() {
           const body = document.body;
           const btn = document.querySelector('.dark-mode-btn');
