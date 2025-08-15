@@ -115,9 +115,16 @@ def load_data():
         
         if is_chinese_target and has_en_column and source_is_chinese:
             columns_to_keep = [str_id_col, source_col, 'EN', target_language]
+            actual_source_col = source_col
             print(f"DEBUG: Chinese mode detected - columns: {columns_to_keep}")
         else:
-            columns_to_keep = [str_id_col, source_col, target_language]
+            if 'EN' in df.columns and target_language != 'EN':
+                columns_to_keep = [str_id_col, 'EN', target_language]
+                actual_source_col = 'EN'
+                session['source_col'] = 'EN'
+            else:
+                columns_to_keep = [str_id_col, source_col, target_language]
+                actual_source_col = source_col
             print(f"DEBUG: Normal mode - columns: {columns_to_keep}")
         
         # Validate columns exist
@@ -129,7 +136,7 @@ def load_data():
         print(f"DEBUG: Filtered DataFrame shape: {df_filtered.shape}")
         print(f"DEBUG: Filtered DataFrame columns: {df_filtered.columns.tolist()}")
 
-        actual_source_col = source_col
+        # actual_source_col = source_col
         if 'base' in df_filtered.columns:
             df_filtered = df_filtered.rename(columns={'base': 'CN'})
             if source_col == 'base':
