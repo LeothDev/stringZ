@@ -795,10 +795,20 @@
                     ordering: true,
                     deferRender: true,
                     lengthMenu: [[-1, 10, 25, 50, 100], ["All", 10, 25, 50, 100]],
+                    pageLength: 100,
                     order: [],
                     autoWidth: false,
                     columnDefs: dataRenderer.getColumnDefs()
                 });
+
+                const savedPageLength = localStorage.getItem(`visualizer_page_length_{{TITLE}}`);
+                if (savedPageLength) {
+                    state.dataTable.page.len(parseInt(savedPageLength)).draw();
+                }
+
+                $('#myTable').on('length.dt', function(e, settings, len) {
+                    localStorage.setItem(`visualizer_page_length_{{TITLE}}`, len);
+                });                
 
                 setTimeout(() => {
                     state.dataTable.columns.adjust().draw();
