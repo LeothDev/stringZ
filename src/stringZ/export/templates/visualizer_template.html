@@ -1409,6 +1409,11 @@
 
                 if (targetIndex >= 0) {
                     state.currentRowIndex = Math.max(0, targetIndex);
+
+                    const pageLength = state.dataTable.page.len();
+                    const targetPage = Math.floor(targetIndex / pageLength);
+                    state.dataTable.page(targetPage).draw('page');
+
                     normal.highlightCurrentRow();
                     normal.scrollToCurrentRow();
                     return true;
