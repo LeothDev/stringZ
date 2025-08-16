@@ -775,7 +775,12 @@
                     dataRenderer.updateTable(transformed);
                 }
 
-                setTimeout(() => dataRenderer.applyColumnClasses(), 100);
+                setTimeout(() => {
+                    dataRenderer.applyColumnClasses()    
+                    if (state.isKeyboardMode) {
+                        normal.highlightCurrentRow();
+                    }
+                }, 100);
             },
 
             initializeTable: (transformed) => {
@@ -805,9 +810,19 @@
             updateTable: (transformed) => {
                 const currentPage = state.dataTable.page();
                 const currentLength = state.dataTable.page.len();
+
+                const wasKeyboardMode = state.isKeyboardMode;
+                const currentRowIndex = state.currentRowIndex;
+                
                 state.dataTable.clear().rows.add(transformed).draw(false);
                 state.dataTable.page.len(currentLength).draw();
                 state.dataTable.page(currentPage).draw(false);
+
+                if (wasKeyboardMode) {
+                    setTimeout(() => {
+                        normal.highlightCurrentRow();
+                    }, 100);
+                }
             },
 
             getColumnDefs: () => {
