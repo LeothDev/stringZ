@@ -1338,8 +1338,20 @@
                 state.currentRowIndex += direction;
                 state.currentRowIndex = Math.max(0, Math.min(state.currentRowIndex, totalRows - 1));
 
-                normal.highlightCurrentRow();
-                normal.scrollToCurrentRow();
+                const pageLength = state.dataTable.page.len();
+                const currentPage = state.dataTable.page();
+                const targetPage = Math.floor(state.currentRowIndex / pageLength);
+
+                if (targetPage !== currentPage) {
+                    state.dataTable.page(targetPage).draw('page');
+                    setTimeout(() => {
+                        normal.highlightCurrentRow();
+                        normal.scrollToCurrentRow();
+                    }, 50);
+                } else {
+                    normal.highlightCurrentRow();
+                    normal.scrollToCurrentRow();
+                }
             },
 
             markCurrentRow: (stateValue) => {
@@ -1398,6 +1410,11 @@
 
             nextUnreviewed: () => {
                 if (!state.isKeyboardMode) return;
+
+                if (state.currentRowSpacesMode) {
+                    normal.toggleCurrentRowSpaces();
+                }
+
                 const totalRows = state.dataTable.rows().count();
 
                 for (let i = state.currentRowIndex + 1; i < totalRows; i++) {
@@ -1415,6 +1432,10 @@
             previousUnreviewed: () => {
                 if (!state.isKeyboardMode) return;
 
+                if (state.currentRowSpacesMode) {
+                    normal.toggleCurrentRowSpaces();
+                }
+
                 for (let i = state.currentRowIndex - 1; i >= 0; i--) {
                     if (!storage.getState(i)) {
                         state.currentRowIndex = i;
@@ -1429,6 +1450,11 @@
 
             goToRow: (rowNumber) => {
                 if (!state.isKeyboardMode) return false;
+
+                if (state.currentRowSpacesMode) {
+                    normal.toggleCurrentRowSpaces();
+                }
+                
                 const totalRows = state.dataTable.rows().count();
                 const targetIndex = Math.min(rowNumber - 1, totalRows - 1);
 
@@ -1703,6 +1729,7 @@
             },
 
             nextUnreviewed: () => {
+                zen.clearSpaces();
                 for (let i = state.zenCurrentIndex + 1; i < state.tableData.length; i++) {
                     if (!storage.getState(i)) {
                         state.zenCurrentIndex = i;
@@ -1715,6 +1742,7 @@
             },
 
             previousUnreviewed: () => {
+                zen.clearSpaces();
                 for (let i = state.zenCurrentIndex - 1; i >= 0; i--) {
                     if (!storage.getState(i)) {
                         state.zenCurrentIndex = i;
@@ -1727,6 +1755,7 @@
             },
 
             goToString: (stringNumber) => {
+                zen.clearSpaces();
                 const targetIndex = Math.min(stringNumber - 1, state.tableData.length - 1);
                 if (targetIndex >= 0) {
                     state.zenCurrentIndex = Math.max(0, targetIndex);
