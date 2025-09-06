@@ -28,7 +28,7 @@ def extract_game_elements(text):
     elements['color_tags'] = color_matches
     
     # Extract color values from color tags
-    color_value_pattern = r'<color[=]([^>]+)>'
+    color_value_pattern = r'<color=(["\']?)([^"\'>\s]+)\1>'
     color_values = re.findall(color_value_pattern, text)
     elements['color_values'] = color_values
     
