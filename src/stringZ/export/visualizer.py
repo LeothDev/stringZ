@@ -30,11 +30,11 @@ def format_text_for_visualizer(text):
     formatted_text = text
     
     # Convert color tags: <color="#eadca2">text</color> -> <span style="color: #eadca2;">text</span>
-    color_pattern = r'<color[=]?"([^">]+)"?>([^<]*)</color>'
-    formatted_text = re.sub(color_pattern, r'<span style="color: \1;">\2</span>', formatted_text)
-    
-    # Convert line breaks: \\n -> <br>
+    color_pattern = r'<color=(?:"?)([^">]+?)(?:"?)>(.*?)</color>'
+    formatted_text = re.sub(color_pattern, r'<span style="color: \1; font-weight: 500;">\2</span>', formatted_text)    
+    # Convert BOTH line breaks: \\n -> <br> | \n -> <br>
     formatted_text = formatted_text.replace('\\n', '<br>')
+    formatted_text = formatted_text.replace('\n', '<br>')
     
     # Convert other common patterns
     formatted_text = formatted_text.replace('\\t', '&nbsp;&nbsp;&nbsp;&nbsp;')  # tabs to spaces
