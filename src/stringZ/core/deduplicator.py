@@ -25,9 +25,8 @@ class KeepFirstWithOccurrencesStrategy(DeduplicationStrategy):
             en_text = entry.source_text.strip() if entry.source_text else ""
             target_text = entry.target_text.strip() if entry.target_text else ""
             
-            # Handle null/empty values like your original script
             if not target_text:
-                target_text = ""  # Treat None/empty as empty string
+                target_text = "" 
             
             key = (en_text, target_text)
             groups[key].append(entry)
@@ -37,15 +36,15 @@ class KeepFirstWithOccurrencesStrategy(DeduplicationStrategy):
         
         logger.info(f"Found {len(groups)} unique EN+target combinations from {len(entries)} entries")
         
-        # Process each unique EN+target combination
         for (en_text, target_text), group_entries in groups.items():
-            # Keep first entry but create a NEW entry with occurrences count
             first_entry = group_entries[0]
             occurrences_count = len(group_entries)
+
+            all_str_ids = [entry.str_id for entry in group_entries]
+            combined_str_ids = '\n'.join(all_str_ids) if occurrences_count > 1 else first_entry.str_id
             
-            # CRITICAL: Create new entry with occurrences count (don't modify existing dataclass)
             new_entry = TranslationEntry(
-                str_id=first_entry.str_id,
+                str_id=combined_str_ids,
                 source_text=first_entry.source_text,
                 target_text=first_entry.target_text,
                 source_lang=first_entry.source_lang,
@@ -58,7 +57,6 @@ class KeepFirstWithOccurrencesStrategy(DeduplicationStrategy):
             if occurrences_count > 1:
                 logger.info(f"Duplicate found: '{en_text[:30]}...' + '{target_text[:20]}...' appears {occurrences_count} times")
             
-            # Record duplicate group if there are multiple occurrences
             if len(group_entries) > 1:
                 duplicate_group = DuplicateGroup(
                     source_text=en_text,
@@ -70,17 +68,17 @@ class KeepFirstWithOccurrencesStrategy(DeduplicationStrategy):
         # Sort by occurrences (descending)
         unique_entries.sort(key=lambda e: e.occurrences, reverse=True)
         
-        duplicates_removed = len(entries) - len(unique_entries)
-        logger.info("Deduplication results:")
-        logger.info(f"  Original entries: {len(entries)}")
-        logger.info(f"  Unique EN+target combinations: {len(unique_entries)}")
-        logger.info(f"  Duplicates removed: {duplicates_removed}")
-        logger.info(f"  Duplicate groups found: {len(duplicate_groups)}")
+        # duplicates_removed = len(entries) - len(unique_entries)
+        # logger.info("Deduplication results:")
+        # logger.info(f"  Original entries: {len(entries)}")
+        # logger.info(f"  Unique EN+target combinations: {len(unique_entries)}")
+        # logger.info(f"  Duplicates removed: {duplicates_removed}")
+        # logger.info(f"  Duplicate groups found: {len(duplicate_groups)}")
         
         # Log sample with occurrences
-        if unique_entries:
-            sample = unique_entries[0]
-            logger.info(f"  Sample entry with occurrences: {sample.str_id} has {sample.occurrences} occurrences")
+        # if unique_entries:
+        #     sample = unique_entries[0]
+        #     logger.info(f"  Sample entry with occurrences: {sample.str_id} has {sample.occurrences} occurrences")
         
         return unique_entries, duplicate_groups
 

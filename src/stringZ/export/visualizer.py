@@ -41,6 +41,18 @@ def format_text_for_visualizer(text):
     
     return raw_text, formatted_text
 
+def format_str_id_for_visualizer(str_id_text):
+    """Format string IDs - convert newlines to <br> for display, preserve for copying"""
+    if not str_id_text:
+        return '', ''
+
+    str_id_text = str(str_id_text)
+
+    raw_text = str_id_text
+    formatted_text = html.escape(str_id_text).replace('\n', '<br>')
+
+    return raw_text, formatted_text
+
 def generate_visualizer_html(dataset, original_filename=None):
     template = load_template()
 
@@ -167,7 +179,7 @@ def _prepare_chinese_data_rows(df, dataset, target_lang):
 
     for idx, (_, row) in enumerate(df.iterrows()):
         str_id_col = dataset.str_id_col or 'strId'
-        str_id = str(row.get(str_id_col, ''))
+        str_id_raw = str(row.get(str_id_col, ''))
 
         cn_col = 'CN' if 'CN' in df.columns else 'base'
         cn_text = str(row.get(cn_col, ''))
@@ -177,13 +189,15 @@ def _prepare_chinese_data_rows(df, dataset, target_lang):
         occurrences_raw = row.get('Occurrences')
         occurrences = int(occurrences_raw) if occurrences_raw is not None else 1
 
+        raw_str_id, formatted_str_id = format_str_id_for_visualizer(str_id_raw)
+
         raw_cn, formatted_cn = format_text_for_visualizer(cn_text)
         raw_en, formatted_en = format_text_for_visualizer(en_text)
         raw_target, formatted_target = format_text_for_visualizer(target_text)
 
-        raw_row = [str_id, raw_cn, raw_en, raw_target, str(occurrences), "", ""]
+        raw_row = [raw_str_id, raw_cn, raw_en, raw_target, str(occurrences), "", ""]
         formatted_row = [
-            html.escape(str_id),
+            formatted_str_id,
             formatted_cn,
             formatted_en,
             formatted_target,
@@ -203,12 +217,12 @@ def _prepare_data_rows(df, dataset, target_lang):
     formatted_data_rows = []
 
     # DEBUG
-    print("DataFrame columns:", df.columns.tolist())
+    # print("DataFrame columns:", df.columns.tolist())
     
     for idx, (_,row) in enumerate(df.iterrows()):
         # Extract values
         str_id_col = dataset.str_id_col or 'strId'
-        str_id = str(row.get(str_id_col, ''))
+        str_id_raw = str(row.get(str_id_col, ''))
         en_text = str(row.get(dataset.source_lang, ''))
         target_text = str(row.get(target_lang, '')) if target_lang in df.columns else ''
 
@@ -217,15 +231,17 @@ def _prepare_data_rows(df, dataset, target_lang):
         # print(f"Row {idx}: Occurrences raw = {occurrences_raw}, type = {type(occurrences_raw)}")
         # occurrences = int(row.get('Occurrences', 1))
         occurrences = int(occurrences_raw) if occurrences_raw is not None else 1
+
+        raw_str_id, formatted_str_id = format_str_id_for_visualizer(str_id_raw)
         
         # Format text for both views
         raw_en, formatted_en = format_text_for_visualizer(en_text)
         raw_target, formatted_target = format_text_for_visualizer(target_text)
         
         # Create data rows
-        raw_row = [str_id, raw_en, raw_target, str(occurrences), "", ""]
+        raw_row = [raw_str_id, raw_en, raw_target, str(occurrences), "", ""]
         formatted_row = [
-            html.escape(str_id),
+            formatted_str_id,
             formatted_en,
             formatted_target,
             str(occurrences),
