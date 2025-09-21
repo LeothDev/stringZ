@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>StringZ Visualizer - Russian</title>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <style>
+      :root {
+        /* Light mode colors */
+        --bg-primary: #f8f9fa;
+        --bg-secondary: white;
+        --bg-banner: #f8f9fa;
+        --text-primary: #333;
+        --text-secondary: #6c757d;
+        --text-muted: #495057;
+        --border-color: #dee2e6;
+        --table-header-bg: #f8f9fa;
+        --table-border: #dee2e6;
+        --button-bg: #6c757d;
+        --button-hover: #5a6268;
+        --input-bg: white;
+      }
+      
+      [data-theme="dark"] {
+        /* Dark mode colors */
+        --bg-primary: #1a1a1a;
+        --bg-secondary: #2d2d2d;
+        --bg-banner: #343a40;
+        --text-primary: #f8f9fa;
+        --text-secondary: #adb5bd;
+        --text-muted: #ced4da;
+        --border-color: #495057;
+        --table-header-bg: #343a40;
+        --table-border: #495057;
+        --button-bg: #495057;
+        --button-hover: #5a6268;
+        --input-bg: #343a40;
+      }
+      
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: var(--bg-primary);
+        margin: 0;
+        padding: 0;
+        color: var(--text-primary);
+        transition: background-color 0.3s ease, color 0.3s ease;
+      }
+      
+      .toggle-btn {
+        position: fixed;
+        top: 15px;
+        left: 15px;
+        z-index: 9999;
+        padding: 8px 16px;
+        background-color: var(--button-bg);
+        color: white;
+        border: 1px solid var(--button-bg);
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        font-size: 14px;
+        transition: background-color 0.2s ease;
+      }
+      
+      .toggle-btn:hover {
+        background-color: var(--button-hover);
+        border-color: var(--button-hover);
+      }
+      
+      .dark-mode-btn {
+        position: fixed;
+        top: 15px;
+        left: 150px;
+        z-index: 9999;
+        padding: 8px 16px;
+        background-color: var(--button-bg);
+        color: white;
+        border: 1px solid var(--button-bg);
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        font-size: 14px;
+        transition: background-color 0.2s ease;
+      }
+      
+      .dark-mode-btn:hover {
+        background-color: var(--button-hover);
+        border-color: var(--button-hover);
+      }
+      
+      #clearState {
+        float: left;
+        margin-right: 15px;
+        margin-bottom: 15px;
+        padding: 8px 16px;
+        background-color: #dc3545;
+        color: white;
+        border: 1px solid #dc3545;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        font-size: 14px;
+        transition: background-color 0.2s ease;
+      }
+      
+      #clearState:hover {
+        background-color: #c82333;
+        border-color: #bd2130;
+      }
+      
+      .container {
+        padding: 70px 30px 30px 30px;
+        background: var(--bg-secondary);
+        margin: 0;
+        min-height: 100vh;
+        transition: background-color 0.3s ease;
+      }
+      
+      .info-banner {
+        background-color: var(--bg-banner);
+        border: 1px solid var(--border-color);
+        color: var(--text-muted);
+        padding: 20px;
+        margin-bottom: 25px;
+        border-radius: 4px;
+        text-align: center;
+        transition: background-color 0.3s ease, border-color 0.3s ease;
+      }
+      
+      .info-banner h2 {
+        margin: 0 0 10px 0;
+        font-size: 24px;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+      
+      .info-banner p {
+        margin: 0;
+        font-size: 14px;
+        color: var(--text-secondary);
+      }
+      
+      #myTable {
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        overflow: hidden;
+        transition: border-color 0.3s ease;
+      }
+      
+      #myTable td {
+        user-select: text !important;
+        padding: 12px 8px;
+        vertical-align: top;
+        border-bottom: 1px solid var(--table-border);
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+        transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+      }
+      
+      #myTable th {
+        background-color: var(--table-header-bg);
+        border-bottom: 2px solid var(--border-color);
+        color: var(--text-muted);
+        font-weight: 600;
+        padding: 15px 8px;
+        text-align: center;
+        transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+      }
+      
+      /* Enhanced styling for different columns */
+      #myTable td:first-child {
+        text-align: center;
+        font-family: 'Courier New', monospace;
+        font-size: 12px;
+        color: var(--text-secondary);
+        /*<!-- max-width: 120px; -->*/
+        width: 50px;
+      }
+      
+      #myTable td:nth-child(2) {
+        font-family: 'Courier New', monospace;
+        font-size: 12px;
+        color: var(--text-secondary);
+        text-align: left;
+        /*line-height: 1.4;*/
+        max-width: 120px;
+      }
+
+      #myTable td:nth-child(3), #myTable td:nth-child(4) {
+        line-height: 1.4;
+        max-width: 300px;
+        word-wrap: break-word;
+        text-align: left;
+      }
+      
+      #myTable td:nth-child(5) {
+        text-align: center;
+        font-weight: 600;
+        color: var(--text-muted);
+        font-size: 14px;
+        width: 80px;
+      }
+      
+      #myTable td:nth-child(6) {
+        min-width: 120px;
+        max-width: 150px;
+        text-align: center;
+      }
+
+      #myTable td:nth-child(7) {
+        min-width: 150px;
+        max-width: 200px;
+      }
+      
+      select.state-select {
+        width: 100%;
+        font-weight: 500;
+        padding: 6px 8px;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        font-size: 14px;
+        background-color: var(--input-bg);
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+      }
+      
+      input.notes-input {
+        width: 100%;
+        padding: 6px 8px;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        font-size: 12px;
+        background-color: var(--input-bg);
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+      }
+      
+      input.notes-input:focus {
+        outline: none;
+        border-color: #80bdff;
+        box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+      }
+      
+      input.notes-input::placeholder {
+        color: var(--text-secondary);
+        font-style: italic;
+      }
+      
+      select.state-select:focus {
+        outline: none;
+        border-color: #80bdff;
+        box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+      }
+      
+      select.state-select.pass {
+        color: #28a745;
+        border-color: #28a745;
+      }
+      
+      select.state-select.fail {
+        color: #dc3545;
+        border-color: #dc3545;
+      }
+      
+      /* DataTables styling */
+      .dataTables_wrapper {
+        color: var(--text-primary);
+      }
+      
+      .dataTables_wrapper .dataTables_length,
+      .dataTables_wrapper .dataTables_filter,
+      .dataTables_wrapper .dataTables_info,
+      .dataTables_wrapper .dataTables_paginate {
+        margin: 15px 0;
+      }
+      
+      .dataTables_wrapper .dataTables_filter input {
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        padding: 6px 12px;
+        margin-left: 8px;
+        background-color: var(--input-bg);
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+      }
+      
+      .dataTables_wrapper .dataTables_length select {
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        padding: 4px 8px;
+        margin: 0 8px;
+        background-color: var(--input-bg);
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+      }
+      
+      .dataTables_wrapper .dataTables_paginate .paginate_button {
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        padding: 6px 12px;
+        margin: 0 2px;
+        background-color: var(--input-bg);
+        color: var(--text-primary) !important;
+        transition: all 0.3s ease;
+      }
+      
+      .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+        background-color: var(--bg-banner);
+        border-color: var(--text-secondary);
+      }
+      
+      .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+        background-color: #007bff;
+        border-color: #007bff;
+        color: white !important;
+      }
+
+      /* Copy feature styling */
+    .copyable-cell {
+        cursor: pointer;
+        position: relative;
+        transition: background-color 0.2s ease;
+    }
+
+    .copyable-cell:hover {
+        background-color: rgba(0, 123, 255, 0.1) !important;
+    }
+
+    .copy-feedback {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #28a745;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        z-index: 1000;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .copy-feedback.show {
+        opacity: 1;
+    }
+
+    .keyboard-focus {
+      background-color: rgba(0, 123, 255, 0.08) !important;
+      border: 2px solid #007bff !important;
+      box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2) !important;
+    }
+
+    .keyboard-focus td {
+      background-color: rgba(0, 123, 255, 0.05) !important;
+    }
+
+    kbd {
+      background-color: var(--button-bg);
+      color: white;
+      padding: 2px 4px;
+      border-radius: 3px;
+      font-size: 11px;
+      font-family: monospace;
+    }
+    </style>
+  </head>
+  <body>
+    <button class="toggle-btn" onclick="toggleData()">Show Raw</button>
+    <button class="dark-mode-btn" onclick="toggleDarkMode()">🌙 Dark</button>
+    <div class="container">
+      <div class="info-banner">
+        <h2>StringZ Visualizer - Russian</h2>
+        <p>📊
+          <strong>270</strong>
+          strings • 🌍
+          <strong>EN</strong>
+          →
+          <strong>Russian</strong>
+          • 📝
+          <strong>2,830</strong>
+          words • 🛠️ Generated by StringZ</p>
+      </div>
+      <button id="clearState">Clear All States</button>
+      <table id="myTable" class="display" style="width:100%"></table>
+    </div>
+    <script>
+      const headers = ["strId", "EN", "Russian", "State", "Notes"];
+            const rawData = [["BUFFAttribute_mName_8202044", "DMG Increase", "Повышение УРН", "", ""], ["BUFFAttribute_mName_8202045", "DMG Reduction", "Сниж. УРН", "", ""], ["BUFFAttribute_mTips_322928", "Fire-Tipped Spear ignores {30,num}% of the enemy&#x27;s DEF. Universe Ring bounces {31,num} extra time(s) and can hit the same target multiple times. Yin-Yang Blade executes common monsters with HP below {32,num}%.", "«Огненное копье» игнорирует {30,num}% ЗАЩ врага. «Кольцо Вселенной» отскакивает доп. {31,num} р. и может несколько раз поразить одну и ту же цель. «Клинок инь-ян» казнит обычных монстров с ОЗ ниже {32,num}%.", "", ""], ["ChampionshipPlan_mChampionshipDesc_833", "Participate in Artifact Material Raid to win trophies and redeem rewards.", "Проходите рейд для материалов артефактов, чтобы собирать трофеи и получать награды.", "", ""], ["ChampionshipPlan_mChampionshipDesc_834", "Level up/star up/promote heroes or upgrade heroes&#x27; skills to win trophies and redeem rewards.", "Повышайте ур./кол-во звезд героев, продв. их и улучшайте их навыки, чтобы собирать трофеи и получать награды.", "", ""], ["ChampionshipPlan_mChampionshipDesc_835", "Participate in Gear Raid I to win trophies and redeem rewards.", "Проходите рейд для снаряжения I, чтобы собирать трофеи и получать награды.", "", ""], ["ChampionshipPlan_mChampionshipDesc_836", "Participate in Gear Raid II to win trophies and redeem rewards.", "Проходите рейд для снаряжения II, чтобы собирать трофеи и получать награды.", "", ""], ["ChampionshipPlan_mChampionshipDesc_837", "Summon heroes to win trophies and redeem rewards.", "Призывайте героев, чтобы собирать трофеи и получать награды.", "", ""], ["ChampionshipPlan_mChampionshipDesc_838", "Participate in Artifact Material Raid to win trophies and redeem rewards.", "Проходите рейд для материалов артефактов, чтобы собирать трофеи и получать награды.", "", ""], ["ChampionshipPlan_mChampionshipDesc_839", "Participate in Gear Raid III to win trophies and redeem rewards.", "Проходите рейд для снаряжения III, чтобы собирать трофеи и получать награды.", "", ""], ["ChampionshipPlan_mChampionshipDesc_840", "Level up/star up/promote heroes or upgrade heroes&#x27; skills to win trophies and redeem rewards.", "Повышайте ур./кол-во звезд героев, продв. их и улучшайте их навыки, чтобы собирать трофеи и получать награды.", "", ""], ["ChampionshipPlan_mChampionshipDesc_841", "Participate in Gear Raid I to win trophies and redeem rewards.", "Проходите рейд для снаряжения I, чтобы собирать трофеи и получать награды.", "", ""], ["ChampionshipPlan_mChampionshipDesc_842", "Participate in Gear Raid II to win trophies and redeem rewards.", "Проходите рейд для снаряжения II, чтобы собирать трофеи и получать награды.", "", ""], ["ChampionshipPlan_mChampionshipGlobalName_837", "Arrival of Heroes Ultimate Leaderboard", "Супертаблица лидеров «Прибытие героев»", "", ""], ["ChampionshipPlan_mChampionshipName_833", "Mystery of Artifacts", "Тайна артефактов", "", ""], ["ChampionshipPlan_mChampionshipName_834", "Hero Training", "Тренировка героев", "", ""], ["ChampionshipPlan_mChampionshipName_835", "The Lost Legacy", "Потерянное наследие", "", ""], ["ChampionshipPlan_mChampionshipName_836", "Vault in the Sands", "Сокровищница в песках", "", ""], ["ChampionshipPlan_mChampionshipName_837", "Arrival of Heroes", "Прибытие героев", "", ""], ["ChampionshipPlan_mChampionshipName_838", "Mystery of Artifacts", "Тайна артефактов", "", ""], ["ChampionshipPlan_mChampionshipName_839", "Forgotten Palace", "Забытый дворец", "", ""], ["ChampionshipPlan_mChampionshipName_840", "Hero Training", "Тренировка героев", "", ""], ["ChampionshipPlan_mChampionshipName_841", "The Lost Legacy", "Потерянное наследие", "", ""], ["ChampionshipPlan_mChampionshipName_842", "Vault in the Sands", "Сокровищница в песках", "", ""], ["Chapter_mChapterName_4301", "Titanic Ruins - Playtest", "«Руины титанов» – тест героя", "", ""], ["CommonText_mMessage_25116", "Awaken the mystical power within.", "Пробудите мистическую силу внутри.", "", ""], ["CommonText_mMessage_25125", "Take destiny into your own hands.", "Возьмите судьбу в свои руки.", "", ""], ["CommonText_mMessage_25132", "Reveal cards to earn Dragon&#x27;s Gold by matching the designated patterns.", "Открывайте карты и получайте золото дракона, собирая определенные узоры.", "", ""], ["CommonText_mMessage_25133", "Reveal cards and match 3 identical patterns to earn a &lt;color=&quot;#fdbe36&quot;&gt;{num}&lt;/color&gt;x reward!", "Открывайте карты и соберите 3 одинаковых узора, чтобы получить x&lt;color=&quot;#fdbe36&quot;&gt;{num}&lt;/color&gt; награду!", "", ""], ["CommonText_mMessage_25631", "Number:", "Число:", "", ""], ["CommonText_mMessage_25635", "The [?] corresponds to 3 numbers that will be filled into empty slots in sequence—the resulting number will determine the final amount of Dragon&#x27;s Gold you receive!", "Символы [?] соответствуют 3 числам, которые будут последовательно заполнять пустые слоты. Полученное число определит итоговое количество золота дракона, которое вы получите!", "", ""], ["CommonText_mMessage_25773", "Nine-Tailed Nightmare", "Девятихвостый кошмар", "", ""], ["CommonText_mMessage_25828", "Locked", "Заблок.", "", ""], ["CommonText_mMessage_25829", "Invalid", "Недействительно", "", ""], ["CommonText_mMessage_25830", "New Recruit", "Новый рекрут", "", ""], ["CommonText_mMessage_25846", "Officials", "Должностные лица", "", ""], ["CommonText_mMessage_25847", "Guild War Officials Appointment", "Назначение должностных лиц войны гильдий", "", ""], ["CommonText_mMessage_25848", "Rank", "Ранг", "", ""], ["CommonText_mMessage_25849", "Marshal", "Маршал", "", ""], ["CommonText_mMessage_25850", "Members", "Участники", "", ""], ["CommonText_mMessage_25851", "BP", "БС", "", ""], ["CommonText_mMessage_25852", "Season&#x27;s Attacks", "Атаки сезона", "", ""], ["CommonText_mMessage_25853", "Actions", "Действия", "", ""], ["CommonText_mMessage_25854", "Appoint", "Назначить", "", ""], ["CommonText_mMessage_25855", "Dismiss", "Сместить", "", ""], ["CommonText_mMessage_25856", "No Access", "Нет доступа", "", ""], ["CommonText_mMessage_25857", "All Marshals gain &lt;color=&quot;#e37b00&quot;&gt;{num} extra attack(s) &lt;/color&gt; per Guild War round. Only the Guild Leader and Vice Leaders can appoint a Marshal during the preparation phase. If no appointments are made, this position will be automatically assigned based on members&#x27; contribution and BP.", "Все маршалы получают &lt;color=&quot;#e37b00&quot;&gt;дополнительные атаки ({num})&lt;/color&gt; за раунд войны гильдий. Только глава гильдии и заместители главы гильдии могут назначать маршалов во время фазы подготовки. Если назначения не произведены, эта должность будет автоматически распределена на основе вклада и БС участников.", "", ""], ["CommonText_mMessage_25858", "Appointed: {num1}/{num2}", "Назначены: {num1}/{num2}", "", ""], ["CommonText_mMessage_25859", "Appointment successful. Player gains {num} extra attack(s) per round.", "Назначение успешно. Игрок получает дополнительные атаки ({num}) за раунд.", "", ""], ["CommonText_mMessage_25860", "Marshal slots are full. Dismiss one to continue.", "Все слоты для маршалов заняты. Сместите одного, чтобы продолжить.", "", ""], ["CommonText_mMessage_25861", "&lt;color=&quot;#feab53&quot;&gt;Are you sure you want to dismiss this player from the Marshal position?&lt;/color&gt;\\nEach Guild can have up to {num1} Marshals, each gaining {num2} extra attack(s) per round.", "&lt;color=&quot;#feab53&quot;&gt;Вы уверены, что хотите снять этого игрока с должности маршала?&lt;/color&gt;\\nВ каждой гильдии может быть до {num1} маршалов, каждый из которых получает несколько ({num2}) доп. атак за раунд.", "", ""], ["CommonText_mMessage_25862", "Marshal dismissed successfully. Please appoint a new one.", "Маршал успешно смещен. Назначьте нового.", "", ""], ["CommonText_mMessage_25863", "Guild War Attempts", "Попытки войны гильдий", "", ""], ["CommonText_mMessage_25931", "Points of the Round", "Очки раунда", "", ""], ["CommonText_mMessage_26080", "Prioritize Guild War team.", "Приоритет команде войны гильдий.", "", ""], ["CommonText_mMessage_26081", "Playtest mode cannot save battle results or auto-fight.", "Режим теста героя не сохраняет результаты битвы и не поддерживает автобитву.", "", ""], ["CommonText_mMessage_60708", "Score Details", "Детали очков", "", ""], ["Difficulty_mDetail_1100001", "Only heroes from &lt;color=&quot;#e37b00&quot;&gt;The Nightmare Council, The Star Piercers&lt;/color&gt; can challenge this stage.\\nLord Skills of each Faction can only affect up to &lt;color=&quot;#fd4540&quot;&gt;5&lt;/color&gt; heroes.", "Только герои из &lt;color=&quot;#e37b00&quot;&gt;«Совета кошмара», «Звездных странников»&lt;/color&gt; могут бросить вызов этому этапу.\\nНавыки лорда каждой фракции могут действовать максимум на &lt;color=&quot;#fd4540&quot;&gt;5&lt;/color&gt; героев.", "", ""], ["Difficulty_mDetail_1100003", "Only heroes from &lt;color=&quot;#e37b00&quot;&gt;The Infernal Blast, The North Throne&lt;/color&gt; can challenge this stage.\\nLord Skills of each Faction can only affect up to &lt;color=&quot;#fd4540&quot;&gt;5&lt;/color&gt; heroes.", "Только герои из &lt;color=&quot;#e37b00&quot;&gt;«Адского взрыва», «Трона севера»&lt;/color&gt; могут бросить вызов этому этапу.\\nНавыки лорда каждой фракции могут действовать максимум на &lt;color=&quot;#fd4540&quot;&gt;5&lt;/color&gt; героев.", "", ""], ["Difficulty_mDetail_1100004", "Only heroes from &lt;color=&quot;#e37b00&quot;&gt;The Esoteria Order, The Chaos Dominion, and The Supreme Arbiters&lt;/color&gt; can challenge this stage.\\nLord Skills of each Faction can only affect up to &lt;color=&quot;#fd4540&quot;&gt;5&lt;/color&gt; heroes.", "Только герои из &lt;color=&quot;#e37b00&quot;&gt;«Ордена таинств», «Доминиона хаоса» и «Верховных судей»&lt;/color&gt; могут бросить вызов этому этапу.\\nНавыки лорда каждой фракции могут действовать максимум на &lt;color=&quot;#fd4540&quot;&gt;5&lt;/color&gt; героев.", "", ""], ["Difficulty_mDetail_1200001", "The following heroes are exempt from map info restrictions.", "Следующие герои не подвержены ограничениям информации по карте.", "", ""], ["Difficulty_mDetail_1200002", "The following heroes are exempt from map info restrictions.", "Следующие герои не подвержены ограничениям информации по карте.", "", ""], ["Difficulty_mDetail_1200003", "The following heroes are exempt from map info restrictions.", "Следующие герои не подвержены ограничениям информации по карте.", "", ""], ["Difficulty_mDetail_1200004", "The following heroes are exempt from map info restrictions.", "Следующие герои не подвержены ограничениям информации по карте.", "", ""], ["Difficulty_mDetail_1300001", "Erlang Shen cannot be deployed in this special stage.", "Эрлан-шэнь не может быть размещен на этом специальном этапе.", "", ""], ["Difficulty_mDetail_32010053", "Mage heroes cannot be included in the team.", "В команду нельзя взять героев-магов.", "", ""], ["Difficulty_mDetail_32010153", "Destroyers gain the Camaraderie skill. When they die, nearby monsters receive an enhancement.", "Разрушители получают навык «Братство». Когда они погибают, ближайшие монстры получают усиление.", "", ""], ["Difficulty_mDetail_32010163", "When the Priest of Thunder appears, he gains Ghost Form for 30 sec.", "При появлении жрец грома получает эффект «Призрачный облик» на 30 сек.", "", ""], ["Difficulty_mDetail_32010364", "Boss enemies restore 1% Max HP per sec, while other enemies restore 5% Max HP per sec.", "Враги-боссы восстанавливают 1% макс. ОЗ в сек., а другие враги восстанавливают 5% макс. ОЗ в сек.", "", ""], ["Difficulty_mDetail_32010476", "Langlyn&#x27;s Max HP increases by 50%, but cannot be healed.", "Макс. ОЗ Ланглина повышаются на 50%, но его нельзя исцелить.", "", ""], ["Difficulty_mDetail_32010477", "Langlyn&#x27;s Max HP increases by 75%, but cannot be healed.", "Макс. ОЗ Ланглина повышаются на 75%, но его нельзя исцелить.", "", ""], ["Difficulty_mDetail_32010478", "Langlyn&#x27;s Max HP increases by 100%, but cannot be healed.", "Макс. ОЗ Ланглина повышаются на 100%, но его нельзя исцелить.", "", ""], ["ExpStageUI_mRaidName_8201006", "COTD-1", "COTD-1", "", ""], ["ExpStageUI_mRaidName_8201007", "COTD-2", "COTD-2", "", ""], ["ExpStageUI_mRaidName_8201008", "COTD-3", "COTD-3", "", ""], ["ExpStageUI_mRaidName_8201009", "COTD-4", "COTD-4", "", ""], ["ExpStageUI_mRaidName_8201010", "COTD-5", "COTD-5", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010153", "Destroyers gain the Camaraderie skill. When a Destroyer dies, nearby Destroyers receive an enhancement.", "Разрушители получают навык «Братство». Когда разрушитель погибает, ближайшие разрушители получают усиление.", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010163", "When the Priest of Thunder appears, he gains Ghost Form for 30 sec.", "При появлении жрец грома получает эффект «Призрачный облик» на 30 сек.", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010364", "Boss enemies restore 1% Max HP per sec, while other enemies restore 5% Max HP per sec.", "Враги-боссы восстанавливают 1% макс. ОЗ в сек., а другие враги восстанавливают 5% макс. ОЗ в сек.", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010476", "Langlyn&#x27;s Max HP increases by 50%, but cannot be healed.", "Макс. ОЗ Ланглина повышаются на 50%, но его нельзя исцелить.", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010477", "Langlyn&#x27;s Max HP increases by 75%, but cannot be healed.", "Макс. ОЗ Ланглина повышаются на 75%, но его нельзя исцелить.", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010478", "Langlyn&#x27;s Max HP increases by 100%, but cannot be healed.", "Макс. ОЗ Ланглина повышаются на 100%, но его нельзя исцелить.", "", ""], ["HeroFactionKingSkill_mName_100441_1", "The Cursed Cult", "Проклятый культ", "", ""], ["HeroFactionKingSkill_mName_100441_2", "The Cursed Cult", "Проклятый культ", "", ""], ["HeroFactionKingSkill_mName_100441_3", "The Cursed Cult", "Проклятый культ", "", ""], ["HeroFactionKingSkill_mName_100441_4", "The Cursed Cult", "Проклятый культ", "", ""], ["HeroFactionKingSkill_mName_100441_5", "The Cursed Cult", "Проклятый культ", "", ""], ["Item_mItemDesc_110", "Purchase to obtain a 30-Day Monthly Card of Diamonds.", "Приобретите, чтобы получить 30-дневную месячную карту: алмазы.", "", ""], ["Item_mItemDesc_111", "Purchase to obtain a 30-Day Monthly Card of Summoning.", "Приобретите, чтобы получить 30-дневную месячную карту: призыв.", "", ""], ["Item_mItemDesc_112", "Purchase to obtain a 30-Day Monthly Card of Stamina.", "Приобретите, чтобы получить 30-дневную месячную карту: энергия.", "", ""], ["Item_mItemDesc_31096", "Select 1 event-exclusive hero to join the event. The selected exclusive hero has an increased drop rate &amp; is guaranteed within 200 summons!", "Выберите 1 эксклюзивного героя события для участия в событии. У выбранного эксклюзивного героя повышен шанс получения, гарантирован в течение 200 призывов!", "", ""], ["Item_mItemDesc_31097", "&lt;color=&quot;#eadca2&quot;&gt;Special Summon Offer&lt;/color&gt;\\n\\nGet the necessary materials for Hero Summon", "&lt;color=&quot;#eadca2&quot;&gt;Призыв: особое предложение&lt;/color&gt;\\n\\nПолучите необходимые материалы для призыва героя", "", ""], ["Item_mItemDesc_3333", "&lt;color=&quot;#498a40&quot;&gt;Exclusive avatar border for the Gold Dragon Pass.&lt;/color&gt;", "&lt;color=&quot;#498a40&quot;&gt;Эксклюзивная рамка аватара пропуска золотого дракона.&lt;/color&gt;", "", ""], ["Item_mItemDesc_3519", "Unknown Clue of Erlang Shen. When obtained, it will automatically convert into a random one from Erlang Shen&#x27;s Clues 1-5.", "Неизвестная подсказка Эрлан-шэня. При получении автоматически преобразуется в случайную подсказку из подсказок Эрлан-шэня 1-5.", "", ""], ["Item_mItemDesc_3521", "Erlang Shen&#x27;s Clue 2.\\n&lt;color=&quot;#498a40&quot;&gt;Usage: Consume this item via Fate&#x27;s Chapters to unlock the corresponding clue.&lt;/color&gt;", "Подсказка Эрлан-шэня 2.\\n&lt;color=&quot;#498a40&quot;&gt;Применение: используется в «Главах судьбы» для разблокировки соответствующей подсказки.&lt;/color&gt;", "", ""], ["Item_mItemDesc_3522", "Erlang Shen&#x27;s Clue 3.\\n&lt;color=&quot;#498a40&quot;&gt;Usage: Consume this item via Fate&#x27;s Chapters to unlock the corresponding clue.&lt;/color&gt;", "Подсказка Эрлан-шэня 3.\\n&lt;color=&quot;#498a40&quot;&gt;Применение: используется в «Главах судьбы» для разблокировки соответствующей подсказки.&lt;/color&gt;", "", ""], ["Item_mItemDesc_3523", "Erlang Shen&#x27;s Clue 4.\\n&lt;color=&quot;#498a40&quot;&gt;Usage: Consume this item via Fate&#x27;s Chapters to unlock the corresponding clue.&lt;/color&gt;", "Подсказка Эрлан-шэня 4.\\n&lt;color=&quot;#498a40&quot;&gt;Применение: используется в «Главах судьбы» для разблокировки соответствующей подсказки.&lt;/color&gt;", "", ""], ["Item_mItemDesc_3524", "Erlang Shen&#x27;s Clue 5.\\n&lt;color=&quot;#498a40&quot;&gt;Usage: Consume this item via Fate&#x27;s Chapters to unlock the corresponding clue.&lt;/color&gt;", "Подсказка Эрлан-шэня 5.\\n&lt;color=&quot;#498a40&quot;&gt;Применение: используйте этот предмет через «Главы судьбы», чтобы разблокировать соответствующую подсказку.&lt;/color&gt;", "", ""], ["Item_mItemDesc_35473", "You can obtain the following items:\\nMonthly Card of Diamonds (30-Day)\\nDiamond x500", "Вы можете получить следующие предметы:\\nМесячная карта: алмазы (30 дней)\\nАлмаз x500", "", ""], ["Item_mItemDesc_35474", "You can obtain the following items:\\nMonthly Card of Summoning (30-Day)\\nRare Summoning Crystal x500", "Вы можете получить следующие предметы:\\nМесячная карта: призыв (30 дней)\\nРедкий кристалл призыва x500", "", ""], ["Item_mItemDesc_35475", "You can obtain the following items:\\nMonthly Card of Stamina (30-Day)\\nStamina x600\\nAuto-Fight Chance x30", "Вы можете получить следующие предметы:\\nМесячная карта: энергия (30 дней)\\nЭнергия x600\\nПопытка автобитвы x30", "", ""], ["Item_mItemDesc_56310", "Grants a random &lt;color=&quot;#498a40&quot;&gt;Lvl. 2-4&lt;/color&gt; Trial Keystone.", "Дает случайный ключ испытаний &lt;color=&quot;#498a40&quot;&gt;ур. 2-4&lt;/color&gt;.", "", ""], ["Item_mItemDesc_56311", "Grants a random &lt;color=&quot;#498a40&quot;&gt;Lvl. 2-5&lt;/color&gt; Trial Keystone.", "Дает случайный ключ испытаний &lt;color=&quot;#498a40&quot;&gt;ур. 2-5&lt;/color&gt;.", "", ""], ["Item_mItemName_110", "Monthly Card of Diamonds (30-Day)", "Месячная карта: алмазы (30 дней)", "", ""], ["Item_mItemName_111", "Monthly Card of Summoning (30-Day)", "Месячная карта: призыв (30 дней)", "", ""], ["Item_mItemName_112", "Monthly Card of Stamina (30-Day)", "Месячная карта: энергия (30 дней)", "", ""], ["Item_mItemName_31096", "Exclusive Lucky Pick", "Эксклюзивный удачный выбор", "", ""], ["Item_mItemName_31097", "Turbo Summon Bundle", "Набор ускорения призыва", "", ""], ["Item_mItemName_3324", "Avatar Border: Nine-Tailed Nightmare Ranking Champion", "Рамка аватара: чемпион рейтинга «Девятихвостый кошмар»", "", ""], ["Item_mItemName_3325", "Avatar Border: Nine-Tailed Nightmare Ranking Runner-Up", "Рамка аватара: 2-е место рейтинга «Девятихвостый кошмар»", "", ""], ["Item_mItemName_3326", "Avatar Border: Nine-Tailed Nightmare Ranking Third Place", "Рамка аватара: 3-е место в рейтинге «Девятихвостый кошмар»", "", ""], ["Item_mItemName_3333", "Avatar Border: Gold Dragon Pass", "Рамка аватара: пропуск золотого дракона", "", ""], ["Item_mItemName_35473", "Monthly Card of Diamonds", "Месячная карта: алмазы", "", ""], ["Item_mItemName_35474", "Monthly Card of Summoning", "Месячная карта: призыв", "", ""], ["Item_mItemName_35475", "Monthly Card of Stamina", "Месячная карта: энергия", "", ""], ["Item_mItemName_56310", "Random Trial Keystone (Lvl. 2-4)", "Случайный ключ испытаний (ур. 2-4)", "", ""], ["Item_mItemName_56311", "Random Trial Keystone (Lvl. 2-5)", "Случайный ключ испытаний (ур. 2-5)", "", ""], ["Quest_mQuestTitle_380034", "Obtain a total of 100 Dragon&#x27;s Gold.", "Получите 100 золота дракона в сумме.", "", ""], ["Quest_mQuestTitle_380035", "Obtain a total of 200 Dragon&#x27;s Gold.", "Получите 200 золота дракона в сумме.", "", ""], ["Quest_mQuestTitle_380036", "Obtain a total of 300 Dragon&#x27;s Gold.", "Получите 300 золота дракона в сумме.", "", ""], ["Quest_mQuestTitle_380037", "Obtain a total of 500 Dragon&#x27;s Gold.", "Получите 500 золота дракона в сумме.", "", ""], ["Quest_mQuestTitle_380038", "Obtain a total of 800 Dragon&#x27;s Gold.", "Получите 800 золота дракона в сумме.", "", ""], ["Quest_mQuestTitle_380039", "Obtain a total of 1,000 Dragon&#x27;s Gold.", "Получите 1000 золота дракона в сумме.", "", ""], ["Quest_mQuestTitle_380040", "Obtain a total of 1,500 Dragon&#x27;s Gold.", "Получите 1500 золота дракона в сумме.", "", ""], ["Quest_mQuestTitle_380041", "Obtain a total of 2,000 Dragon&#x27;s Gold.", "Получите 2000 золота дракона в сумме.", "", ""], ["Quest_mQuestTitle_380042", "Obtain a total of 3,000 Dragon&#x27;s Gold.", "Получите 3000 золота дракона в сумме.", "", ""], ["Quest_mQuestTitle_380043", "Obtain a total of 4,000 Dragon&#x27;s Gold.", "Получите 4000 золота дракона в сумме.", "", ""], ["Quest_mQuestTitle_380044", "Obtain a total of 5,000 Dragon&#x27;s Gold.", "Получите 5000 золота дракона в сумме.", "", ""], ["RoleHeadFrame_mSourceDesc_84", "Awarded to the Commander who ranks first on the Points Leaderboard in the Echoes of Woe during the Nine-Tailed Nightmare.", "Вручается командиру, занявшему первое место в таблице лидеров по очкам «Эха скорби» во время события «Девятихвостый кошмар».", "", ""], ["RoleHeadFrame_mSourceDesc_85", "Awarded to the Commander who ranks second on the Points Leaderboard in the Echoes of Woe during the Nine-Tailed Nightmare.", "Вручается командиру, занявшему второе место в таблице лидеров по очкам «Эха скорби» во время события «Девятихвостый кошмар».", "", ""], ["RoleHeadFrame_mSourceDesc_86", "Awarded to the Commander who ranks third on the Points Leaderboard in the Echoes of Woe during the Nine-Tailed Nightmare.", "Вручается командиру, занявшему третье место в таблице лидеров по очкам «Эха скорби» во время события «Девятихвостый кошмар».", "", ""], ["RoleHeadFrame_mSourceDesc_89", "Guild War S10 &quot;Overlord&quot; exclusive avatar border.", "Эксклюзивная рамка аватара 10-го сезона войны гильдий «Повелитель».", "", ""], ["RoleHeadFrame_mSourceDesc_91", "Obtained from Gold Dragon Pass.", "Можно получить в пропуске золотого дракона.", "", ""], ["RollDiceBuilding_mName_11_1", "Turn of Luck", "Поворот судьбы", "", ""], ["RollDiceBuilding_mName_12_1", "Turn of Luck", "Поворот судьбы", "", ""], ["Skill_mSkillDesc_1908301_1", "Swings claws, dealing DMG to all heroes within 1 tile ahead.", "Размахивает когтями, нанося УРН всем героям в пределах 1 плитки впереди.", "", ""], ["Skill_mSkillDesc_1908304_1", "Swings claws, dealing DMG to all heroes within 1 tile ahead.", "Размахивает когтями, нанося УРН всем героям в пределах 1 плитки впереди.", "", ""], ["Skill_mSkillDesc_1908315_1", "When the Nine-Tailed Fox takes fatal DMG, she flees the battlefield and activates the tails on the field to attack. When the tails are defeated, the Nine-Tailed Fox returns to the battlefield. After all tails on the field are defeated, the Nine-Tailed Fox transforms and summons a large number of foxes.", "Когда девятихвостая лиса получает смертельный УРН, она покидает поле боя и активирует хвосты на поле для атаки. Когда хвосты побеждены, девятихвостая лиса возвращается на поле боя. После того как все хвосты на поле побеждены, девятихвостая лиса трансформируется и призывает большое количество лис.", "", ""], ["Skill_mSkillDesc_1908345_1", "Deals M. DMG to the last deployed unit on the battlefield, prioritizing Defenders.", "Наносит маг. УРН последнему размещенному юниту на поле боя, отдавая приоритет защитникам.", "", ""], ["Skill_mSkillDesc_1908357_1", "Deals M. DMG to the last deployed unit on the battlefield, prioritizing Defenders.", "Наносит маг. УРН последнему размещенному юниту на поле боя, отдавая приоритет защитникам.", "", ""], ["Skill_mSkillDesc_803803_1", "Immune to all &lt;color=&quot;#4A9DF2&quot;&gt;CC Effects&lt;/color&gt; (except Slow).", "Невосприимчивость ко всем &lt;color=&quot;#4A9DF2&quot;&gt;эффектам масс. контроля&lt;/color&gt; (кроме «Замедления»).", "", ""], ["Skill_mSkillDesc_8202053_1", "Reduces the Redeployment Time of allied heroes by &lt;color=&quot;#4A9DF2&quot;&gt;{sk1}%&lt;/color&gt;, but increases their Deployment Cost by &lt;color=&quot;#4A9DF2&quot;&gt;+{sk2}&lt;/color&gt;.", "Сокращает время повторного размещения союзных героев на &lt;color=&quot;#4A9DF2&quot;&gt;{sk1}%&lt;/color&gt;, но повышает их стоимость размещения на &lt;color=&quot;#4A9DF2&quot;&gt;+{sk2}&lt;/color&gt;.", "", ""], ["Skill_mSkillDesc_8202084_1", "Increases allied heroes&#x27; DMG by &lt;color=&quot;#4A9DF2&quot;&gt;{sk1}%&lt;/color&gt; each round and reduces Basic ATK interval by &lt;color=&quot;#4A9DF2&quot;&gt;{sk1}%&lt;/color&gt;. Vulnerability (P. DMG) and Vulnerability (M. DMG) increase by &lt;color=&quot;#4A9DF2&quot;&gt;{sk2}%&lt;/color&gt; each round.", "Повышает УРН союзных героев на &lt;color=&quot;#4A9DF2&quot;&gt;{sk1}%&lt;/color&gt; каждый раунд и сокращает интервал базовой АТК на &lt;color=&quot;#4A9DF2&quot;&gt;{sk1}%&lt;/color&gt;. Эффекты «Уязвимость (физ. УРН)» и «Уязвимость (маг. УРН)» повышаются на &lt;color=&quot;#4A9DF2&quot;&gt;{sk2}%&lt;/color&gt; каждый раунд.", "", ""], ["Skill_mSkillDesc_8202103_1", "Allied Hero Deployment Limit +&lt;color=&quot;#4A9DF2&quot;&gt;{sk1}&lt;/color&gt;", "Лимит размещения союзных героев +&lt;color=&quot;#4A9DF2&quot;&gt;{sk1}&lt;/color&gt;", "", ""], ["Skill_mSkillName_1033701_1", "Accelerated Incubation", "Ускоренное создание", "", ""], ["Skill_mSkillName_3991865_1", "High Quality", "Высокое качество", "", ""], ["Skill_mSkillName_803610_1", "Freeze", "Заморозка", "", ""], ["Skill_mSkillName_803801_1", "Frostbite Strike", "Морозный удар", "", ""], ["Skill_mSkillName_803803_1", "Control Immunity", "Невосприимчивость к контролю", "", ""], ["Skill_mSkillName_804001_1", "Frostbite Rupture", "Морозный разрыв", "", ""], ["Skill_mSkillName_8202053_1", "Time VS Money", "Время против денег", "", ""], ["Skill_mSkillName_8202084_1", "Heating Up", "Разогрев", "", ""], ["Skill_mSkillName_8202103_1", "Rigged Arena", "Подстроенная арена", "", ""], ["Skill_mSkillSimpleDesc_11015501_1", "Increases ATK by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;, and reduces the number of attacks required to trigger Nature&#x27;s Fury enhanced attack by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;. When in Berserker Stance, Basic ATK restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt; Max HP, and triggering Ground Stomp restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; Max HP.", "Повышает АТК на &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt; и на &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt; уменьшает количество атак, необходимых для активации усиленной атаки «Ярости природы». В стойке берсерка базовая АТК восстанавливает &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt; макс. ОЗ, а активация «Удара по земле» восстанавливает &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; макс. ОЗ.", "", ""], ["Skill_mSkillSimpleDesc_11015501_2", "Increases ATK by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;, and reduces the number of attacks required to trigger Nature&#x27;s Fury enhanced attack by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;. When in Berserker Stance, Basic ATK restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt; Max HP, and triggering Ground Stomp restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; Max HP.", "Повышает АТК на &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt; и на &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt; уменьшает количество атак, необходимых для активации усиленной атаки «Ярости природы». В стойке берсерка базовая АТК восстанавливает &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt; макс. ОЗ, а активация «Удара по земле» восстанавливает &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; макс. ОЗ.", "", ""], ["Skill_mSkillSimpleDesc_11015501_3", "Increases ATK by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;, and reduces the number of attacks required to trigger Nature&#x27;s Fury enhanced attack by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;. When in Berserker Stance, Basic ATK restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt; Max HP, and triggering Ground Stomp restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; Max HP.", "Повышает АТК на &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt; и на &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt; уменьшает количество атак, необходимых для активации усиленной атаки «Ярости природы». В стойке берсерка базовая АТК восстанавливает &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt; макс. ОЗ, а активация «Удара по земле» восстанавливает &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; макс. ОЗ.", "", ""], ["Skill_mSkillSimpleDesc_11015501_4", "Increases ATK by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;, and reduces the number of attacks required to trigger Nature&#x27;s Fury enhanced attack by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;. When in Berserker Stance, Basic ATK restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt; Max HP, and triggering Ground Stomp restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; Max HP.", "Повышает АТК на &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt; и на &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt; уменьшает количество атак, необходимых для активации усиленной атаки «Ярости природы». В стойке берсерка базовая АТК восстанавливает &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt; макс. ОЗ, а активация «Удара по земле» восстанавливает &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; макс. ОЗ.", "", ""], ["Skill_mSkillSimpleDesc_11015501_5", "Increases ATK by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;, and reduces the number of attacks required to trigger Nature&#x27;s Fury enhanced attack by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;. When in Berserker Stance, Basic ATK restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt; Max HP, and triggering Ground Stomp restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; Max HP.", "Повышает АТК на &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt; и на &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt; уменьшает количество атак, необходимых для активации усиленной атаки «Ярости природы». В стойке берсерка базовая АТК восстанавливает &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt; макс. ОЗ, а активация «Удара по земле» восстанавливает &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; макс. ОЗ.", "", ""], ["Skill_mSkillSimpleDesc_11015501_6", "Increases ATK by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;, and reduces the number of attacks required to trigger Nature&#x27;s Fury enhanced attack by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;. When in Berserker Stance, Basic ATK restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt; Max HP, and triggering Ground Stomp restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; Max HP.", "Повышает АТК на &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt; и на &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt; уменьшает количество атак, необходимых для активации усиленной атаки «Ярости природы». В стойке берсерка базовая АТК восстанавливает &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt; макс. ОЗ, а активация «Удара по земле» восстанавливает &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; макс. ОЗ.", "", ""], ["Skill_mSkillSimpleDesc_13000441_1", "Increases faction team members&#x27; basic attributes by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;.\\nIncreases faction team members&#x27; DMG dealt to enemies inflicted with Slow, Stun, Freeze, Immobilized State, and other CC Effects by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt;. \\nIncreases faction team members&#x27; DMG by &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;. When the Lord is on the battlefield and an allied summon dies, increases all faction team members&#x27; DMG by an additional &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; for &lt;color=&quot;#4A9DF2&quot;&gt;{skm5}&lt;/color&gt; sec, stacking up to &lt;color=&quot;#4A9DF2&quot;&gt;{skm6}&lt;/color&gt; time(s).", "Повышает базовые характеристики представителей фракции в команде на &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;.\\nПовышает УРН представителей фракции в команде, наносимый врагам под воздействием эффектов «Замедления», «Оглушения», «Заморозки», «Состояния обездвиживания» и других эффектов масс. контроля, на &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt;. \\nПовышает УРН представителей фракции в команде на &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;. Когда лорд находится на поле боя и союзное призванное существо погибает, повышает УРН всех представителей фракции в команде дополнительно на &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; на &lt;color=&quot;#4A9DF2&quot;&gt;{skm5}&lt;/color&gt; сек. Складывается до &lt;color=&quot;#4A9DF2&quot;&gt;{skm6}&lt;/color&gt; р.", "", ""], ["Skill_mSkillSimpleDesc_13000441_2", "Increases faction team members&#x27; basic attributes by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;.\\nIncreases faction team members&#x27; DMG dealt to enemies inflicted with Slow, Stun, Freeze, Immobilized State, and other CC Effects by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt;. \\nIncreases faction team members&#x27; DMG by &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;. When the Lord is on the battlefield and an allied summon dies, increases all faction team members&#x27; DMG by an additional &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; for &lt;color=&quot;#4A9DF2&quot;&gt;{skm5}&lt;/color&gt; sec, stacking up to &lt;color=&quot;#4A9DF2&quot;&gt;{skm6}&lt;/color&gt; time(s).", "Повышает базовые характеристики представителей фракции в команде на &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;.\\nПовышает УРН представителей фракции в команде, наносимый врагам под воздействием эффектов «Замедления», «Оглушения», «Заморозки», «Состояния обездвиживания» и других эффектов масс. контроля, на &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt;. \\nПовышает УРН представителей фракции в команде на &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;. Когда лорд находится на поле боя и союзное призванное существо погибает, повышает УРН всех представителей фракции в команде дополнительно на &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; на &lt;color=&quot;#4A9DF2&quot;&gt;{skm5}&lt;/color&gt; сек. Складывается до &lt;color=&quot;#4A9DF2&quot;&gt;{skm6}&lt;/color&gt; р.", "", ""], ["Skill_mSkillSimpleDesc_13000441_3", "Increases faction team members&#x27; basic attributes by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;.\\nIncreases faction team members&#x27; DMG dealt to enemies inflicted with Slow, Stun, Freeze, Immobilized State, and other CC Effects by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt;. \\nIncreases faction team members&#x27; DMG by &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;. When the Lord is on the battlefield and an allied summon dies, increases all faction team members&#x27; DMG by an additional &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; for &lt;color=&quot;#4A9DF2&quot;&gt;{skm5}&lt;/color&gt; sec, stacking up to &lt;color=&quot;#4A9DF2&quot;&gt;{skm6}&lt;/color&gt; time(s).", "Повышает базовые характеристики представителей фракции в команде на &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;.\\nПовышает УРН представителей фракции в команде, наносимый врагам под воздействием эффектов «Замедления», «Оглушения», «Заморозки», «Состояния обездвиживания» и других эффектов масс. контроля, на &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt;. \\nПовышает УРН представителей фракции в команде на &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;. Когда лорд находится на поле боя и союзное призванное существо погибает, повышает УРН всех представителей фракции в команде дополнительно на &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; на &lt;color=&quot;#4A9DF2&quot;&gt;{skm5}&lt;/color&gt; сек. Складывается до &lt;color=&quot;#4A9DF2&quot;&gt;{skm6}&lt;/color&gt; р.", "", ""], ["Skill_mSkillSimpleDesc_13000441_4", "Increases faction team members&#x27; basic attributes by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;.\\nIncreases faction team members&#x27; DMG dealt to enemies inflicted with Slow, Stun, Freeze, Immobilized State, and other CC Effects by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt;. \\nIncreases faction team members&#x27; DMG by &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;. When the Lord is on the battlefield and an allied summon dies, increases all faction team members&#x27; DMG by an additional &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; for &lt;color=&quot;#4A9DF2&quot;&gt;{skm5}&lt;/color&gt; sec, stacking up to &lt;color=&quot;#4A9DF2&quot;&gt;{skm6}&lt;/color&gt; time(s).", "Повышает базовые характеристики представителей фракции в команде на &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;.\\nПовышает УРН представителей фракции в команде, наносимый врагам под воздействием эффектов «Замедления», «Оглушения», «Заморозки», «Состояния обездвиживания» и других эффектов масс. контроля, на &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt;. \\nПовышает УРН представителей фракции в команде на &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;. Когда лорд находится на поле боя и союзное призванное существо погибает, повышает УРН всех представителей фракции в команде дополнительно на &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; на &lt;color=&quot;#4A9DF2&quot;&gt;{skm5}&lt;/color&gt; сек. Складывается до &lt;color=&quot;#4A9DF2&quot;&gt;{skm6}&lt;/color&gt; р.", "", ""], ["Skill_mSkillSimpleDesc_13000441_5", "Increases faction team members&#x27; basic attributes by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;.\\nIncreases faction team members&#x27; DMG dealt to enemies inflicted with Slow, Stun, Freeze, Immobilized State, and other CC Effects by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt;. \\nIncreases faction team members&#x27; DMG by &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;. When the Lord is on the battlefield and an allied summon dies, increases all faction team members&#x27; DMG by an additional &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; for &lt;color=&quot;#4A9DF2&quot;&gt;{skm5}&lt;/color&gt; sec, stacking up to &lt;color=&quot;#4A9DF2&quot;&gt;{skm6}&lt;/color&gt; time(s).", "Повышает базовые характеристики представителей фракции в команде на &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;.\\nПовышает УРН представителей фракции в команде, наносимый врагам под воздействием эффектов «Замедления», «Оглушения», «Заморозки», «Состояния обездвиживания» и других эффектов масс. контроля, на &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt;. \\nПовышает УРН представителей фракции в команде на &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;. Когда лорд находится на поле боя и союзное призванное существо погибает, повышает УРН всех представителей фракции в команде дополнительно на &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; на &lt;color=&quot;#4A9DF2&quot;&gt;{skm5}&lt;/color&gt; сек. Складывается до &lt;color=&quot;#4A9DF2&quot;&gt;{skm6}&lt;/color&gt; р.", "", ""], ["Skill_mSkillSimpleDesc_8202053_1", "Reduces the Redeployment Time of allied heroes by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;, but increases their Deployment Cost by &lt;color=&quot;#4A9DF2&quot;&gt;+{skm2}&lt;/color&gt;.", "Сокращает время повторного размещения союзных героев на &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;, но повышает их стоимость размещения на &lt;color=&quot;#4A9DF2&quot;&gt;+{skm2}&lt;/color&gt;.", "", ""], ["Skill_mSkillSimpleDesc_8202084_1", "Increases allied heroes&#x27; DMG by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt; each round and reduces Basic ATK Interval by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;. Vulnerability (P. DMG) and Vulnerability (M. DMG) increase by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt; each round.", "Повышает УРН союзных героев на &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt; каждый раунд и сокращает интервал базовой АТК на &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;. Эффекты «Уязвимость (физ. УРН)» и «Уязвимость (маг. УРН)» повышаются на &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt; каждый раунд.", "", ""], ["Skill_mSkillSimpleDesc_8202103_1", "Allied Hero Deployment Limit +&lt;color=&quot;#4A9DF2&quot;&gt;{skm1}&lt;/color&gt;", "Лимит размещения союзных героев +&lt;color=&quot;#4A9DF2&quot;&gt;{skm1}&lt;/color&gt;", "", ""], ["Skill_mSkillSimpleDesc_8203031_1", "Hotspot appears on both players&#x27; battlefields. Heroes standing on the Hotspot have all attributes increased by 20%.", "Горячая точка появляется на поле боя обоих игроков. У героев, стоящих на горячей точке, все характеристики повышаются на 20%.", "", ""], ["Stage_mStageDesc_5003001", "In this epic battle, you will face an unprecedented enemy - Semrah. Hailing from ancient times, Semrah fights in 3 Battle Modes, each posing a tough challenge.", "В этом эпическом бою вы столкнетесь с невероятным противником – Семрахом. Это древнее существо обладает 3 боевыми режимами, в каждом из которых его будет непросто победить.", "", ""], ["Stage_mStageDesc_5003002", "In this epic battle, you will face an unprecedented enemy - Semrah. Hailing from ancient times, Semrah fights in 3 Battle Modes, each posing a tough challenge.", "В этом эпическом бою вы столкнетесь с невероятным противником – Семрахом. Это древнее существо обладает 3 боевыми режимами, в каждом из которых его будет непросто победить.", "", ""], ["Stage_mStageDesc_8101001", "Starting from Round 5, &lt;color=&quot;#fd4540&quot;&gt;all monsters gain Invisibility and become untargetable&lt;/color&gt; for 7 sec.", "Начиная с 5-го раунда &lt;color=&quot;#fd4540&quot;&gt;все монстры получают эффект «Невидимость», и их нельзя выбрать целью&lt;/color&gt;. Эффект действует 7 сек.", "", ""], ["Stage_mStageDesc_8101002", "Starting from Round 5, &lt;color=&quot;#fd4540&quot;&gt;all monsters gain Invincibility upon taking DMG for the first time, becoming immune to all DMG&lt;/color&gt; for 4 sec.", "Начиная с 5-го раунда &lt;color=&quot;#fd4540&quot;&gt;все монстры получают эффект «Неуязвимость», когда получают УРН в первый раз, становясь невосприимчивыми ко всем видам УРН&lt;/color&gt;. Эффект действует 4 сек.", "", ""], ["Stage_mStageDesc_8101003", "Starting from Round 5, &lt;color=&quot;#fd4540&quot;&gt;all heroes continuously take True DMG equal to 4% of their Max HP per sec&lt;/color&gt;.", "Начиная с 5-го раунда &lt;color=&quot;#fd4540&quot;&gt;все герои получают реальный УРН в размере 4% их макс. ОЗ каждую секунду&lt;/color&gt;.", "", ""], ["Stage_mStageDesc_8201011", "Team up with your friends to defeat the enemy Boss and fend off the tides of enemies.", "Объединитесь в команду с друзьями, чтобы победить вражеского босса и противостоять волнам врагов.", "", ""], ["Stage_mStageDesc_8201012", "Team up with your friends to defeat the enemy Boss and fend off the tides of enemies.", "Объединитесь в команду с друзьями, чтобы победить вражеского босса и противостоять волнам врагов.", "", ""], ["Stage_mStageDesc_8201013", "Team up with your friends to defeat the enemy Boss and fend off the tides of enemies.", "Объединитесь в команду с друзьями, чтобы победить вражеского босса и противостоять волнам врагов.", "", ""], ["Stage_mStageDesc_8201014", "Team up with your friends to defeat the enemy Boss and fend off the tides of enemies.", "Объединитесь в команду с друзьями, чтобы победить вражеского босса и противостоять волнам врагов.", "", ""], ["Stage_mStageDesc_8201015", "Team up with your friends to defeat the enemy Boss and fend off the tides of enemies.", "Объединитесь в команду с друзьями, чтобы победить вражеского босса и противостоять волнам врагов.", "", ""], ["Stage_mStageFailDesc_5003001", "Pay extra attention to Semrah&#x27;s Battle Mode and exploit its weakness.", "Учитывайте уязвимые места боевого режима, когда Семрах входит в него.", "", ""], ["Stage_mStageFailDesc_5003002", "Pay extra attention to Semrah&#x27;s Battle Mode and exploit its weakness.", "Учитывайте уязвимые места боевого режима, когда Семрах входит в него.", "", ""], ["Stage_mStageIdDesc_5003001", "Apocalypse I - Playtest", "«Апокалипсис I» – тест героя", "", ""], ["Stage_mStageIdDesc_5003002", "Apocalypse II - Playtest", "«Апокалипсис II» – тест героя", "", ""], ["Stage_mStageIdDesc_8201011", "Stage 1", "Этап 1", "", ""], ["Stage_mStageIdDesc_8201012", "Stage 2", "Этап 2", "", ""], ["Stage_mStageIdDesc_8201013", "Stage 3", "Этап 3", "", ""], ["Stage_mStageIdDesc_8201014", "Stage 4", "Этап 4", "", ""], ["Stage_mStageIdDesc_8201015", "Stage 5", "Этап 5", "", ""], ["Stage_mStageIdDesc_991001", "Test 1-1", "Тест 1-1", "", ""], ["Stage_mStageIdDesc_991002", "Test 1-2", "Тест 1-2", "", ""], ["Stage_mStageIdDesc_991003", "Test 1-3", "Тест 1-3", "", ""], ["Stage_mStageName_5003001", "Semrah", "Семрах", "", ""], ["Stage_mStageName_5003002", "Semrah", "Семрах", "", ""], ["Stage_mStageName_8201011", "Co-op Mode", "Совместный режим", "", ""], ["Stage_mStageName_8201012", "Co-op Mode", "Совместный режим", "", ""], ["Stage_mStageName_8201013", "Co-op Mode", "Совместный режим", "", ""], ["Stage_mStageName_8201014", "Co-op Mode", "Совместный режим", "", ""], ["Stage_mStageName_8201015", "Co-op Mode", "Совместный режим", "", ""], ["UILanguage_mKeyValue_Form_BackpackIntegration_SubTitle", "Sort", "Фильтр", "", ""], ["UILanguage_mKeyValue_Panel_BackpackEquipPanel_EquipedText", "Equipped", "Надето", "", ""], ["UILanguage_mKeyValue_Panel_MaterialPanel_GetWayTitle_Text", "Access", "Перейти", "", ""], ["UILanguage_mKeyValue_Panel_MaterialPanel_Text_Use", "Use", "Использовать", "", ""], ["UnionRaise_mRaiseText_15", "Donate &lt;color=#28d37c&gt;{num}&lt;/color&gt; Mythic Extract(s).", "Сделайте взнос: мифическая вытяжка х&lt;color=#28d37c&gt;{num}&lt;/color&gt;.", "", ""], ["UnionRaise_mRaiseText_16", "Donate &lt;color=#28d37c&gt;{num}&lt;/color&gt; 5-star Psychic Power(s).", "Сделайте взнос: 5-зв. сила медиума х&lt;color=#28d37c&gt;{num}&lt;/color&gt;.", "", ""], ["UnionRaise_mRaiseTitle_15", "Promotion Insignia III", "Эмблема продвижения III", "", ""], ["UnionRaise_mRaiseTitle_16", "Hero Star Up", "Повышение звезды героя", "", ""], ["Unit_mDescribe_37105", "Scalekin mages, adept in the art of poisonous magic, possess the ability to &lt;color=#ff4500&gt;inflict poison on enemies&lt;/color&gt;.", "Маги чешуйчатых, использующие ядовитую магию, способны &lt;color=#ff4500&gt;отравлять врагов&lt;/color&gt;.", "", ""], ["Unit_mDescribe_37106", "Elite Skeleton Archers that can deal massive DMG from afar.", "Элитные скелеты-лучники, наносят огромный УРН издалека.", "", ""], ["Unit_mDescribe_37107", "Small spiders, very aggressive but weak individually.", "Маленькие пауки, очень агрессивные, но слабые поодиночке.", "", ""], ["Unit_mDescribe_37108", "Toxic Suicides will explode when approaching enemies, &lt;color=#ff4500&gt;dealing moderate AoE DMG and poisoning them&lt;/color&gt;.", "Отравляющие самоубийцы взрываются рядом с врагами, &lt;color=#ff4500&gt;нанося умеренный масс. урон и отравляя цели&lt;/color&gt;.", "", ""], ["Unit_mDescribe_37110", "Clad in giant shields and possessing unyielding skeletal frames, they are renowned for their exceptional DEF.", "Благодаря огромным щитам и прочным скелетным каркасам, они славятся своей исключительной ЗАЩ.", "", ""], ["Unit_mDescribe_37112", "Produces a Queen Spider when left out of combat for a while. Eliminate it before it hatches.", "Создает королеву пауков, если некоторое время не участвует в бою. Устраните его, пока она не вылупилась.", "", ""], ["Unit_mFeature_10408", "Ludwig has been reborn from the abyss. With a horrifying power granted by his master - the Eldritch God. Ludwig has now lost his humanity.", "Благодаря Бездне Людвиг переродился. Преисполнившись мощи, дарованной его господином, Древним Богом, Людвиг полностью утратил человечность.", "", ""], ["Unit_mFeature_10409", "Ludwig has been reborn from the abyss. With a horrifying power granted by his master - the Eldritch God. Ludwig has now lost his humanity.", "Благодаря Бездне Людвиг переродился. Преисполнившись мощи, дарованной его господином, Древним Богом, Людвиг полностью утратил человечность.", "", ""], ["Unit_mFeature_10410", "Ludwig has been reborn from the abyss. With a horrifying power granted by his master - the Eldritch God. Ludwig has now lost his humanity.", "Благодаря Бездне Людвиг переродился. Преисполнившись мощи, дарованной его господином, Древним Богом, Людвиг полностью утратил человечность.", "", ""], ["Unit_mFeature_37105", "Scalekin mages, adept in the art of poisonous magic, possess the ability to inflict continuous Poison DMG on enemies.", "Маги чешуйчатых, использующие ядовитую магию, способны наносить врагам постоянный УРН от яда.", "", ""], ["Unit_mFeature_37106", "Elite Skeleton Archers that can deal massive DMG from afar.", "Элитные скелеты-лучники, наносят огромный УРН издалека.", "", ""], ["Unit_mFeature_37107", "Small spiders, very aggressive but weak individually.", "Маленькие пауки, очень агрессивные, но слабые поодиночке.", "", ""], ["Unit_mFeature_37108", "The inferior zraks, whose bodies are filled with corrosive liquids, will launch suicide attacks on enemies.", "Низшие представители жуков, их тела наполнены едкими жидкостями и они будут атаковать своих врагов ценой собственной жизни.", "", ""], ["Unit_mFeature_37110", "Equipped with a giant shield, these stiff skeletons are able to hold off heavy attacks.", "Эти крепкие скелеты с огромными щитами могут сдерживать мощные удары.", "", ""], ["Unit_mFeature_37112", "Produces a Queen Spider when left out of combat for a while. Eliminate it before it hatches.", "Создает королеву пауков, если некоторое время не участвует в бою. Устраните его, пока она не вылупилась.", "", ""], ["Unit_mName_37105", "Poison Mage", "Маг яда", "", ""], ["Unit_mName_37106", "Elite Skeleton Archer", "Элитный скелет-лучник", "", ""], ["Unit_mName_37107", "Small Arachnid", "Маленький арахнид", "", ""], ["Unit_mName_37108", "Suicide", "Самоубийца", "", ""], ["Unit_mName_37110", "Skeletal Giant-Shielder", "Скелет с огромным щитом", "", ""], ["Unit_mName_37112", "Huge Spider Egg", "Огромное паучье яйцо", "", ""], ["Unit_mFeature_16474", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "Существа, рожденные повелевать камнями, неустанно атакуют всех чужаков на своей территории.", "", ""], ["Unit_mFeature_16475", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "Существа, рожденные повелевать камнями, неустанно атакуют всех чужаков на своей территории.", "", ""], ["Unit_mFeature_16481", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "Существа, рожденные повелевать камнями, неустанно атакуют всех чужаков на своей территории.", "", ""], ["Unit_mFeature_16487", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "Существа, рожденные повелевать камнями, неустанно атакуют всех чужаков на своей территории.", "", ""], ["Unit_mFeature_16496", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "Существа, рожденные повелевать камнями, неустанно атакуют всех чужаков на своей территории.", "", ""], ["Unit_mFeature_16497", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "Существа, рожденные повелевать камнями, неустанно атакуют всех чужаков на своей территории.", "", ""], ["Unit_mFeature_18133", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "Существа, рожденные повелевать камнями, неустанно атакуют всех чужаков на своей территории.", "", ""], ["Unit_mFeature_18137", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "Существа, рожденные повелевать камнями, неустанно атакуют всех чужаков на своей территории.", "", ""], ["Unit_mFeature_11127", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "Существа, рожденные повелевать камнями, неустанно атакуют всех чужаков на своей территории.", "", ""], ["Stage_mStageDesc_9042001", "The Nine-Tailed Fox, resurrected by the grievance from the Shang Dynasty, wreaks havoc upon the mortal realm with her illusions. Four supreme arrays must be laid to obliterate its true spirit.\\n\\nFire Realm: Molten lava surges as crimson chains, coiling round her nine tails to scorch demonic bones. The fox’s wails crackle like searing thunder.", "Девятихвостая лиса, воскрешенная недовольством династии Шан, своими иллюзиями сеет хаос в мире смертных. Нужно создать четыре высших строя, чтобы уничтожить ее истинный дух.\\n\\n«Царство огня»: расплавленная лава поднимается как багровые цепи, обвиваясь вокруг девяти хвостов, чтобы испепелить демонические кости. Вопли лисы потрескивают, словно обжигающий гром.", "", ""], ["Item_mItemName_214901", "Shawl of the Lifegiver", "Плат лекаря", "", ""], ["Skill_mSkillSimpleDesc_232170_1", "When the Talent is triggered, increases the hero&#x27;s DMG by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;, with an additional &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt; against Elite and Boss units for &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}&lt;/color&gt; sec.", "При активации таланта увеличивает УРН героя на &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt; с доп. &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt; против юнитов элиты и боссов на &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}&lt;/color&gt; сек.", "", ""], ["CommonText_mMessage_25947", "Corresponding Arena Challenge Attack Mode", "Соответствующий режим атаки в испытании арены", "", ""], ["CommonText_mMessage_25948", "Corresponding Arena Challenge Defense Mode", "Соответствующий режим защиты в испытании арены", "", ""], ["Skill_mSkillSimpleDesc_220903_5", "Applies &lt;color=&quot;#28d37c&quot;&gt;[322095]&lt;/color&gt; to &lt;color=&quot;#4A9DF2&quot;&gt;1&lt;/color&gt; ally with the lowest HP percentage in range for &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}&lt;/color&gt; sec.", "Накладывает эффект «&lt;color=&quot;#28d37c&quot;&gt;[322095]&lt;/color&gt;» на &lt;color=&quot;#4A9DF2&quot;&gt;1&lt;/color&gt; союзника с наименьшим процентом ОЗ в пределах дальности на &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}&lt;/color&gt; сек.", "", ""], ["Skill_mSkillSimpleDesc_220903_4", "Applies &lt;color=&quot;#28d37c&quot;&gt;[322094]&lt;/color&gt; to &lt;color=&quot;#4A9DF2&quot;&gt;1&lt;/color&gt; ally with the lowest HP percentage in range for &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}&lt;/color&gt; sec.", "Накладывает эффект «&lt;color=&quot;#28d37c&quot;&gt;[322094]&lt;/color&gt;» на &lt;color=&quot;#4A9DF2&quot;&gt;1&lt;/color&gt; союзника с наименьшим процентом ОЗ в пределах дальности на &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}&lt;/color&gt; сек.", "", ""], ["Skill_mSkillSimpleDesc_220903_3", "Applies &lt;color=&quot;#28d37c&quot;&gt;[322093]&lt;/color&gt; to &lt;color=&quot;#4A9DF2&quot;&gt;1&lt;/color&gt; ally with the lowest HP percentage in range for &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}&lt;/color&gt; sec.", "Накладывает эффект «&lt;color=&quot;#28d37c&quot;&gt;[322093]&lt;/color&gt;» на &lt;color=&quot;#4A9DF2&quot;&gt;1&lt;/color&gt; союзника с наименьшим процентом ОЗ в пределах дальности на &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}&lt;/color&gt; сек.", "", ""], ["Skill_mSkillSimpleDesc_220903_2", "Applies &lt;color=&quot;#28d37c&quot;&gt;[322092]&lt;/color&gt; to &lt;color=&quot;#4A9DF2&quot;&gt;1&lt;/color&gt; ally with the lowest HP percentage in range for &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}&lt;/color&gt; sec.", "Накладывает эффект «&lt;color=&quot;#28d37c&quot;&gt;[322092]&lt;/color&gt;» на &lt;color=&quot;#4A9DF2&quot;&gt;1&lt;/color&gt; союзника с наименьшим процентом ОЗ в пределах дальности на &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}&lt;/color&gt; сек.", "", ""], ["LANG_STRID_notice_NineTailedNightmare", "Nine-Tailed Nightmare Event Intro", "Введение в событие «Девятихвостый кошмар»", "", ""], ["LANG_STRID_push_long9_title_1", "Grimmscale Invasion Launches", "Запуск «Вторжения Мракочешуйчатого»", "", ""], ["LANG_STRID_push_long9_title_2", "Commanders can challenge Sauryan, Wing of Chaos infinitely every day. Rewards are based on the highest total damage dealt in a single challenge attempt.", "Командиры могут бросать вызов Сауриану, Крылу Хаоса, неограниченное количество раз каждый день. Награды зависят от наибольшего суммарного урона, нанесенного за одну попытку испытания.", "", ""], ["LANG_STRID_push_xyx_title_1", "Zombie Invasion Starts!", "Вторжение зомби начинается!", "", ""], ["LANG_STRID_push_xyx_title_2", "Build your hero&#x27;s skills, equip powerful Relics, and battle through waves of monsters to survive!", "Развивайте навыки своего героя, экипируйте мощные реликвии и сражайтесь с волнами монстров, чтобы выжить!", "", ""], ["LANG_STRID_notice_jwhpv", "Event Trailer: Nine-Tailed Nightmare", "Трейлер события: «Девятихвостый кошмар»", "", ""], ["LANG_STRID_push_jwhyy1", "Nine-Tailed Nightmare Is Here!", "«Девятихвостый кошмар» уже здесь!", "", ""], ["LANG_STRID_push_jwhyy2", "The new Legendary heroes Ne Zha and Erlang Shen arrive! Join the events to claim event-exclusive rewards, including Exclusive Artifacts, Summoning Crystals, Avatar, Emote, and more! Plus, Erlang Shen&#x27;s time-limited skin is now available!", "Новые легендарные герои Нэчжа и Эрлан-шэнь прибыли! Участвуйте в событиях и получайте эксклюзивные награды, включая эксклюзивные артефакты, кристаллы призыва, аватар, эмоцию и многое другое! Кроме того, уже доступен временный облик Эрлан-шэня!", "", ""], ["LANG_STRID_notice_NineTailed2", "Nine-Tailed Nightmare Starts!", "Старт «Девятихвостого кошмара»", "", ""], ["LANG_STRID_notice_NineTailed3", "Join the event to obtain event-exclusive rewards, including Exclusive Artifacts, Avatar, Avatar Border, Summoning Crystals, and more!", "Участвуйте в событии и получайте эксклюзивные награды, включая эксклюзивные артефакты, аватар, рамку аватара, кристаллы призыва и многое другое!", "", ""], ["LANG_STRID_push_shardsummon_nezha", "Collect shards to assemble Ne Zha&#x27;s Exclusive Artifact: Fire-Tipped Spear!", "Собирайте осколки, чтобы получить эксклюзивный артефакт Нэчжа «Огненное копье»!", "", ""], ["LANG_STRID_push_shardsummon_sqhcending", "Artifact Shard Assembly Countdown", "Обратный отсчет сбора осколков артефакта", "", ""], ["LANG_STRID_push_shardsummon_nezhaend2", "Last chance to collect shards and assemble Ne Zha&#x27;s Exclusive Artifact: Fire-Tipped Spear! Don&#x27;t miss out!", "Последний шанс собрать осколки и получить эксклюзивный артефакт Нэчжа «Огненное копье»! Не упустите возможность!", "", ""], ["LANG_STRID_notice_CreativeShort", "Creative Short", "Творческий ролик", "", ""], ["LANG_STRID_compete_brief", "After the event starts, Commanders earn League points by participating in the Arena, Guild - Drake&#x27;s Chasm and spending Stamina and can claim Personal Score Rewards. Commanders within the same League compete against each other for ranking rewards. After the event ends, Commanders who have earned points can claim the Basic League Rewards. Members of the League with a higher total score will receive additional Champion League Reward.", "После начала события командиры зарабатывают очки лиги, участвуя на арене, в гильдии – «Драконова падь» и тратя энергию, и могут получить награды за личный результат. Командиры в одной лиге соревнуются друг с другом за награды рейтинга. После окончания события командиры, заработавшие очки, могут получить обычные награды лиги. Члены лиги с более высоким общим результатом получат дополнительную награду лиги-чемпиона.", "", ""], ["LANG_STRID_Anniversary_Discount_Event_Des_01", "Discount Tokens obtained from event quests can be used to randomly discount an item on the event page once. Each item can be discounted up to 3 times.", "Токены скидки, полученные за задания события, можно использовать для случайной скидки на предмет на странице события один раз. На каждый предмет можно получить скидку до 3 раз.", "", ""], ["LANG_STRID_FishingRanking", "&lt;color=#e1e1e1&gt;After the event ends, the top 3 Commanders on the leaderboard will each receive a physical merchandise reward. Contact info will be requested via in-game mail for delivery.&lt;/color&gt;", "&lt;color=#e1e1e1&gt;После окончания события топ-3 командира в таблице лидеров получат физический мерч в качестве награды. Контактная информация для доставки будет запрошена через внутриигровую почту.&lt;/color&gt;", "", ""], ["LANG_STRID_notice_nzgl", "Hero Gameplay: Ne Zha", "Геймплей героя: Нэчжа", "", ""], ["LANG_STRID_notice_yjgl", "Hero Gameplay: Erlang Shen", "Геймплей героя: Эрлан-шэнь", "", ""], ["LANG_STRID_GDP_title_26", "Celestial Season", "Небесный сезон", "", ""], ["LANG_STRID_activity_popup_GDP_htj", "Gold Dragon Pass - Celestial Season", "Пропуск золотого дракона – «Небесный сезон»", "", ""], ["LANG_STRID_CompeteEvent_Rule11", "&lt;color=#e1e1e1&gt;Consume general items to gain points.&lt;/color&gt;", "&lt;color=#e1e1e1&gt;Потратьте обычные предметы, чтобы получить очки.&lt;/color&gt;", "", ""], ["LANG_STRID_CompeteEvent_Rule12", "&lt;color=#e1e1e1&gt;Consume Mythril and Meteorite to gain points.&lt;/color&gt;", "&lt;color=#e1e1e1&gt;Потратьте мифрил и метеорит, чтобы получить очки.&lt;/color&gt;", "", ""], ["LANG_STRID_Moon_Dec_01", "Shadows of Tomorrow", "Тени завтрашнего дня", "", ""], ["LANG_STRID_Anniversary_Discount_Event_Detail", "&lt;color=&quot;#cec2b1&quot;&gt;Discount Event&lt;/color&gt;\\nEach use of a Discount Token will apply a &lt;color=&quot;#28d37c&quot;&gt;random discount&lt;/color&gt; to a random item in the event. Participate in event quests to obtain Discount Tokens. All unused Discount Tokens will be removed after the event ends.\\nPlayers may choose to purchase event items at their original prices without using any Discount Tokens.\\n\\nEach time a Discount Token is used, one item will be randomly selected from the three available in the event interface for a discount. After each discount, the price of the currently selected item will be further reduced. &lt;color=&quot;#28d37c&quot;&gt;Each item reaches its maximum discount after being discounted 3 times&lt;/color&gt;.\\nOnly items that have not reached the maximum discount and have not been purchased can continue to participate in the discount event.", "&lt;color=&quot;#cec2b1&quot;&gt;Событие скидок&lt;/color&gt;\\nКаждое использование токена скидки применит &lt;color=&quot;#28d37c&quot;&gt;случайную скидку&lt;/color&gt; к случайному предмету в событии. Участвуйте в заданиях события, чтобы получить токены скидки. Все неиспользованные токены скидки будут удалены после окончания события.\\nИгроки могут приобрести предметы события по их первоначальной цене без использования токенов скидки.\\n\\nПри каждом использовании токена скидки один предмет будет случайно выбран из трех доступных в интерфейсе события для получения скидки. После каждой скидки цена выбранного в данный момент предмета будет снижаться дальше. &lt;color=&quot;#28d37c&quot;&gt;Каждый предмет достигает максимальной скидки после получения скидки 3 раза&lt;/color&gt;.\\nТолько предметы, которые не достигли максимальной скидки и не были куплены, могут продолжать участвовать в событии скидок.", "", ""]];
+            const formattedData = [["BUFFAttribute_mName_8202044", "DMG Increase", "Повышение УРН", "", ""], ["BUFFAttribute_mName_8202045", "DMG Reduction", "Сниж. УРН", "", ""], ["BUFFAttribute_mTips_322928", "Fire-Tipped Spear ignores {30,num}% of the enemy's DEF. Universe Ring bounces {31,num} extra time(s) and can hit the same target multiple times. Yin-Yang Blade executes common monsters with HP below {32,num}%.", "«Огненное копье» игнорирует {30,num}% ЗАЩ врага. «Кольцо Вселенной» отскакивает доп. {31,num} р. и может несколько раз поразить одну и ту же цель. «Клинок инь-ян» казнит обычных монстров с ОЗ ниже {32,num}%.", "", ""], ["ChampionshipPlan_mChampionshipDesc_833", "Participate in Artifact Material Raid to win trophies and redeem rewards.", "Проходите рейд для материалов артефактов, чтобы собирать трофеи и получать награды.", "", ""], ["ChampionshipPlan_mChampionshipDesc_834", "Level up/star up/promote heroes or upgrade heroes' skills to win trophies and redeem rewards.", "Повышайте ур./кол-во звезд героев, продв. их и улучшайте их навыки, чтобы собирать трофеи и получать награды.", "", ""], ["ChampionshipPlan_mChampionshipDesc_835", "Participate in Gear Raid I to win trophies and redeem rewards.", "Проходите рейд для снаряжения I, чтобы собирать трофеи и получать награды.", "", ""], ["ChampionshipPlan_mChampionshipDesc_836", "Participate in Gear Raid II to win trophies and redeem rewards.", "Проходите рейд для снаряжения II, чтобы собирать трофеи и получать награды.", "", ""], ["ChampionshipPlan_mChampionshipDesc_837", "Summon heroes to win trophies and redeem rewards.", "Призывайте героев, чтобы собирать трофеи и получать награды.", "", ""], ["ChampionshipPlan_mChampionshipDesc_838", "Participate in Artifact Material Raid to win trophies and redeem rewards.", "Проходите рейд для материалов артефактов, чтобы собирать трофеи и получать награды.", "", ""], ["ChampionshipPlan_mChampionshipDesc_839", "Participate in Gear Raid III to win trophies and redeem rewards.", "Проходите рейд для снаряжения III, чтобы собирать трофеи и получать награды.", "", ""], ["ChampionshipPlan_mChampionshipDesc_840", "Level up/star up/promote heroes or upgrade heroes' skills to win trophies and redeem rewards.", "Повышайте ур./кол-во звезд героев, продв. их и улучшайте их навыки, чтобы собирать трофеи и получать награды.", "", ""], ["ChampionshipPlan_mChampionshipDesc_841", "Participate in Gear Raid I to win trophies and redeem rewards.", "Проходите рейд для снаряжения I, чтобы собирать трофеи и получать награды.", "", ""], ["ChampionshipPlan_mChampionshipDesc_842", "Participate in Gear Raid II to win trophies and redeem rewards.", "Проходите рейд для снаряжения II, чтобы собирать трофеи и получать награды.", "", ""], ["ChampionshipPlan_mChampionshipGlobalName_837", "Arrival of Heroes Ultimate Leaderboard", "Супертаблица лидеров «Прибытие героев»", "", ""], ["ChampionshipPlan_mChampionshipName_833", "Mystery of Artifacts", "Тайна артефактов", "", ""], ["ChampionshipPlan_mChampionshipName_834", "Hero Training", "Тренировка героев", "", ""], ["ChampionshipPlan_mChampionshipName_835", "The Lost Legacy", "Потерянное наследие", "", ""], ["ChampionshipPlan_mChampionshipName_836", "Vault in the Sands", "Сокровищница в песках", "", ""], ["ChampionshipPlan_mChampionshipName_837", "Arrival of Heroes", "Прибытие героев", "", ""], ["ChampionshipPlan_mChampionshipName_838", "Mystery of Artifacts", "Тайна артефактов", "", ""], ["ChampionshipPlan_mChampionshipName_839", "Forgotten Palace", "Забытый дворец", "", ""], ["ChampionshipPlan_mChampionshipName_840", "Hero Training", "Тренировка героев", "", ""], ["ChampionshipPlan_mChampionshipName_841", "The Lost Legacy", "Потерянное наследие", "", ""], ["ChampionshipPlan_mChampionshipName_842", "Vault in the Sands", "Сокровищница в песках", "", ""], ["Chapter_mChapterName_4301", "Titanic Ruins - Playtest", "«Руины титанов» – тест героя", "", ""], ["CommonText_mMessage_25116", "Awaken the mystical power within.", "Пробудите мистическую силу внутри.", "", ""], ["CommonText_mMessage_25125", "Take destiny into your own hands.", "Возьмите судьбу в свои руки.", "", ""], ["CommonText_mMessage_25132", "Reveal cards to earn Dragon's Gold by matching the designated patterns.", "Открывайте карты и получайте золото дракона, собирая определенные узоры.", "", ""], ["CommonText_mMessage_25133", "Reveal cards and match 3 identical patterns to earn a <span style=\"color: #fdbe36;\">{num}</span>x reward!", "Открывайте карты и соберите 3 одинаковых узора, чтобы получить x<span style=\"color: #fdbe36;\">{num}</span> награду!", "", ""], ["CommonText_mMessage_25631", "Number:", "Число:", "", ""], ["CommonText_mMessage_25635", "The [?] corresponds to 3 numbers that will be filled into empty slots in sequence—the resulting number will determine the final amount of Dragon's Gold you receive!", "Символы [?] соответствуют 3 числам, которые будут последовательно заполнять пустые слоты. Полученное число определит итоговое количество золота дракона, которое вы получите!", "", ""], ["CommonText_mMessage_25773", "Nine-Tailed Nightmare", "Девятихвостый кошмар", "", ""], ["CommonText_mMessage_25828", "Locked", "Заблок.", "", ""], ["CommonText_mMessage_25829", "Invalid", "Недействительно", "", ""], ["CommonText_mMessage_25830", "New Recruit", "Новый рекрут", "", ""], ["CommonText_mMessage_25846", "Officials", "Должностные лица", "", ""], ["CommonText_mMessage_25847", "Guild War Officials Appointment", "Назначение должностных лиц войны гильдий", "", ""], ["CommonText_mMessage_25848", "Rank", "Ранг", "", ""], ["CommonText_mMessage_25849", "Marshal", "Маршал", "", ""], ["CommonText_mMessage_25850", "Members", "Участники", "", ""], ["CommonText_mMessage_25851", "BP", "БС", "", ""], ["CommonText_mMessage_25852", "Season's Attacks", "Атаки сезона", "", ""], ["CommonText_mMessage_25853", "Actions", "Действия", "", ""], ["CommonText_mMessage_25854", "Appoint", "Назначить", "", ""], ["CommonText_mMessage_25855", "Dismiss", "Сместить", "", ""], ["CommonText_mMessage_25856", "No Access", "Нет доступа", "", ""], ["CommonText_mMessage_25857", "All Marshals gain <span style=\"color: #e37b00;\">{num} extra attack(s) </span> per Guild War round. Only the Guild Leader and Vice Leaders can appoint a Marshal during the preparation phase. If no appointments are made, this position will be automatically assigned based on members' contribution and BP.", "Все маршалы получают <span style=\"color: #e37b00;\">дополнительные атаки ({num})</span> за раунд войны гильдий. Только глава гильдии и заместители главы гильдии могут назначать маршалов во время фазы подготовки. Если назначения не произведены, эта должность будет автоматически распределена на основе вклада и БС участников.", "", ""], ["CommonText_mMessage_25858", "Appointed: {num1}/{num2}", "Назначены: {num1}/{num2}", "", ""], ["CommonText_mMessage_25859", "Appointment successful. Player gains {num} extra attack(s) per round.", "Назначение успешно. Игрок получает дополнительные атаки ({num}) за раунд.", "", ""], ["CommonText_mMessage_25860", "Marshal slots are full. Dismiss one to continue.", "Все слоты для маршалов заняты. Сместите одного, чтобы продолжить.", "", ""], ["CommonText_mMessage_25861", "<span style=\"color: #feab53;\">Are you sure you want to dismiss this player from the Marshal position?</span><br>Each Guild can have up to {num1} Marshals, each gaining {num2} extra attack(s) per round.", "<span style=\"color: #feab53;\">Вы уверены, что хотите снять этого игрока с должности маршала?</span><br>В каждой гильдии может быть до {num1} маршалов, каждый из которых получает несколько ({num2}) доп. атак за раунд.", "", ""], ["CommonText_mMessage_25862", "Marshal dismissed successfully. Please appoint a new one.", "Маршал успешно смещен. Назначьте нового.", "", ""], ["CommonText_mMessage_25863", "Guild War Attempts", "Попытки войны гильдий", "", ""], ["CommonText_mMessage_25931", "Points of the Round", "Очки раунда", "", ""], ["CommonText_mMessage_26080", "Prioritize Guild War team.", "Приоритет команде войны гильдий.", "", ""], ["CommonText_mMessage_26081", "Playtest mode cannot save battle results or auto-fight.", "Режим теста героя не сохраняет результаты битвы и не поддерживает автобитву.", "", ""], ["CommonText_mMessage_60708", "Score Details", "Детали очков", "", ""], ["Difficulty_mDetail_1100001", "Only heroes from <span style=\"color: #e37b00;\">The Nightmare Council, The Star Piercers</span> can challenge this stage.<br>Lord Skills of each Faction can only affect up to <span style=\"color: #fd4540;\">5</span> heroes.", "Только герои из <span style=\"color: #e37b00;\">«Совета кошмара», «Звездных странников»</span> могут бросить вызов этому этапу.<br>Навыки лорда каждой фракции могут действовать максимум на <span style=\"color: #fd4540;\">5</span> героев.", "", ""], ["Difficulty_mDetail_1100003", "Only heroes from <span style=\"color: #e37b00;\">The Infernal Blast, The North Throne</span> can challenge this stage.<br>Lord Skills of each Faction can only affect up to <span style=\"color: #fd4540;\">5</span> heroes.", "Только герои из <span style=\"color: #e37b00;\">«Адского взрыва», «Трона севера»</span> могут бросить вызов этому этапу.<br>Навыки лорда каждой фракции могут действовать максимум на <span style=\"color: #fd4540;\">5</span> героев.", "", ""], ["Difficulty_mDetail_1100004", "Only heroes from <span style=\"color: #e37b00;\">The Esoteria Order, The Chaos Dominion, and The Supreme Arbiters</span> can challenge this stage.<br>Lord Skills of each Faction can only affect up to <span style=\"color: #fd4540;\">5</span> heroes.", "Только герои из <span style=\"color: #e37b00;\">«Ордена таинств», «Доминиона хаоса» и «Верховных судей»</span> могут бросить вызов этому этапу.<br>Навыки лорда каждой фракции могут действовать максимум на <span style=\"color: #fd4540;\">5</span> героев.", "", ""], ["Difficulty_mDetail_1200001", "The following heroes are exempt from map info restrictions.", "Следующие герои не подвержены ограничениям информации по карте.", "", ""], ["Difficulty_mDetail_1200002", "The following heroes are exempt from map info restrictions.", "Следующие герои не подвержены ограничениям информации по карте.", "", ""], ["Difficulty_mDetail_1200003", "The following heroes are exempt from map info restrictions.", "Следующие герои не подвержены ограничениям информации по карте.", "", ""], ["Difficulty_mDetail_1200004", "The following heroes are exempt from map info restrictions.", "Следующие герои не подвержены ограничениям информации по карте.", "", ""], ["Difficulty_mDetail_1300001", "Erlang Shen cannot be deployed in this special stage.", "Эрлан-шэнь не может быть размещен на этом специальном этапе.", "", ""], ["Difficulty_mDetail_32010053", "Mage heroes cannot be included in the team.", "В команду нельзя взять героев-магов.", "", ""], ["Difficulty_mDetail_32010153", "Destroyers gain the Camaraderie skill. When they die, nearby monsters receive an enhancement.", "Разрушители получают навык «Братство». Когда они погибают, ближайшие монстры получают усиление.", "", ""], ["Difficulty_mDetail_32010163", "When the Priest of Thunder appears, he gains Ghost Form for 30 sec.", "При появлении жрец грома получает эффект «Призрачный облик» на 30 сек.", "", ""], ["Difficulty_mDetail_32010364", "Boss enemies restore 1% Max HP per sec, while other enemies restore 5% Max HP per sec.", "Враги-боссы восстанавливают 1% макс. ОЗ в сек., а другие враги восстанавливают 5% макс. ОЗ в сек.", "", ""], ["Difficulty_mDetail_32010476", "Langlyn's Max HP increases by 50%, but cannot be healed.", "Макс. ОЗ Ланглина повышаются на 50%, но его нельзя исцелить.", "", ""], ["Difficulty_mDetail_32010477", "Langlyn's Max HP increases by 75%, but cannot be healed.", "Макс. ОЗ Ланглина повышаются на 75%, но его нельзя исцелить.", "", ""], ["Difficulty_mDetail_32010478", "Langlyn's Max HP increases by 100%, but cannot be healed.", "Макс. ОЗ Ланглина повышаются на 100%, но его нельзя исцелить.", "", ""], ["ExpStageUI_mRaidName_8201006", "COTD-1", "COTD-1", "", ""], ["ExpStageUI_mRaidName_8201007", "COTD-2", "COTD-2", "", ""], ["ExpStageUI_mRaidName_8201008", "COTD-3", "COTD-3", "", ""], ["ExpStageUI_mRaidName_8201009", "COTD-4", "COTD-4", "", ""], ["ExpStageUI_mRaidName_8201010", "COTD-5", "COTD-5", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010153", "Destroyers gain the Camaraderie skill. When a Destroyer dies, nearby Destroyers receive an enhancement.", "Разрушители получают навык «Братство». Когда разрушитель погибает, ближайшие разрушители получают усиление.", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010163", "When the Priest of Thunder appears, he gains Ghost Form for 30 sec.", "При появлении жрец грома получает эффект «Призрачный облик» на 30 сек.", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010364", "Boss enemies restore 1% Max HP per sec, while other enemies restore 5% Max HP per sec.", "Враги-боссы восстанавливают 1% макс. ОЗ в сек., а другие враги восстанавливают 5% макс. ОЗ в сек.", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010476", "Langlyn's Max HP increases by 50%, but cannot be healed.", "Макс. ОЗ Ланглина повышаются на 50%, но его нельзя исцелить.", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010477", "Langlyn's Max HP increases by 75%, but cannot be healed.", "Макс. ОЗ Ланглина повышаются на 75%, но его нельзя исцелить.", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010478", "Langlyn's Max HP increases by 100%, but cannot be healed.", "Макс. ОЗ Ланглина повышаются на 100%, но его нельзя исцелить.", "", ""], ["HeroFactionKingSkill_mName_100441_1", "The Cursed Cult", "Проклятый культ", "", ""], ["HeroFactionKingSkill_mName_100441_2", "The Cursed Cult", "Проклятый культ", "", ""], ["HeroFactionKingSkill_mName_100441_3", "The Cursed Cult", "Проклятый культ", "", ""], ["HeroFactionKingSkill_mName_100441_4", "The Cursed Cult", "Проклятый культ", "", ""], ["HeroFactionKingSkill_mName_100441_5", "The Cursed Cult", "Проклятый культ", "", ""], ["Item_mItemDesc_110", "Purchase to obtain a 30-Day Monthly Card of Diamonds.", "Приобретите, чтобы получить 30-дневную месячную карту: алмазы.", "", ""], ["Item_mItemDesc_111", "Purchase to obtain a 30-Day Monthly Card of Summoning.", "Приобретите, чтобы получить 30-дневную месячную карту: призыв.", "", ""], ["Item_mItemDesc_112", "Purchase to obtain a 30-Day Monthly Card of Stamina.", "Приобретите, чтобы получить 30-дневную месячную карту: энергия.", "", ""], ["Item_mItemDesc_31096", "Select 1 event-exclusive hero to join the event. The selected exclusive hero has an increased drop rate & is guaranteed within 200 summons!", "Выберите 1 эксклюзивного героя события для участия в событии. У выбранного эксклюзивного героя повышен шанс получения, гарантирован в течение 200 призывов!", "", ""], ["Item_mItemDesc_31097", "<span style=\"color: #eadca2;\">Special Summon Offer</span><br><br>Get the necessary materials for Hero Summon", "<span style=\"color: #eadca2;\">Призыв: особое предложение</span><br><br>Получите необходимые материалы для призыва героя", "", ""], ["Item_mItemDesc_3333", "<span style=\"color: #498a40;\">Exclusive avatar border for the Gold Dragon Pass.</span>", "<span style=\"color: #498a40;\">Эксклюзивная рамка аватара пропуска золотого дракона.</span>", "", ""], ["Item_mItemDesc_3519", "Unknown Clue of Erlang Shen. When obtained, it will automatically convert into a random one from Erlang Shen's Clues 1-5.", "Неизвестная подсказка Эрлан-шэня. При получении автоматически преобразуется в случайную подсказку из подсказок Эрлан-шэня 1-5.", "", ""], ["Item_mItemDesc_3521", "Erlang Shen's Clue 2.<br><span style=\"color: #498a40;\">Usage: Consume this item via Fate's Chapters to unlock the corresponding clue.</span>", "Подсказка Эрлан-шэня 2.<br><span style=\"color: #498a40;\">Применение: используется в «Главах судьбы» для разблокировки соответствующей подсказки.</span>", "", ""], ["Item_mItemDesc_3522", "Erlang Shen's Clue 3.<br><span style=\"color: #498a40;\">Usage: Consume this item via Fate's Chapters to unlock the corresponding clue.</span>", "Подсказка Эрлан-шэня 3.<br><span style=\"color: #498a40;\">Применение: используется в «Главах судьбы» для разблокировки соответствующей подсказки.</span>", "", ""], ["Item_mItemDesc_3523", "Erlang Shen's Clue 4.<br><span style=\"color: #498a40;\">Usage: Consume this item via Fate's Chapters to unlock the corresponding clue.</span>", "Подсказка Эрлан-шэня 4.<br><span style=\"color: #498a40;\">Применение: используется в «Главах судьбы» для разблокировки соответствующей подсказки.</span>", "", ""], ["Item_mItemDesc_3524", "Erlang Shen's Clue 5.<br><span style=\"color: #498a40;\">Usage: Consume this item via Fate's Chapters to unlock the corresponding clue.</span>", "Подсказка Эрлан-шэня 5.<br><span style=\"color: #498a40;\">Применение: используйте этот предмет через «Главы судьбы», чтобы разблокировать соответствующую подсказку.</span>", "", ""], ["Item_mItemDesc_35473", "You can obtain the following items:<br>Monthly Card of Diamonds (30-Day)<br>Diamond x500", "Вы можете получить следующие предметы:<br>Месячная карта: алмазы (30 дней)<br>Алмаз x500", "", ""], ["Item_mItemDesc_35474", "You can obtain the following items:<br>Monthly Card of Summoning (30-Day)<br>Rare Summoning Crystal x500", "Вы можете получить следующие предметы:<br>Месячная карта: призыв (30 дней)<br>Редкий кристалл призыва x500", "", ""], ["Item_mItemDesc_35475", "You can obtain the following items:<br>Monthly Card of Stamina (30-Day)<br>Stamina x600<br>Auto-Fight Chance x30", "Вы можете получить следующие предметы:<br>Месячная карта: энергия (30 дней)<br>Энергия x600<br>Попытка автобитвы x30", "", ""], ["Item_mItemDesc_56310", "Grants a random <span style=\"color: #498a40;\">Lvl. 2-4</span> Trial Keystone.", "Дает случайный ключ испытаний <span style=\"color: #498a40;\">ур. 2-4</span>.", "", ""], ["Item_mItemDesc_56311", "Grants a random <span style=\"color: #498a40;\">Lvl. 2-5</span> Trial Keystone.", "Дает случайный ключ испытаний <span style=\"color: #498a40;\">ур. 2-5</span>.", "", ""], ["Item_mItemName_110", "Monthly Card of Diamonds (30-Day)", "Месячная карта: алмазы (30 дней)", "", ""], ["Item_mItemName_111", "Monthly Card of Summoning (30-Day)", "Месячная карта: призыв (30 дней)", "", ""], ["Item_mItemName_112", "Monthly Card of Stamina (30-Day)", "Месячная карта: энергия (30 дней)", "", ""], ["Item_mItemName_31096", "Exclusive Lucky Pick", "Эксклюзивный удачный выбор", "", ""], ["Item_mItemName_31097", "Turbo Summon Bundle", "Набор ускорения призыва", "", ""], ["Item_mItemName_3324", "Avatar Border: Nine-Tailed Nightmare Ranking Champion", "Рамка аватара: чемпион рейтинга «Девятихвостый кошмар»", "", ""], ["Item_mItemName_3325", "Avatar Border: Nine-Tailed Nightmare Ranking Runner-Up", "Рамка аватара: 2-е место рейтинга «Девятихвостый кошмар»", "", ""], ["Item_mItemName_3326", "Avatar Border: Nine-Tailed Nightmare Ranking Third Place", "Рамка аватара: 3-е место в рейтинге «Девятихвостый кошмар»", "", ""], ["Item_mItemName_3333", "Avatar Border: Gold Dragon Pass", "Рамка аватара: пропуск золотого дракона", "", ""], ["Item_mItemName_35473", "Monthly Card of Diamonds", "Месячная карта: алмазы", "", ""], ["Item_mItemName_35474", "Monthly Card of Summoning", "Месячная карта: призыв", "", ""], ["Item_mItemName_35475", "Monthly Card of Stamina", "Месячная карта: энергия", "", ""], ["Item_mItemName_56310", "Random Trial Keystone (Lvl. 2-4)", "Случайный ключ испытаний (ур. 2-4)", "", ""], ["Item_mItemName_56311", "Random Trial Keystone (Lvl. 2-5)", "Случайный ключ испытаний (ур. 2-5)", "", ""], ["Quest_mQuestTitle_380034", "Obtain a total of 100 Dragon's Gold.", "Получите 100 золота дракона в сумме.", "", ""], ["Quest_mQuestTitle_380035", "Obtain a total of 200 Dragon's Gold.", "Получите 200 золота дракона в сумме.", "", ""], ["Quest_mQuestTitle_380036", "Obtain a total of 300 Dragon's Gold.", "Получите 300 золота дракона в сумме.", "", ""], ["Quest_mQuestTitle_380037", "Obtain a total of 500 Dragon's Gold.", "Получите 500 золота дракона в сумме.", "", ""], ["Quest_mQuestTitle_380038", "Obtain a total of 800 Dragon's Gold.", "Получите 800 золота дракона в сумме.", "", ""], ["Quest_mQuestTitle_380039", "Obtain a total of 1,000 Dragon's Gold.", "Получите 1000 золота дракона в сумме.", "", ""], ["Quest_mQuestTitle_380040", "Obtain a total of 1,500 Dragon's Gold.", "Получите 1500 золота дракона в сумме.", "", ""], ["Quest_mQuestTitle_380041", "Obtain a total of 2,000 Dragon's Gold.", "Получите 2000 золота дракона в сумме.", "", ""], ["Quest_mQuestTitle_380042", "Obtain a total of 3,000 Dragon's Gold.", "Получите 3000 золота дракона в сумме.", "", ""], ["Quest_mQuestTitle_380043", "Obtain a total of 4,000 Dragon's Gold.", "Получите 4000 золота дракона в сумме.", "", ""], ["Quest_mQuestTitle_380044", "Obtain a total of 5,000 Dragon's Gold.", "Получите 5000 золота дракона в сумме.", "", ""], ["RoleHeadFrame_mSourceDesc_84", "Awarded to the Commander who ranks first on the Points Leaderboard in the Echoes of Woe during the Nine-Tailed Nightmare.", "Вручается командиру, занявшему первое место в таблице лидеров по очкам «Эха скорби» во время события «Девятихвостый кошмар».", "", ""], ["RoleHeadFrame_mSourceDesc_85", "Awarded to the Commander who ranks second on the Points Leaderboard in the Echoes of Woe during the Nine-Tailed Nightmare.", "Вручается командиру, занявшему второе место в таблице лидеров по очкам «Эха скорби» во время события «Девятихвостый кошмар».", "", ""], ["RoleHeadFrame_mSourceDesc_86", "Awarded to the Commander who ranks third on the Points Leaderboard in the Echoes of Woe during the Nine-Tailed Nightmare.", "Вручается командиру, занявшему третье место в таблице лидеров по очкам «Эха скорби» во время события «Девятихвостый кошмар».", "", ""], ["RoleHeadFrame_mSourceDesc_89", "Guild War S10 \"Overlord\" exclusive avatar border.", "Эксклюзивная рамка аватара 10-го сезона войны гильдий «Повелитель».", "", ""], ["RoleHeadFrame_mSourceDesc_91", "Obtained from Gold Dragon Pass.", "Можно получить в пропуске золотого дракона.", "", ""], ["RollDiceBuilding_mName_11_1", "Turn of Luck", "Поворот судьбы", "", ""], ["RollDiceBuilding_mName_12_1", "Turn of Luck", "Поворот судьбы", "", ""], ["Skill_mSkillDesc_1908301_1", "Swings claws, dealing DMG to all heroes within 1 tile ahead.", "Размахивает когтями, нанося УРН всем героям в пределах 1 плитки впереди.", "", ""], ["Skill_mSkillDesc_1908304_1", "Swings claws, dealing DMG to all heroes within 1 tile ahead.", "Размахивает когтями, нанося УРН всем героям в пределах 1 плитки впереди.", "", ""], ["Skill_mSkillDesc_1908315_1", "When the Nine-Tailed Fox takes fatal DMG, she flees the battlefield and activates the tails on the field to attack. When the tails are defeated, the Nine-Tailed Fox returns to the battlefield. After all tails on the field are defeated, the Nine-Tailed Fox transforms and summons a large number of foxes.", "Когда девятихвостая лиса получает смертельный УРН, она покидает поле боя и активирует хвосты на поле для атаки. Когда хвосты побеждены, девятихвостая лиса возвращается на поле боя. После того как все хвосты на поле побеждены, девятихвостая лиса трансформируется и призывает большое количество лис.", "", ""], ["Skill_mSkillDesc_1908345_1", "Deals M. DMG to the last deployed unit on the battlefield, prioritizing Defenders.", "Наносит маг. УРН последнему размещенному юниту на поле боя, отдавая приоритет защитникам.", "", ""], ["Skill_mSkillDesc_1908357_1", "Deals M. DMG to the last deployed unit on the battlefield, prioritizing Defenders.", "Наносит маг. УРН последнему размещенному юниту на поле боя, отдавая приоритет защитникам.", "", ""], ["Skill_mSkillDesc_803803_1", "Immune to all <span style=\"color: #4A9DF2;\">CC Effects</span> (except Slow).", "Невосприимчивость ко всем <span style=\"color: #4A9DF2;\">эффектам масс. контроля</span> (кроме «Замедления»).", "", ""], ["Skill_mSkillDesc_8202053_1", "Reduces the Redeployment Time of allied heroes by <span style=\"color: #4A9DF2;\">{sk1}%</span>, but increases their Deployment Cost by <span style=\"color: #4A9DF2;\">+{sk2}</span>.", "Сокращает время повторного размещения союзных героев на <span style=\"color: #4A9DF2;\">{sk1}%</span>, но повышает их стоимость размещения на <span style=\"color: #4A9DF2;\">+{sk2}</span>.", "", ""], ["Skill_mSkillDesc_8202084_1", "Increases allied heroes' DMG by <span style=\"color: #4A9DF2;\">{sk1}%</span> each round and reduces Basic ATK interval by <span style=\"color: #4A9DF2;\">{sk1}%</span>. Vulnerability (P. DMG) and Vulnerability (M. DMG) increase by <span style=\"color: #4A9DF2;\">{sk2}%</span> each round.", "Повышает УРН союзных героев на <span style=\"color: #4A9DF2;\">{sk1}%</span> каждый раунд и сокращает интервал базовой АТК на <span style=\"color: #4A9DF2;\">{sk1}%</span>. Эффекты «Уязвимость (физ. УРН)» и «Уязвимость (маг. УРН)» повышаются на <span style=\"color: #4A9DF2;\">{sk2}%</span> каждый раунд.", "", ""], ["Skill_mSkillDesc_8202103_1", "Allied Hero Deployment Limit +<span style=\"color: #4A9DF2;\">{sk1}</span>", "Лимит размещения союзных героев +<span style=\"color: #4A9DF2;\">{sk1}</span>", "", ""], ["Skill_mSkillName_1033701_1", "Accelerated Incubation", "Ускоренное создание", "", ""], ["Skill_mSkillName_3991865_1", "High Quality", "Высокое качество", "", ""], ["Skill_mSkillName_803610_1", "Freeze", "Заморозка", "", ""], ["Skill_mSkillName_803801_1", "Frostbite Strike", "Морозный удар", "", ""], ["Skill_mSkillName_803803_1", "Control Immunity", "Невосприимчивость к контролю", "", ""], ["Skill_mSkillName_804001_1", "Frostbite Rupture", "Морозный разрыв", "", ""], ["Skill_mSkillName_8202053_1", "Time VS Money", "Время против денег", "", ""], ["Skill_mSkillName_8202084_1", "Heating Up", "Разогрев", "", ""], ["Skill_mSkillName_8202103_1", "Rigged Arena", "Подстроенная арена", "", ""], ["Skill_mSkillSimpleDesc_11015501_1", "Increases ATK by <span style=\"color: #4A9DF2;\">{skm1}%</span>, and reduces the number of attacks required to trigger Nature's Fury enhanced attack by <span style=\"color: #4A9DF2;\">{skm2}</span>. When in Berserker Stance, Basic ATK restores <span style=\"color: #4A9DF2;\">{skm3}%</span> Max HP, and triggering Ground Stomp restores <span style=\"color: #4A9DF2;\">{skm4}%</span> Max HP.", "Повышает АТК на <span style=\"color: #4A9DF2;\">{skm1}%</span> и на <span style=\"color: #4A9DF2;\">{skm2}</span> уменьшает количество атак, необходимых для активации усиленной атаки «Ярости природы». В стойке берсерка базовая АТК восстанавливает <span style=\"color: #4A9DF2;\">{skm3}%</span> макс. ОЗ, а активация «Удара по земле» восстанавливает <span style=\"color: #4A9DF2;\">{skm4}%</span> макс. ОЗ.", "", ""], ["Skill_mSkillSimpleDesc_11015501_2", "Increases ATK by <span style=\"color: #4A9DF2;\">{skm1}%</span>, and reduces the number of attacks required to trigger Nature's Fury enhanced attack by <span style=\"color: #4A9DF2;\">{skm2}</span>. When in Berserker Stance, Basic ATK restores <span style=\"color: #4A9DF2;\">{skm3}%</span> Max HP, and triggering Ground Stomp restores <span style=\"color: #4A9DF2;\">{skm4}%</span> Max HP.", "Повышает АТК на <span style=\"color: #4A9DF2;\">{skm1}%</span> и на <span style=\"color: #4A9DF2;\">{skm2}</span> уменьшает количество атак, необходимых для активации усиленной атаки «Ярости природы». В стойке берсерка базовая АТК восстанавливает <span style=\"color: #4A9DF2;\">{skm3}%</span> макс. ОЗ, а активация «Удара по земле» восстанавливает <span style=\"color: #4A9DF2;\">{skm4}%</span> макс. ОЗ.", "", ""], ["Skill_mSkillSimpleDesc_11015501_3", "Increases ATK by <span style=\"color: #4A9DF2;\">{skm1}%</span>, and reduces the number of attacks required to trigger Nature's Fury enhanced attack by <span style=\"color: #4A9DF2;\">{skm2}</span>. When in Berserker Stance, Basic ATK restores <span style=\"color: #4A9DF2;\">{skm3}%</span> Max HP, and triggering Ground Stomp restores <span style=\"color: #4A9DF2;\">{skm4}%</span> Max HP.", "Повышает АТК на <span style=\"color: #4A9DF2;\">{skm1}%</span> и на <span style=\"color: #4A9DF2;\">{skm2}</span> уменьшает количество атак, необходимых для активации усиленной атаки «Ярости природы». В стойке берсерка базовая АТК восстанавливает <span style=\"color: #4A9DF2;\">{skm3}%</span> макс. ОЗ, а активация «Удара по земле» восстанавливает <span style=\"color: #4A9DF2;\">{skm4}%</span> макс. ОЗ.", "", ""], ["Skill_mSkillSimpleDesc_11015501_4", "Increases ATK by <span style=\"color: #4A9DF2;\">{skm1}%</span>, and reduces the number of attacks required to trigger Nature's Fury enhanced attack by <span style=\"color: #4A9DF2;\">{skm2}</span>. When in Berserker Stance, Basic ATK restores <span style=\"color: #4A9DF2;\">{skm3}%</span> Max HP, and triggering Ground Stomp restores <span style=\"color: #4A9DF2;\">{skm4}%</span> Max HP.", "Повышает АТК на <span style=\"color: #4A9DF2;\">{skm1}%</span> и на <span style=\"color: #4A9DF2;\">{skm2}</span> уменьшает количество атак, необходимых для активации усиленной атаки «Ярости природы». В стойке берсерка базовая АТК восстанавливает <span style=\"color: #4A9DF2;\">{skm3}%</span> макс. ОЗ, а активация «Удара по земле» восстанавливает <span style=\"color: #4A9DF2;\">{skm4}%</span> макс. ОЗ.", "", ""], ["Skill_mSkillSimpleDesc_11015501_5", "Increases ATK by <span style=\"color: #4A9DF2;\">{skm1}%</span>, and reduces the number of attacks required to trigger Nature's Fury enhanced attack by <span style=\"color: #4A9DF2;\">{skm2}</span>. When in Berserker Stance, Basic ATK restores <span style=\"color: #4A9DF2;\">{skm3}%</span> Max HP, and triggering Ground Stomp restores <span style=\"color: #4A9DF2;\">{skm4}%</span> Max HP.", "Повышает АТК на <span style=\"color: #4A9DF2;\">{skm1}%</span> и на <span style=\"color: #4A9DF2;\">{skm2}</span> уменьшает количество атак, необходимых для активации усиленной атаки «Ярости природы». В стойке берсерка базовая АТК восстанавливает <span style=\"color: #4A9DF2;\">{skm3}%</span> макс. ОЗ, а активация «Удара по земле» восстанавливает <span style=\"color: #4A9DF2;\">{skm4}%</span> макс. ОЗ.", "", ""], ["Skill_mSkillSimpleDesc_11015501_6", "Increases ATK by <span style=\"color: #4A9DF2;\">{skm1}%</span>, and reduces the number of attacks required to trigger Nature's Fury enhanced attack by <span style=\"color: #4A9DF2;\">{skm2}</span>. When in Berserker Stance, Basic ATK restores <span style=\"color: #4A9DF2;\">{skm3}%</span> Max HP, and triggering Ground Stomp restores <span style=\"color: #4A9DF2;\">{skm4}%</span> Max HP.", "Повышает АТК на <span style=\"color: #4A9DF2;\">{skm1}%</span> и на <span style=\"color: #4A9DF2;\">{skm2}</span> уменьшает количество атак, необходимых для активации усиленной атаки «Ярости природы». В стойке берсерка базовая АТК восстанавливает <span style=\"color: #4A9DF2;\">{skm3}%</span> макс. ОЗ, а активация «Удара по земле» восстанавливает <span style=\"color: #4A9DF2;\">{skm4}%</span> макс. ОЗ.", "", ""], ["Skill_mSkillSimpleDesc_13000441_1", "Increases faction team members' basic attributes by <span style=\"color: #4A9DF2;\">{skm1}%</span>.<br>Increases faction team members' DMG dealt to enemies inflicted with Slow, Stun, Freeze, Immobilized State, and other CC Effects by <span style=\"color: #4A9DF2;\">{skm2}%</span>. <br>Increases faction team members' DMG by <span style=\"color: #4A9DF2;\">{skm3}%</span>. When the Lord is on the battlefield and an allied summon dies, increases all faction team members' DMG by an additional <span style=\"color: #4A9DF2;\">{skm4}%</span> for <span style=\"color: #4A9DF2;\">{skm5}</span> sec, stacking up to <span style=\"color: #4A9DF2;\">{skm6}</span> time(s).", "Повышает базовые характеристики представителей фракции в команде на <span style=\"color: #4A9DF2;\">{skm1}%</span>.<br>Повышает УРН представителей фракции в команде, наносимый врагам под воздействием эффектов «Замедления», «Оглушения», «Заморозки», «Состояния обездвиживания» и других эффектов масс. контроля, на <span style=\"color: #4A9DF2;\">{skm2}%</span>. <br>Повышает УРН представителей фракции в команде на <span style=\"color: #4A9DF2;\">{skm3}%</span>. Когда лорд находится на поле боя и союзное призванное существо погибает, повышает УРН всех представителей фракции в команде дополнительно на <span style=\"color: #4A9DF2;\">{skm4}%</span> на <span style=\"color: #4A9DF2;\">{skm5}</span> сек. Складывается до <span style=\"color: #4A9DF2;\">{skm6}</span> р.", "", ""], ["Skill_mSkillSimpleDesc_13000441_2", "Increases faction team members' basic attributes by <span style=\"color: #4A9DF2;\">{skm1}%</span>.<br>Increases faction team members' DMG dealt to enemies inflicted with Slow, Stun, Freeze, Immobilized State, and other CC Effects by <span style=\"color: #4A9DF2;\">{skm2}%</span>. <br>Increases faction team members' DMG by <span style=\"color: #4A9DF2;\">{skm3}%</span>. When the Lord is on the battlefield and an allied summon dies, increases all faction team members' DMG by an additional <span style=\"color: #4A9DF2;\">{skm4}%</span> for <span style=\"color: #4A9DF2;\">{skm5}</span> sec, stacking up to <span style=\"color: #4A9DF2;\">{skm6}</span> time(s).", "Повышает базовые характеристики представителей фракции в команде на <span style=\"color: #4A9DF2;\">{skm1}%</span>.<br>Повышает УРН представителей фракции в команде, наносимый врагам под воздействием эффектов «Замедления», «Оглушения», «Заморозки», «Состояния обездвиживания» и других эффектов масс. контроля, на <span style=\"color: #4A9DF2;\">{skm2}%</span>. <br>Повышает УРН представителей фракции в команде на <span style=\"color: #4A9DF2;\">{skm3}%</span>. Когда лорд находится на поле боя и союзное призванное существо погибает, повышает УРН всех представителей фракции в команде дополнительно на <span style=\"color: #4A9DF2;\">{skm4}%</span> на <span style=\"color: #4A9DF2;\">{skm5}</span> сек. Складывается до <span style=\"color: #4A9DF2;\">{skm6}</span> р.", "", ""], ["Skill_mSkillSimpleDesc_13000441_3", "Increases faction team members' basic attributes by <span style=\"color: #4A9DF2;\">{skm1}%</span>.<br>Increases faction team members' DMG dealt to enemies inflicted with Slow, Stun, Freeze, Immobilized State, and other CC Effects by <span style=\"color: #4A9DF2;\">{skm2}%</span>. <br>Increases faction team members' DMG by <span style=\"color: #4A9DF2;\">{skm3}%</span>. When the Lord is on the battlefield and an allied summon dies, increases all faction team members' DMG by an additional <span style=\"color: #4A9DF2;\">{skm4}%</span> for <span style=\"color: #4A9DF2;\">{skm5}</span> sec, stacking up to <span style=\"color: #4A9DF2;\">{skm6}</span> time(s).", "Повышает базовые характеристики представителей фракции в команде на <span style=\"color: #4A9DF2;\">{skm1}%</span>.<br>Повышает УРН представителей фракции в команде, наносимый врагам под воздействием эффектов «Замедления», «Оглушения», «Заморозки», «Состояния обездвиживания» и других эффектов масс. контроля, на <span style=\"color: #4A9DF2;\">{skm2}%</span>. <br>Повышает УРН представителей фракции в команде на <span style=\"color: #4A9DF2;\">{skm3}%</span>. Когда лорд находится на поле боя и союзное призванное существо погибает, повышает УРН всех представителей фракции в команде дополнительно на <span style=\"color: #4A9DF2;\">{skm4}%</span> на <span style=\"color: #4A9DF2;\">{skm5}</span> сек. Складывается до <span style=\"color: #4A9DF2;\">{skm6}</span> р.", "", ""], ["Skill_mSkillSimpleDesc_13000441_4", "Increases faction team members' basic attributes by <span style=\"color: #4A9DF2;\">{skm1}%</span>.<br>Increases faction team members' DMG dealt to enemies inflicted with Slow, Stun, Freeze, Immobilized State, and other CC Effects by <span style=\"color: #4A9DF2;\">{skm2}%</span>. <br>Increases faction team members' DMG by <span style=\"color: #4A9DF2;\">{skm3}%</span>. When the Lord is on the battlefield and an allied summon dies, increases all faction team members' DMG by an additional <span style=\"color: #4A9DF2;\">{skm4}%</span> for <span style=\"color: #4A9DF2;\">{skm5}</span> sec, stacking up to <span style=\"color: #4A9DF2;\">{skm6}</span> time(s).", "Повышает базовые характеристики представителей фракции в команде на <span style=\"color: #4A9DF2;\">{skm1}%</span>.<br>Повышает УРН представителей фракции в команде, наносимый врагам под воздействием эффектов «Замедления», «Оглушения», «Заморозки», «Состояния обездвиживания» и других эффектов масс. контроля, на <span style=\"color: #4A9DF2;\">{skm2}%</span>. <br>Повышает УРН представителей фракции в команде на <span style=\"color: #4A9DF2;\">{skm3}%</span>. Когда лорд находится на поле боя и союзное призванное существо погибает, повышает УРН всех представителей фракции в команде дополнительно на <span style=\"color: #4A9DF2;\">{skm4}%</span> на <span style=\"color: #4A9DF2;\">{skm5}</span> сек. Складывается до <span style=\"color: #4A9DF2;\">{skm6}</span> р.", "", ""], ["Skill_mSkillSimpleDesc_13000441_5", "Increases faction team members' basic attributes by <span style=\"color: #4A9DF2;\">{skm1}%</span>.<br>Increases faction team members' DMG dealt to enemies inflicted with Slow, Stun, Freeze, Immobilized State, and other CC Effects by <span style=\"color: #4A9DF2;\">{skm2}%</span>. <br>Increases faction team members' DMG by <span style=\"color: #4A9DF2;\">{skm3}%</span>. When the Lord is on the battlefield and an allied summon dies, increases all faction team members' DMG by an additional <span style=\"color: #4A9DF2;\">{skm4}%</span> for <span style=\"color: #4A9DF2;\">{skm5}</span> sec, stacking up to <span style=\"color: #4A9DF2;\">{skm6}</span> time(s).", "Повышает базовые характеристики представителей фракции в команде на <span style=\"color: #4A9DF2;\">{skm1}%</span>.<br>Повышает УРН представителей фракции в команде, наносимый врагам под воздействием эффектов «Замедления», «Оглушения», «Заморозки», «Состояния обездвиживания» и других эффектов масс. контроля, на <span style=\"color: #4A9DF2;\">{skm2}%</span>. <br>Повышает УРН представителей фракции в команде на <span style=\"color: #4A9DF2;\">{skm3}%</span>. Когда лорд находится на поле боя и союзное призванное существо погибает, повышает УРН всех представителей фракции в команде дополнительно на <span style=\"color: #4A9DF2;\">{skm4}%</span> на <span style=\"color: #4A9DF2;\">{skm5}</span> сек. Складывается до <span style=\"color: #4A9DF2;\">{skm6}</span> р.", "", ""], ["Skill_mSkillSimpleDesc_8202053_1", "Reduces the Redeployment Time of allied heroes by <span style=\"color: #4A9DF2;\">{skm1}%</span>, but increases their Deployment Cost by <span style=\"color: #4A9DF2;\">+{skm2}</span>.", "Сокращает время повторного размещения союзных героев на <span style=\"color: #4A9DF2;\">{skm1}%</span>, но повышает их стоимость размещения на <span style=\"color: #4A9DF2;\">+{skm2}</span>.", "", ""], ["Skill_mSkillSimpleDesc_8202084_1", "Increases allied heroes' DMG by <span style=\"color: #4A9DF2;\">{skm1}%</span> each round and reduces Basic ATK Interval by <span style=\"color: #4A9DF2;\">{skm1}%</span>. Vulnerability (P. DMG) and Vulnerability (M. DMG) increase by <span style=\"color: #4A9DF2;\">{skm2}%</span> each round.", "Повышает УРН союзных героев на <span style=\"color: #4A9DF2;\">{skm1}%</span> каждый раунд и сокращает интервал базовой АТК на <span style=\"color: #4A9DF2;\">{skm1}%</span>. Эффекты «Уязвимость (физ. УРН)» и «Уязвимость (маг. УРН)» повышаются на <span style=\"color: #4A9DF2;\">{skm2}%</span> каждый раунд.", "", ""], ["Skill_mSkillSimpleDesc_8202103_1", "Allied Hero Deployment Limit +<span style=\"color: #4A9DF2;\">{skm1}</span>", "Лимит размещения союзных героев +<span style=\"color: #4A9DF2;\">{skm1}</span>", "", ""], ["Skill_mSkillSimpleDesc_8203031_1", "Hotspot appears on both players' battlefields. Heroes standing on the Hotspot have all attributes increased by 20%.", "Горячая точка появляется на поле боя обоих игроков. У героев, стоящих на горячей точке, все характеристики повышаются на 20%.", "", ""], ["Stage_mStageDesc_5003001", "In this epic battle, you will face an unprecedented enemy - Semrah. Hailing from ancient times, Semrah fights in 3 Battle Modes, each posing a tough challenge.", "В этом эпическом бою вы столкнетесь с невероятным противником – Семрахом. Это древнее существо обладает 3 боевыми режимами, в каждом из которых его будет непросто победить.", "", ""], ["Stage_mStageDesc_5003002", "In this epic battle, you will face an unprecedented enemy - Semrah. Hailing from ancient times, Semrah fights in 3 Battle Modes, each posing a tough challenge.", "В этом эпическом бою вы столкнетесь с невероятным противником – Семрахом. Это древнее существо обладает 3 боевыми режимами, в каждом из которых его будет непросто победить.", "", ""], ["Stage_mStageDesc_8101001", "Starting from Round 5, <span style=\"color: #fd4540;\">all monsters gain Invisibility and become untargetable</span> for 7 sec.", "Начиная с 5-го раунда <span style=\"color: #fd4540;\">все монстры получают эффект «Невидимость», и их нельзя выбрать целью</span>. Эффект действует 7 сек.", "", ""], ["Stage_mStageDesc_8101002", "Starting from Round 5, <span style=\"color: #fd4540;\">all monsters gain Invincibility upon taking DMG for the first time, becoming immune to all DMG</span> for 4 sec.", "Начиная с 5-го раунда <span style=\"color: #fd4540;\">все монстры получают эффект «Неуязвимость», когда получают УРН в первый раз, становясь невосприимчивыми ко всем видам УРН</span>. Эффект действует 4 сек.", "", ""], ["Stage_mStageDesc_8101003", "Starting from Round 5, <span style=\"color: #fd4540;\">all heroes continuously take True DMG equal to 4% of their Max HP per sec</span>.", "Начиная с 5-го раунда <span style=\"color: #fd4540;\">все герои получают реальный УРН в размере 4% их макс. ОЗ каждую секунду</span>.", "", ""], ["Stage_mStageDesc_8201011", "Team up with your friends to defeat the enemy Boss and fend off the tides of enemies.", "Объединитесь в команду с друзьями, чтобы победить вражеского босса и противостоять волнам врагов.", "", ""], ["Stage_mStageDesc_8201012", "Team up with your friends to defeat the enemy Boss and fend off the tides of enemies.", "Объединитесь в команду с друзьями, чтобы победить вражеского босса и противостоять волнам врагов.", "", ""], ["Stage_mStageDesc_8201013", "Team up with your friends to defeat the enemy Boss and fend off the tides of enemies.", "Объединитесь в команду с друзьями, чтобы победить вражеского босса и противостоять волнам врагов.", "", ""], ["Stage_mStageDesc_8201014", "Team up with your friends to defeat the enemy Boss and fend off the tides of enemies.", "Объединитесь в команду с друзьями, чтобы победить вражеского босса и противостоять волнам врагов.", "", ""], ["Stage_mStageDesc_8201015", "Team up with your friends to defeat the enemy Boss and fend off the tides of enemies.", "Объединитесь в команду с друзьями, чтобы победить вражеского босса и противостоять волнам врагов.", "", ""], ["Stage_mStageFailDesc_5003001", "Pay extra attention to Semrah's Battle Mode and exploit its weakness.", "Учитывайте уязвимые места боевого режима, когда Семрах входит в него.", "", ""], ["Stage_mStageFailDesc_5003002", "Pay extra attention to Semrah's Battle Mode and exploit its weakness.", "Учитывайте уязвимые места боевого режима, когда Семрах входит в него.", "", ""], ["Stage_mStageIdDesc_5003001", "Apocalypse I - Playtest", "«Апокалипсис I» – тест героя", "", ""], ["Stage_mStageIdDesc_5003002", "Apocalypse II - Playtest", "«Апокалипсис II» – тест героя", "", ""], ["Stage_mStageIdDesc_8201011", "Stage 1", "Этап 1", "", ""], ["Stage_mStageIdDesc_8201012", "Stage 2", "Этап 2", "", ""], ["Stage_mStageIdDesc_8201013", "Stage 3", "Этап 3", "", ""], ["Stage_mStageIdDesc_8201014", "Stage 4", "Этап 4", "", ""], ["Stage_mStageIdDesc_8201015", "Stage 5", "Этап 5", "", ""], ["Stage_mStageIdDesc_991001", "Test 1-1", "Тест 1-1", "", ""], ["Stage_mStageIdDesc_991002", "Test 1-2", "Тест 1-2", "", ""], ["Stage_mStageIdDesc_991003", "Test 1-3", "Тест 1-3", "", ""], ["Stage_mStageName_5003001", "Semrah", "Семрах", "", ""], ["Stage_mStageName_5003002", "Semrah", "Семрах", "", ""], ["Stage_mStageName_8201011", "Co-op Mode", "Совместный режим", "", ""], ["Stage_mStageName_8201012", "Co-op Mode", "Совместный режим", "", ""], ["Stage_mStageName_8201013", "Co-op Mode", "Совместный режим", "", ""], ["Stage_mStageName_8201014", "Co-op Mode", "Совместный режим", "", ""], ["Stage_mStageName_8201015", "Co-op Mode", "Совместный режим", "", ""], ["UILanguage_mKeyValue_Form_BackpackIntegration_SubTitle", "Sort", "Фильтр", "", ""], ["UILanguage_mKeyValue_Panel_BackpackEquipPanel_EquipedText", "Equipped", "Надето", "", ""], ["UILanguage_mKeyValue_Panel_MaterialPanel_GetWayTitle_Text", "Access", "Перейти", "", ""], ["UILanguage_mKeyValue_Panel_MaterialPanel_Text_Use", "Use", "Использовать", "", ""], ["UnionRaise_mRaiseText_15", "Donate <color=#28d37c>{num}</color> Mythic Extract(s).", "Сделайте взнос: мифическая вытяжка х<color=#28d37c>{num}</color>.", "", ""], ["UnionRaise_mRaiseText_16", "Donate <color=#28d37c>{num}</color> 5-star Psychic Power(s).", "Сделайте взнос: 5-зв. сила медиума х<color=#28d37c>{num}</color>.", "", ""], ["UnionRaise_mRaiseTitle_15", "Promotion Insignia III", "Эмблема продвижения III", "", ""], ["UnionRaise_mRaiseTitle_16", "Hero Star Up", "Повышение звезды героя", "", ""], ["Unit_mDescribe_37105", "Scalekin mages, adept in the art of poisonous magic, possess the ability to <color=#ff4500>inflict poison on enemies</color>.", "Маги чешуйчатых, использующие ядовитую магию, способны <color=#ff4500>отравлять врагов</color>.", "", ""], ["Unit_mDescribe_37106", "Elite Skeleton Archers that can deal massive DMG from afar.", "Элитные скелеты-лучники, наносят огромный УРН издалека.", "", ""], ["Unit_mDescribe_37107", "Small spiders, very aggressive but weak individually.", "Маленькие пауки, очень агрессивные, но слабые поодиночке.", "", ""], ["Unit_mDescribe_37108", "Toxic Suicides will explode when approaching enemies, <color=#ff4500>dealing moderate AoE DMG and poisoning them</color>.", "Отравляющие самоубийцы взрываются рядом с врагами, <color=#ff4500>нанося умеренный масс. урон и отравляя цели</color>.", "", ""], ["Unit_mDescribe_37110", "Clad in giant shields and possessing unyielding skeletal frames, they are renowned for their exceptional DEF.", "Благодаря огромным щитам и прочным скелетным каркасам, они славятся своей исключительной ЗАЩ.", "", ""], ["Unit_mDescribe_37112", "Produces a Queen Spider when left out of combat for a while. Eliminate it before it hatches.", "Создает королеву пауков, если некоторое время не участвует в бою. Устраните его, пока она не вылупилась.", "", ""], ["Unit_mFeature_10408", "Ludwig has been reborn from the abyss. With a horrifying power granted by his master - the Eldritch God. Ludwig has now lost his humanity.", "Благодаря Бездне Людвиг переродился. Преисполнившись мощи, дарованной его господином, Древним Богом, Людвиг полностью утратил человечность.", "", ""], ["Unit_mFeature_10409", "Ludwig has been reborn from the abyss. With a horrifying power granted by his master - the Eldritch God. Ludwig has now lost his humanity.", "Благодаря Бездне Людвиг переродился. Преисполнившись мощи, дарованной его господином, Древним Богом, Людвиг полностью утратил человечность.", "", ""], ["Unit_mFeature_10410", "Ludwig has been reborn from the abyss. With a horrifying power granted by his master - the Eldritch God. Ludwig has now lost his humanity.", "Благодаря Бездне Людвиг переродился. Преисполнившись мощи, дарованной его господином, Древним Богом, Людвиг полностью утратил человечность.", "", ""], ["Unit_mFeature_37105", "Scalekin mages, adept in the art of poisonous magic, possess the ability to inflict continuous Poison DMG on enemies.", "Маги чешуйчатых, использующие ядовитую магию, способны наносить врагам постоянный УРН от яда.", "", ""], ["Unit_mFeature_37106", "Elite Skeleton Archers that can deal massive DMG from afar.", "Элитные скелеты-лучники, наносят огромный УРН издалека.", "", ""], ["Unit_mFeature_37107", "Small spiders, very aggressive but weak individually.", "Маленькие пауки, очень агрессивные, но слабые поодиночке.", "", ""], ["Unit_mFeature_37108", "The inferior zraks, whose bodies are filled with corrosive liquids, will launch suicide attacks on enemies.", "Низшие представители жуков, их тела наполнены едкими жидкостями и они будут атаковать своих врагов ценой собственной жизни.", "", ""], ["Unit_mFeature_37110", "Equipped with a giant shield, these stiff skeletons are able to hold off heavy attacks.", "Эти крепкие скелеты с огромными щитами могут сдерживать мощные удары.", "", ""], ["Unit_mFeature_37112", "Produces a Queen Spider when left out of combat for a while. Eliminate it before it hatches.", "Создает королеву пауков, если некоторое время не участвует в бою. Устраните его, пока она не вылупилась.", "", ""], ["Unit_mName_37105", "Poison Mage", "Маг яда", "", ""], ["Unit_mName_37106", "Elite Skeleton Archer", "Элитный скелет-лучник", "", ""], ["Unit_mName_37107", "Small Arachnid", "Маленький арахнид", "", ""], ["Unit_mName_37108", "Suicide", "Самоубийца", "", ""], ["Unit_mName_37110", "Skeletal Giant-Shielder", "Скелет с огромным щитом", "", ""], ["Unit_mName_37112", "Huge Spider Egg", "Огромное паучье яйцо", "", ""], ["Unit_mFeature_16474", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "Существа, рожденные повелевать камнями, неустанно атакуют всех чужаков на своей территории.", "", ""], ["Unit_mFeature_16475", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "Существа, рожденные повелевать камнями, неустанно атакуют всех чужаков на своей территории.", "", ""], ["Unit_mFeature_16481", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "Существа, рожденные повелевать камнями, неустанно атакуют всех чужаков на своей территории.", "", ""], ["Unit_mFeature_16487", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "Существа, рожденные повелевать камнями, неустанно атакуют всех чужаков на своей территории.", "", ""], ["Unit_mFeature_16496", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "Существа, рожденные повелевать камнями, неустанно атакуют всех чужаков на своей территории.", "", ""], ["Unit_mFeature_16497", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "Существа, рожденные повелевать камнями, неустанно атакуют всех чужаков на своей территории.", "", ""], ["Unit_mFeature_18133", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "Существа, рожденные повелевать камнями, неустанно атакуют всех чужаков на своей территории.", "", ""], ["Unit_mFeature_18137", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "Существа, рожденные повелевать камнями, неустанно атакуют всех чужаков на своей территории.", "", ""], ["Unit_mFeature_11127", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "Существа, рожденные повелевать камнями, неустанно атакуют всех чужаков на своей территории.", "", ""], ["Stage_mStageDesc_9042001", "The Nine-Tailed Fox, resurrected by the grievance from the Shang Dynasty, wreaks havoc upon the mortal realm with her illusions. Four supreme arrays must be laid to obliterate its true spirit.<br><br>Fire Realm: Molten lava surges as crimson chains, coiling round her nine tails to scorch demonic bones. The fox’s wails crackle like searing thunder.", "Девятихвостая лиса, воскрешенная недовольством династии Шан, своими иллюзиями сеет хаос в мире смертных. Нужно создать четыре высших строя, чтобы уничтожить ее истинный дух.<br><br>«Царство огня»: расплавленная лава поднимается как багровые цепи, обвиваясь вокруг девяти хвостов, чтобы испепелить демонические кости. Вопли лисы потрескивают, словно обжигающий гром.", "", ""], ["Item_mItemName_214901", "Shawl of the Lifegiver", "Плат лекаря", "", ""], ["Skill_mSkillSimpleDesc_232170_1", "When the Talent is triggered, increases the hero's DMG by <span style=\"color: #4A9DF2;\">{skm1}%</span>, with an additional <span style=\"color: #4A9DF2;\">{skm2}%</span> against Elite and Boss units for <span style=\"color: #4A9DF2;\">{skm3}</span> sec.", "При активации таланта увеличивает УРН героя на <span style=\"color: #4A9DF2;\">{skm1}%</span> с доп. <span style=\"color: #4A9DF2;\">{skm2}%</span> против юнитов элиты и боссов на <span style=\"color: #4A9DF2;\">{skm3}</span> сек.", "", ""], ["CommonText_mMessage_25947", "Corresponding Arena Challenge Attack Mode", "Соответствующий режим атаки в испытании арены", "", ""], ["CommonText_mMessage_25948", "Corresponding Arena Challenge Defense Mode", "Соответствующий режим защиты в испытании арены", "", ""], ["Skill_mSkillSimpleDesc_220903_5", "Applies <span style=\"color: #28d37c;\">[322095]</span> to <span style=\"color: #4A9DF2;\">1</span> ally with the lowest HP percentage in range for <span style=\"color: #4A9DF2;\">{skm1}</span> sec.", "Накладывает эффект «<span style=\"color: #28d37c;\">[322095]</span>» на <span style=\"color: #4A9DF2;\">1</span> союзника с наименьшим процентом ОЗ в пределах дальности на <span style=\"color: #4A9DF2;\">{skm1}</span> сек.", "", ""], ["Skill_mSkillSimpleDesc_220903_4", "Applies <span style=\"color: #28d37c;\">[322094]</span> to <span style=\"color: #4A9DF2;\">1</span> ally with the lowest HP percentage in range for <span style=\"color: #4A9DF2;\">{skm1}</span> sec.", "Накладывает эффект «<span style=\"color: #28d37c;\">[322094]</span>» на <span style=\"color: #4A9DF2;\">1</span> союзника с наименьшим процентом ОЗ в пределах дальности на <span style=\"color: #4A9DF2;\">{skm1}</span> сек.", "", ""], ["Skill_mSkillSimpleDesc_220903_3", "Applies <span style=\"color: #28d37c;\">[322093]</span> to <span style=\"color: #4A9DF2;\">1</span> ally with the lowest HP percentage in range for <span style=\"color: #4A9DF2;\">{skm1}</span> sec.", "Накладывает эффект «<span style=\"color: #28d37c;\">[322093]</span>» на <span style=\"color: #4A9DF2;\">1</span> союзника с наименьшим процентом ОЗ в пределах дальности на <span style=\"color: #4A9DF2;\">{skm1}</span> сек.", "", ""], ["Skill_mSkillSimpleDesc_220903_2", "Applies <span style=\"color: #28d37c;\">[322092]</span> to <span style=\"color: #4A9DF2;\">1</span> ally with the lowest HP percentage in range for <span style=\"color: #4A9DF2;\">{skm1}</span> sec.", "Накладывает эффект «<span style=\"color: #28d37c;\">[322092]</span>» на <span style=\"color: #4A9DF2;\">1</span> союзника с наименьшим процентом ОЗ в пределах дальности на <span style=\"color: #4A9DF2;\">{skm1}</span> сек.", "", ""], ["LANG_STRID_notice_NineTailedNightmare", "Nine-Tailed Nightmare Event Intro", "Введение в событие «Девятихвостый кошмар»", "", ""], ["LANG_STRID_push_long9_title_1", "Grimmscale Invasion Launches", "Запуск «Вторжения Мракочешуйчатого»", "", ""], ["LANG_STRID_push_long9_title_2", "Commanders can challenge Sauryan, Wing of Chaos infinitely every day. Rewards are based on the highest total damage dealt in a single challenge attempt.", "Командиры могут бросать вызов Сауриану, Крылу Хаоса, неограниченное количество раз каждый день. Награды зависят от наибольшего суммарного урона, нанесенного за одну попытку испытания.", "", ""], ["LANG_STRID_push_xyx_title_1", "Zombie Invasion Starts!", "Вторжение зомби начинается!", "", ""], ["LANG_STRID_push_xyx_title_2", "Build your hero's skills, equip powerful Relics, and battle through waves of monsters to survive!", "Развивайте навыки своего героя, экипируйте мощные реликвии и сражайтесь с волнами монстров, чтобы выжить!", "", ""], ["LANG_STRID_notice_jwhpv", "Event Trailer: Nine-Tailed Nightmare", "Трейлер события: «Девятихвостый кошмар»", "", ""], ["LANG_STRID_push_jwhyy1", "Nine-Tailed Nightmare Is Here!", "«Девятихвостый кошмар» уже здесь!", "", ""], ["LANG_STRID_push_jwhyy2", "The new Legendary heroes Ne Zha and Erlang Shen arrive! Join the events to claim event-exclusive rewards, including Exclusive Artifacts, Summoning Crystals, Avatar, Emote, and more! Plus, Erlang Shen's time-limited skin is now available!", "Новые легендарные герои Нэчжа и Эрлан-шэнь прибыли! Участвуйте в событиях и получайте эксклюзивные награды, включая эксклюзивные артефакты, кристаллы призыва, аватар, эмоцию и многое другое! Кроме того, уже доступен временный облик Эрлан-шэня!", "", ""], ["LANG_STRID_notice_NineTailed2", "Nine-Tailed Nightmare Starts!", "Старт «Девятихвостого кошмара»", "", ""], ["LANG_STRID_notice_NineTailed3", "Join the event to obtain event-exclusive rewards, including Exclusive Artifacts, Avatar, Avatar Border, Summoning Crystals, and more!", "Участвуйте в событии и получайте эксклюзивные награды, включая эксклюзивные артефакты, аватар, рамку аватара, кристаллы призыва и многое другое!", "", ""], ["LANG_STRID_push_shardsummon_nezha", "Collect shards to assemble Ne Zha's Exclusive Artifact: Fire-Tipped Spear!", "Собирайте осколки, чтобы получить эксклюзивный артефакт Нэчжа «Огненное копье»!", "", ""], ["LANG_STRID_push_shardsummon_sqhcending", "Artifact Shard Assembly Countdown", "Обратный отсчет сбора осколков артефакта", "", ""], ["LANG_STRID_push_shardsummon_nezhaend2", "Last chance to collect shards and assemble Ne Zha's Exclusive Artifact: Fire-Tipped Spear! Don't miss out!", "Последний шанс собрать осколки и получить эксклюзивный артефакт Нэчжа «Огненное копье»! Не упустите возможность!", "", ""], ["LANG_STRID_notice_CreativeShort", "Creative Short", "Творческий ролик", "", ""], ["LANG_STRID_compete_brief", "After the event starts, Commanders earn League points by participating in the Arena, Guild - Drake's Chasm and spending Stamina and can claim Personal Score Rewards. Commanders within the same League compete against each other for ranking rewards. After the event ends, Commanders who have earned points can claim the Basic League Rewards. Members of the League with a higher total score will receive additional Champion League Reward.", "После начала события командиры зарабатывают очки лиги, участвуя на арене, в гильдии – «Драконова падь» и тратя энергию, и могут получить награды за личный результат. Командиры в одной лиге соревнуются друг с другом за награды рейтинга. После окончания события командиры, заработавшие очки, могут получить обычные награды лиги. Члены лиги с более высоким общим результатом получат дополнительную награду лиги-чемпиона.", "", ""], ["LANG_STRID_Anniversary_Discount_Event_Des_01", "Discount Tokens obtained from event quests can be used to randomly discount an item on the event page once. Each item can be discounted up to 3 times.", "Токены скидки, полученные за задания события, можно использовать для случайной скидки на предмет на странице события один раз. На каждый предмет можно получить скидку до 3 раз.", "", ""], ["LANG_STRID_FishingRanking", "<color=#e1e1e1>After the event ends, the top 3 Commanders on the leaderboard will each receive a physical merchandise reward. Contact info will be requested via in-game mail for delivery.</color>", "<color=#e1e1e1>После окончания события топ-3 командира в таблице лидеров получат физический мерч в качестве награды. Контактная информация для доставки будет запрошена через внутриигровую почту.</color>", "", ""], ["LANG_STRID_notice_nzgl", "Hero Gameplay: Ne Zha", "Геймплей героя: Нэчжа", "", ""], ["LANG_STRID_notice_yjgl", "Hero Gameplay: Erlang Shen", "Геймплей героя: Эрлан-шэнь", "", ""], ["LANG_STRID_GDP_title_26", "Celestial Season", "Небесный сезон", "", ""], ["LANG_STRID_activity_popup_GDP_htj", "Gold Dragon Pass - Celestial Season", "Пропуск золотого дракона – «Небесный сезон»", "", ""], ["LANG_STRID_CompeteEvent_Rule11", "<color=#e1e1e1>Consume general items to gain points.</color>", "<color=#e1e1e1>Потратьте обычные предметы, чтобы получить очки.</color>", "", ""], ["LANG_STRID_CompeteEvent_Rule12", "<color=#e1e1e1>Consume Mythril and Meteorite to gain points.</color>", "<color=#e1e1e1>Потратьте мифрил и метеорит, чтобы получить очки.</color>", "", ""], ["LANG_STRID_Moon_Dec_01", "Shadows of Tomorrow", "Тени завтрашнего дня", "", ""], ["LANG_STRID_Anniversary_Discount_Event_Detail", "<span style=\"color: #cec2b1;\">Discount Event</span><br>Each use of a Discount Token will apply a <span style=\"color: #28d37c;\">random discount</span> to a random item in the event. Participate in event quests to obtain Discount Tokens. All unused Discount Tokens will be removed after the event ends.<br>Players may choose to purchase event items at their original prices without using any Discount Tokens.<br><br>Each time a Discount Token is used, one item will be randomly selected from the three available in the event interface for a discount. After each discount, the price of the currently selected item will be further reduced. <span style=\"color: #28d37c;\">Each item reaches its maximum discount after being discounted 3 times</span>.<br>Only items that have not reached the maximum discount and have not been purchased can continue to participate in the discount event.", "<span style=\"color: #cec2b1;\">Событие скидок</span><br>Каждое использование токена скидки применит <span style=\"color: #28d37c;\">случайную скидку</span> к случайному предмету в событии. Участвуйте в заданиях события, чтобы получить токены скидки. Все неиспользованные токены скидки будут удалены после окончания события.<br>Игроки могут приобрести предметы события по их первоначальной цене без использования токенов скидки.<br><br>При каждом использовании токена скидки один предмет будет случайно выбран из трех доступных в интерфейсе события для получения скидки. После каждой скидки цена выбранного в данный момент предмета будет снижаться дальше. <span style=\"color: #28d37c;\">Каждый предмет достигает максимальной скидки после получения скидки 3 раза</span>.<br>Только предметы, которые не достигли максимальной скидки и не были куплены, могут продолжать участвовать в событии скидок.", "", ""]];
+            let showingRaw = false;
+            let tableData = formattedData;
+            let dataTable;
+        
+            function getStateKey(index) {
+                return "state_StringZ Visualizer - Russian_row_" + index; 
+            }
+            
+            function getNotesKey(index) {
+                return "notes_StringZ Visualizer - Russian_row_" + index;
+            }
+        
+            function generateRowWithState(row, idx) {
+                const savedState = localStorage.getItem(getStateKey(idx)) || "";
+                const savedNotes = localStorage.getItem(getNotesKey(idx)) || "";
+                
+                const selectHTML = '<select class="state-select ' + savedState.toLowerCase() + '">' +
+                    '<option value="" ' + (savedState === "" ? "selected" : "") + '></option>' +
+                    '<option value="Pass" ' + (savedState === "Pass" ? "selected" : "") + '>Pass</option>' +
+                    '<option value="Fail" ' + (savedState === "Fail" ? "selected" : "") + '>Fail</option>' +
+                    '</select>';
+                
+                const notesHTML = '<input type="text" class="notes-input" value="' + 
+                    savedNotes.replace(/"/g, '&quot;') + 
+                    '" placeholder="Personal notes..." maxlength="200">';
+                
+                const newRow = row.slice();
+                const stateIndex = headers.indexOf("State") + 1;
+                const notesIndex = headers.indexOf("Notes") + 1;
+                newRow[stateIndex] = selectHTML;
+                newRow[notesIndex] = notesHTML;
+                return newRow;
+            }
+        
+            function renderData(data) {
+                tableData = data;
+                const transformed = data.map((row, idx) => {
+                  const rowWithNumber = [idx + 1, ...row];
+                  return generateRowWithState(rowWithNumber, idx);
+                });
+        
+                if (!dataTable) {
+                    const columnsWithNumber = [{ title: '#' }, ...headers.map(h => ({ title: h }))];
+                    dataTable = $('#myTable').DataTable({
+                        data: transformed,
+                        columns: columnsWithNumber,
+                        scrollX: true,
+                        paging: true,
+                        searching: true,
+                        ordering: true,
+                        deferRender: true,
+                        lengthMenu: [[-1, 10, 25, 50], ["All", 10, 25, 50]],
+                        order: [],
+                        columnDefs: [
+                            {
+                                targets: headers.indexOf("State"),
+                                orderable: true
+                            }
+                        ]
+                    });
+        
+                    $('#myTable tbody').on('change', 'select.state-select', function () {
+                        const rowIdx = dataTable.row($(this).closest('tr')).index();
+                        const value = $(this).val();
+                        localStorage.setItem(getStateKey(rowIdx), value);
+                        this.className = "state-select " + value.toLowerCase();
+                    });
+                    
+                    $('#myTable tbody').on('input', 'input.notes-input', function () {
+                        const rowIdx = dataTable.row($(this).closest('tr')).index();
+                        const value = $(this).val();
+                        localStorage.setItem(getNotesKey(rowIdx), value);
+                    });
+
+                    $('#myTable tbody').on('keydown', 'input.notes-input', function(e) {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        $(this).blur(); // Remove focus from notes
+                      }
+                    });
+                } else {
+                    const currentPage = dataTable.page();
+                    const currentLength = dataTable.page.len();
+                    dataTable.clear().rows.add(transformed).draw(false);
+                    dataTable.page.len(currentLength).draw();
+                    dataTable.page(currentPage).draw(false);
+                }
+            }
+        
+            function toggleData() {
+                showingRaw = !showingRaw;
+                renderData(showingRaw ? rawData : formattedData);
+                
+                // Update button text
+                const btn = document.querySelector('.toggle-btn');
+                btn.textContent = showingRaw ? 'Show Formatted' : 'Show Raw';
+            }
+        
+            function clearAllStates() {
+                const total = tableData.length;
+                let clearedCount = 0;
+                
+                for (let i = 0; i < total; i++) {
+                    const stateKey = getStateKey(i);
+                    const notesKey = getNotesKey(i);
+                    
+                    if (localStorage.getItem(stateKey)) {
+                        localStorage.removeItem(stateKey);
+                        clearedCount++;
+                    }
+                    if (localStorage.getItem(notesKey)) {
+                        localStorage.removeItem(notesKey);
+                    }
+                }
+                
+                renderData(tableData);
+                
+                // Better user feedback
+                if (clearedCount > 0) {
+                    alert(`✅ Cleared ${clearedCount} review states and all notes!`);
+                } else {
+                    alert('ℹ️ No review states to clear.');
+                }
+            }
+        
+            function getProgress() {
+                const total = tableData.length;
+                let reviewed = 0;
+                let passed = 0;
+                let failed = 0;
+                
+                for (let i = 0; i < total; i++) {
+                    const state = localStorage.getItem(getStateKey(i));
+                    if (state) {
+                        reviewed++;
+                        if (state === 'Pass') passed++;
+                        if (state === 'Fail') failed++;
+                    }
+                }
+                
+                return { total, reviewed, passed, failed };
+            }
+            
+            function updateProgressDisplay() {
+                const progress = getProgress();
+                const percentage = Math.round((progress.reviewed / progress.total) * 100);
+                
+                // Update the info banner with progress
+                const banner = document.querySelector('.info-banner p');
+                if (banner) {
+                    const originalText = banner.textContent.split('•')[0] + '•';
+                    banner.innerHTML = `${originalText} 📊 <strong>${progress.reviewed}/${progress.total}</strong> reviewed (<strong>${percentage}%</strong>) • ✅ <strong>${progress.passed}</strong> passed • ❌ <strong>${progress.failed}</strong> failed`;
+                }
+            }
+        
+            function toggleDarkMode() {
+                const body = document.body;
+                const btn = document.querySelector('.dark-mode-btn');
+                const isDark = body.getAttribute('data-theme') === 'dark';
+                
+                if (isDark) {
+                    body.removeAttribute('data-theme');
+                    btn.textContent = '🌙 Dark';
+                    localStorage.setItem('visualizer-theme', 'light');
+                } else {
+                    body.setAttribute('data-theme', 'dark');
+                    btn.textContent = '☀️ Light'; 
+                    localStorage.setItem('visualizer-theme', 'dark');
+                }
+            }
+            
+            function initializeTheme() {
+                const savedTheme = localStorage.getItem('visualizer-theme');
+                const btn = document.querySelector('.dark-mode-btn');
+                
+                if (savedTheme === 'dark') {
+                    document.body.setAttribute('data-theme', 'dark');
+                    btn.textContent = '☀️ Light';
+                } else {
+                    btn.textContent = '🌙 Dark';
+                }
+            }
+
+            // New copyToClipboard function to copy ONLY the rawText
+            // Can be updated to copy depending on the Formatting/Raw toggle
+            function copyToClipboard(text, element) {
+                const rowIndex = dataTable.row(element).index();
+                const cellIndex = $(element).index();
+
+                let rawText = text;
+                if (!showingRaw && rawData[rowIndex]) {
+                    rawText = rawData[rowIndex][cellIndex - 1];
+                }
+    
+                // Decode HTML entities to get original text
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = rawText;
+                const decodedText = tempDiv.textContent || tempDiv.innerText || rawText;
+
+                navigator.clipboard.writeText(decodedText).then(() => {
+                    // Show feedback
+                    const feedback = document.createElement('div');
+                    feedback.className = 'copy-feedback show';
+                    feedback.textContent = 'Copied!';
+                    element.style.position = 'relative';
+                    element.appendChild(feedback);
+
+                    setTimeout(() => {
+                        feedback.classList.remove('show');
+                        setTimeout(() => {
+                            if (feedback.parentNode) {
+                                feedback.parentNode.removeChild(feedback);
+                            }
+                            $(element).removeClass('copyable-cell');
+                        }, 300);
+                    }, 1000);
+                });
+            }        
+
+            $(document).ready(function () {
+              initializeTheme();
+              renderData(formattedData);
+              $('#clearState').click(clearAllStates);
+  
+              // Update progress on page load
+              updateProgressDisplay();
+  
+              // Update progress when states change
+              $('#myTable tbody').on('change', 'select.state-select', function () {
+                  setTimeout(updateProgressDisplay, 100);
+              });
+
+              $('#myTable tbody').on('mouseenter', 'td:nth-child(2), td:nth-child(3), td:nth-child(4)', function() {
+                $(this).addClass('copyable-cell');
+              }).on('mouseleave', 'td:nth-child(2), td:nth-child(3), td:nth-child(4)', function() {
+                if (!$(this).find('.copy-feedback').length) {
+                  $(this).removeClass('copyable-cell');
+                }
+              }).on('click', 'td:nth-child(2), td:nth-child(3), td:nth-child(4)', function() {
+                const text = $(this).text().trim();
+                if (text) {
+                  copyToClipboard(text, this);
+                }
+              });
+
+              // Initialize keyboard navigation and show initial hint
+              initKeyboardNavigation();
+              showInitialHint();
+            });
+
+            // Keyboard shortcuts
+            let currentRowIndex = 0;
+            let isKeyboardMode = false;
+
+            function initKeyboardNavigation() {
+              $(document).keydown(function(e) {
+                // Important, don't interfere when typing in inputs
+                if (e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT') return;
+
+                // Even more important! DO NOT INTERFERE WITH BROWSER SHORTCUTS
+                if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+                // Don't interfere with Fn keys either
+                if (e.key.startsWith('F') && e.key.length > 1) return;
+
+                const table = $('#myTable').DataTable();
+                const totalRows = table.rows().count();
+
+                switch(e.key.toLowerCase()) {
+                  case 'p':
+                    e.preventDefault();
+                    markCurrentRow('Pass');
+                    break;
+                  case 'f':
+                    e.preventDefault();
+                    markCurrentRow('Fail');
+                    break;
+                  case 'c':
+                    e.preventDefault();
+                    clearCurrentRow();
+                    break;
+                  case 'arrowdown':
+                  case 'j':
+                    e.preventDefault();
+                    navigateRow(1);
+                    break;
+                  case 'arrowup':
+                  case 'k':
+                    e.preventDefault();
+                    navigateRow(-1);
+                    break;
+                  case 'enter':
+                    e.preventDefault();
+                    focusNotes();
+                    break;
+                  case 'escape':
+                    e.preventDefault();
+                    exitKeyboardMode();
+                    break;
+                  case ' ':
+                    e.preventDefault();
+                    enterKeyboardMode();
+                    break;
+                }
+              });
+            }
+
+            function markCurrentRow(state) {
+              if (!isKeyboardMode) return;
+
+              const currentRow = getCurrentRow();
+              if (currentRow.length) {
+                const select = currentRow.find('.state-select');
+                select.val(state).trigger('change');
+                navigateRow(1);
+              }
+            }
+
+            function clearCurrentRow() {
+              if (!isKeyboardMode) return;
+
+              const currentRow = getCurrentRow();
+              if (currentRow.length) {
+                currentRow.find('.state-select').val('').trigger('change');
+                // currentRow.find('.notes-input').val('').trigger('input');
+              }
+            }
+
+            function navigateRow(direction) {
+              if (!isKeyboardMode) return;
+
+              const table = $('#myTable').DataTable();
+              const totalRows = table.rows().count();
+
+              currentRowIndex += direction;
+              if (currentRowIndex < 0) currentRowIndex = 0;
+              if (currentRowIndex >= totalRows) currentRowIndex = totalRows - 1;
+
+              highlightCurrentRow();
+              scrollToCurrentRow();
+            }
+
+            function getCurrentRow() {
+              const table = $('#myTable').DataTable();
+              return $(table.row(currentRowIndex).node());
+            }
+
+            function highlightCurrentRow() {
+              $('#myTable tbody tr').removeClass('keyboard-focus');
+
+              const currentRow = getCurrentRow();
+              currentRow.addClass('keyboard-focus');
+            }
+
+            function scrollToCurrentRow() {
+              const currentRow = getCurrentRow();
+              if (currentRow.length) {
+                currentRow[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }
+            }
+
+            function focusNotes() {
+              if (!isKeyboardMode) return;
+
+              const currentRow = getCurrentRow();
+              const notesInput = currentRow.find('.notes-input');
+              if (notesInput.length) {
+                notesInput.focus();
+              }
+            }
+
+            function enterKeyboardMode() {
+              isKeyboardMode = true;
+              <!-- currentRowIndex = 0; -->
+              highlightCurrentRow();
+              showKeyboardHint();
+            }
+
+            function exitKeyboardMode() {
+              isKeyboardMode = false;
+              $('#myTable tbody tr').removeClass('keyboard-focus')
+              hideKeyboardHint();
+            }
+
+            function showInitialHint() {
+                $('.keyboard-hint').remove();
+    
+                $('body').append(`
+                    <div class="keyboard-hint" style="
+                        position: fixed; 
+                        top: 15px; 
+                        right: 10px; 
+                        background: var(--bg-banner); 
+                        color: var(--text-primary);
+                        padding: 8px 12px; 
+                        border-radius: 4px; 
+                        font-size: 13px;
+                        font-weight: 500;
+                        z-index: 9999;
+                        border: 1px solid var(--border-color);
+                        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                    ">
+                        Press <kbd>Space</kbd> to start keyboard navigation
+                    </div>
+                `);
+
+                // Auto-hide if not in keyboard mode
+                setTimeout(() => {
+                  if (!isKeyboardMode) {
+                    $('.keyboard-hint').fadeOut(1000, function() {
+                      $(this).remove();
+                    });
+                  }
+                }, 4000);
+            }
+
+            function showKeyboardHint() {
+              $('.keyboard-hint').remove();
+  
+              $('body').append(`
+                  <div class="keyboard-hint" style="
+                      position: fixed; 
+                      top: 15px; 
+                      right: 10px; 
+                      background: var(--bg-banner); 
+                      color: var(--text-primary);
+                      padding: 8px 12px; 
+                      border-radius: 4px; 
+                      font-size: 13px;
+                      font-weight: 500;
+                      z-index: 9999;
+                      border: 1px solid var(--border-color);
+                      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                  ">
+                      Press <kbd>Esc</kbd> to exit keyboard mode
+                  </div>
+              `);
+
+              $('body').append(`
+              <div class="shortcut-summary" style="
+                  position: fixed;
+                  top: 60px;
+                  right: 10px;
+                  background: #007bff;
+                  color: white;
+                  padding: 10px 12px;
+                  border-radius: 6px;
+                  font-size: 11px;
+                  z-index: 9998;
+                  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+                  font-family: monospace;
+              ">
+                  <kbd style="background: rgba(255,255,255,0.2);">P</kbd>ass 
+                  <kbd style="background: rgba(255,255,255,0.2);">F</kbd>ail 
+                  <kbd style="background: rgba(255,255,255,0.2);">C</kbd>lear 
+                  <kbd style="background: rgba(255,255,255,0.2);">↑↓</kbd>Nav 
+                  <kbd style="background: rgba(255,255,255,0.2);">⏎</kbd>Notes
+              </div>
+            `);
+
+              setTimeout(() => {
+                $('.shortcut-summary').fadeOut(800, function() {
+                  $(this).remove();
+                });
+              }, 5000);
+            }            
+
+            function hideKeyboardHint() {
+              $('#keyboard-hint').remove();
+              $('.shortcut-summary').remove();
+              showInitialHint();
+            }
+    </script>
+  </body>
+</html>

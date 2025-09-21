@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>StringZ Visualizer - Japan</title>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <style>
+      :root {
+        /* Light mode colors */
+        --bg-primary: #f8f9fa;
+        --bg-secondary: white;
+        --bg-banner: #f8f9fa;
+        --text-primary: #333;
+        --text-secondary: #6c757d;
+        --text-muted: #495057;
+        --border-color: #dee2e6;
+        --table-header-bg: #f8f9fa;
+        --table-border: #dee2e6;
+        --button-bg: #6c757d;
+        --button-hover: #5a6268;
+        --input-bg: white;
+      }
+      
+      [data-theme="dark"] {
+        /* Dark mode colors */
+        --bg-primary: #1a1a1a;
+        --bg-secondary: #2d2d2d;
+        --bg-banner: #343a40;
+        --text-primary: #f8f9fa;
+        --text-secondary: #adb5bd;
+        --text-muted: #ced4da;
+        --border-color: #495057;
+        --table-header-bg: #343a40;
+        --table-border: #495057;
+        --button-bg: #495057;
+        --button-hover: #5a6268;
+        --input-bg: #343a40;
+      }
+      
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: var(--bg-primary);
+        margin: 0;
+        padding: 0;
+        color: var(--text-primary);
+        transition: background-color 0.3s ease, color 0.3s ease;
+      }
+      
+      .toggle-btn {
+        position: fixed;
+        top: 15px;
+        left: 15px;
+        z-index: 9999;
+        padding: 8px 16px;
+        background-color: var(--button-bg);
+        color: white;
+        border: 1px solid var(--button-bg);
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        font-size: 14px;
+        transition: background-color 0.2s ease;
+      }
+      
+      .toggle-btn:hover {
+        background-color: var(--button-hover);
+        border-color: var(--button-hover);
+      }
+      
+      .dark-mode-btn {
+        position: fixed;
+        top: 15px;
+        left: 150px;
+        z-index: 9999;
+        padding: 8px 16px;
+        background-color: var(--button-bg);
+        color: white;
+        border: 1px solid var(--button-bg);
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        font-size: 14px;
+        transition: background-color 0.2s ease;
+      }
+      
+      .dark-mode-btn:hover {
+        background-color: var(--button-hover);
+        border-color: var(--button-hover);
+      }
+      
+      #clearState {
+        float: left;
+        margin-right: 15px;
+        margin-bottom: 15px;
+        padding: 8px 16px;
+        background-color: #dc3545;
+        color: white;
+        border: 1px solid #dc3545;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        font-size: 14px;
+        transition: background-color 0.2s ease;
+      }
+      
+      #clearState:hover {
+        background-color: #c82333;
+        border-color: #bd2130;
+      }
+      
+      .container {
+        padding: 70px 30px 30px 30px;
+        background: var(--bg-secondary);
+        margin: 0;
+        min-height: 100vh;
+        transition: background-color 0.3s ease;
+      }
+      
+      .info-banner {
+        background-color: var(--bg-banner);
+        border: 1px solid var(--border-color);
+        color: var(--text-muted);
+        padding: 20px;
+        margin-bottom: 25px;
+        border-radius: 4px;
+        text-align: center;
+        transition: background-color 0.3s ease, border-color 0.3s ease;
+      }
+      
+      .info-banner h2 {
+        margin: 0 0 10px 0;
+        font-size: 24px;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+      
+      .info-banner p {
+        margin: 0;
+        font-size: 14px;
+        color: var(--text-secondary);
+      }
+      
+      #myTable {
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        overflow: hidden;
+        transition: border-color 0.3s ease;
+      }
+      
+      #myTable td {
+        user-select: text !important;
+        padding: 12px 8px;
+        vertical-align: top;
+        border-bottom: 1px solid var(--table-border);
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+        transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+      }
+      
+      #myTable th {
+        background-color: var(--table-header-bg);
+        border-bottom: 2px solid var(--border-color);
+        color: var(--text-muted);
+        font-weight: 600;
+        padding: 15px 8px;
+        text-align: center;
+        transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+      }
+      
+      /* Enhanced styling for different columns */
+      #myTable td:first-child {
+        text-align: center;
+        font-family: 'Courier New', monospace;
+        font-size: 12px;
+        color: var(--text-secondary);
+        /*<!-- max-width: 120px; -->*/
+        width: 50px;
+      }
+      
+      #myTable td:nth-child(2) {
+        font-family: 'Courier New', monospace;
+        font-size: 12px;
+        color: var(--text-secondary);
+        text-align: left;
+        /*line-height: 1.4;*/
+        max-width: 120px;
+      }
+
+      #myTable td:nth-child(3), #myTable td:nth-child(4) {
+        line-height: 1.4;
+        max-width: 300px;
+        word-wrap: break-word;
+        text-align: left;
+      }
+      
+      #myTable td:nth-child(5) {
+        text-align: center;
+        font-weight: 600;
+        color: var(--text-muted);
+        font-size: 14px;
+        width: 80px;
+      }
+      
+      #myTable td:nth-child(6) {
+        min-width: 120px;
+        max-width: 150px;
+        text-align: center;
+      }
+
+      #myTable td:nth-child(7) {
+        min-width: 150px;
+        max-width: 200px;
+      }
+      
+      select.state-select {
+        width: 100%;
+        font-weight: 500;
+        padding: 6px 8px;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        font-size: 14px;
+        background-color: var(--input-bg);
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+      }
+      
+      input.notes-input {
+        width: 100%;
+        padding: 6px 8px;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        font-size: 12px;
+        background-color: var(--input-bg);
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+      }
+      
+      input.notes-input:focus {
+        outline: none;
+        border-color: #80bdff;
+        box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+      }
+      
+      input.notes-input::placeholder {
+        color: var(--text-secondary);
+        font-style: italic;
+      }
+      
+      select.state-select:focus {
+        outline: none;
+        border-color: #80bdff;
+        box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+      }
+      
+      select.state-select.pass {
+        color: #28a745;
+        border-color: #28a745;
+      }
+      
+      select.state-select.fail {
+        color: #dc3545;
+        border-color: #dc3545;
+      }
+      
+      /* DataTables styling */
+      .dataTables_wrapper {
+        color: var(--text-primary);
+      }
+      
+      .dataTables_wrapper .dataTables_length,
+      .dataTables_wrapper .dataTables_filter,
+      .dataTables_wrapper .dataTables_info,
+      .dataTables_wrapper .dataTables_paginate {
+        margin: 15px 0;
+      }
+      
+      .dataTables_wrapper .dataTables_filter input {
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        padding: 6px 12px;
+        margin-left: 8px;
+        background-color: var(--input-bg);
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+      }
+      
+      .dataTables_wrapper .dataTables_length select {
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        padding: 4px 8px;
+        margin: 0 8px;
+        background-color: var(--input-bg);
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+      }
+      
+      .dataTables_wrapper .dataTables_paginate .paginate_button {
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        padding: 6px 12px;
+        margin: 0 2px;
+        background-color: var(--input-bg);
+        color: var(--text-primary) !important;
+        transition: all 0.3s ease;
+      }
+      
+      .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+        background-color: var(--bg-banner);
+        border-color: var(--text-secondary);
+      }
+      
+      .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+        background-color: #007bff;
+        border-color: #007bff;
+        color: white !important;
+      }
+
+      /* Copy feature styling */
+    .copyable-cell {
+        cursor: pointer;
+        position: relative;
+        transition: background-color 0.2s ease;
+    }
+
+    .copyable-cell:hover {
+        background-color: rgba(0, 123, 255, 0.1) !important;
+    }
+
+    .copy-feedback {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #28a745;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        z-index: 1000;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .copy-feedback.show {
+        opacity: 1;
+    }
+
+    .keyboard-focus {
+      background-color: rgba(0, 123, 255, 0.08) !important;
+      border: 2px solid #007bff !important;
+      box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2) !important;
+    }
+
+    .keyboard-focus td {
+      background-color: rgba(0, 123, 255, 0.05) !important;
+    }
+
+    kbd {
+      background-color: var(--button-bg);
+      color: white;
+      padding: 2px 4px;
+      border-radius: 3px;
+      font-size: 11px;
+      font-family: monospace;
+    }
+    </style>
+  </head>
+  <body>
+    <button class="toggle-btn" onclick="toggleData()">Show Raw</button>
+    <button class="dark-mode-btn" onclick="toggleDarkMode()">🌙 Dark</button>
+    <div class="container">
+      <div class="info-banner">
+        <h2>StringZ Visualizer - Japan</h2>
+        <p>📊
+          <strong>270</strong>
+          strings • 🌍
+          <strong>EN</strong>
+          →
+          <strong>Japan</strong>
+          • 📝
+          <strong>282</strong>
+          words • 🛠️ Generated by StringZ</p>
+      </div>
+      <button id="clearState">Clear All States</button>
+      <table id="myTable" class="display" style="width:100%"></table>
+    </div>
+    <script>
+      const headers = ["strId", "EN", "Japan", "State", "Notes"];
+            const rawData = [["BUFFAttribute_mName_8202044", "DMG Increase", "ダメージ増加", "", ""], ["BUFFAttribute_mName_8202045", "DMG Reduction", "ダメージ軽減", "", ""], ["BUFFAttribute_mTips_322928", "Fire-Tipped Spear ignores {30,num}% of the enemy&#x27;s DEF. Universe Ring bounces {31,num} extra time(s) and can hit the same target multiple times. Yin-Yang Blade executes common monsters with HP below {32,num}%.", "炎槍は敵の防御力を{30,num}%無視する。ユニバースリングは{31,num}回追加で跳躍し、同じ対象に複数回命中できる。陰陽剣はHPが{32,num}%未満のコモンモンスターを即座に処刑する。", "", ""], ["ChampionshipPlan_mChampionshipDesc_833", "Participate in Artifact Material Raid to win trophies and redeem rewards.", "アーティファクト素材レイドに参加してトロフィーを獲得し、報酬を引き換えましょう。", "", ""], ["ChampionshipPlan_mChampionshipDesc_834", "Level up/star up/promote heroes or upgrade heroes&#x27; skills to win trophies and redeem rewards.", "ヒーローをレベルアップ、スターアップ、昇格、またはヒーロースキルをアップグレードさせてトロフィーを獲得し、報酬と引き換えましょう。", "", ""], ["ChampionshipPlan_mChampionshipDesc_835", "Participate in Gear Raid I to win trophies and redeem rewards.", "装備レイドIに参加してトロフィーを獲得し、報酬と引き換えましょう。", "", ""], ["ChampionshipPlan_mChampionshipDesc_836", "Participate in Gear Raid II to win trophies and redeem rewards.", "装備レイドIIに参加してトロフィーを獲得し、報酬と引き換えましょう。", "", ""], ["ChampionshipPlan_mChampionshipDesc_837", "Summon heroes to win trophies and redeem rewards.", "ヒーローを召喚してトロフィーを獲得し、ランダムな報酬と引き換えましょう。", "", ""], ["ChampionshipPlan_mChampionshipDesc_838", "Participate in Artifact Material Raid to win trophies and redeem rewards.", "アーティファクト素材レイドに参加してトロフィーを獲得し、報酬を引き換えましょう。", "", ""], ["ChampionshipPlan_mChampionshipDesc_839", "Participate in Gear Raid III to win trophies and redeem rewards.", "装備レイドIIIに参加してトロフィーを獲得し、報酬と交換しましょう。", "", ""], ["ChampionshipPlan_mChampionshipDesc_840", "Level up/star up/promote heroes or upgrade heroes&#x27; skills to win trophies and redeem rewards.", "ヒーローをレベルアップ、スターアップ、昇格、またはヒーロースキルをアップグレードさせてトロフィーを獲得し、報酬と引き換えましょう。", "", ""], ["ChampionshipPlan_mChampionshipDesc_841", "Participate in Gear Raid I to win trophies and redeem rewards.", "装備レイドIに参加してトロフィーを獲得し、報酬と引き換えましょう。", "", ""], ["ChampionshipPlan_mChampionshipDesc_842", "Participate in Gear Raid II to win trophies and redeem rewards.", "装備レイドIIに参加してトロフィーを獲得し、報酬と引き換えましょう。", "", ""], ["ChampionshipPlan_mChampionshipGlobalName_837", "Arrival of Heroes Ultimate Leaderboard", "ヒーローの降臨アルティメットリーダーボード", "", ""], ["ChampionshipPlan_mChampionshipName_833", "Mystery of Artifacts", "アーティファクトの謎", "", ""], ["ChampionshipPlan_mChampionshipName_834", "Hero Training", "ヒーロートレーニング", "", ""], ["ChampionshipPlan_mChampionshipName_835", "The Lost Legacy", "失われし遺産", "", ""], ["ChampionshipPlan_mChampionshipName_836", "Vault in the Sands", "砂の宝物庫", "", ""], ["ChampionshipPlan_mChampionshipName_837", "Arrival of Heroes", "ヒーローの降臨", "", ""], ["ChampionshipPlan_mChampionshipName_838", "Mystery of Artifacts", "アーティファクトの謎", "", ""], ["ChampionshipPlan_mChampionshipName_839", "Forgotten Palace", "失われた場所", "", ""], ["ChampionshipPlan_mChampionshipName_840", "Hero Training", "ヒーロートレーニング", "", ""], ["ChampionshipPlan_mChampionshipName_841", "The Lost Legacy", "失われし遺産", "", ""], ["ChampionshipPlan_mChampionshipName_842", "Vault in the Sands", "砂の宝物庫", "", ""], ["Chapter_mChapterName_4301", "Titanic Ruins - Playtest", "タイタニックルーイン - プレイテスト", "", ""], ["CommonText_mMessage_25116", "Awaken the mystical power within.", "眠りし神秘の力を解き放て。", "", ""], ["CommonText_mMessage_25125", "Take destiny into your own hands.", "運命を自らの手に。", "", ""], ["CommonText_mMessage_25132", "Reveal cards to earn Dragon&#x27;s Gold by matching the designated patterns.", "カードを公開し、指定されたパターンとマッチングしてドラゴンの金貨を獲得しよう。", "", ""], ["CommonText_mMessage_25133", "Reveal cards and match 3 identical patterns to earn a &lt;color=&quot;#fdbe36&quot;&gt;{num}&lt;/color&gt;x reward!", "カードを公開して同じ模様を3つ揃えると、&lt;color=&quot;#fdbe36&quot;&gt;{num}&lt;/color&gt;倍の報酬獲得！", "", ""], ["CommonText_mMessage_25631", "Number:", "数値：", "", ""], ["CommonText_mMessage_25635", "The [?] corresponds to 3 numbers that will be filled into empty slots in sequence—the resulting number will determine the final amount of Dragon&#x27;s Gold you receive!", "[?]には3つの数字が順番に入力されます。この組み合わせによって受け取れるドラゴンの金貨の最終額が決まります！", "", ""], ["CommonText_mMessage_25773", "Nine-Tailed Nightmare", "九尾の悪夢", "", ""], ["CommonText_mMessage_25828", "Locked", "未解放", "", ""], ["CommonText_mMessage_25829", "Invalid", "無効", "", ""], ["CommonText_mMessage_25830", "New Recruit", "新規募集", "", ""], ["CommonText_mMessage_25846", "Officials", "役職", "", ""], ["CommonText_mMessage_25847", "Guild War Officials Appointment", "ギルド戦争役職任命", "", ""], ["CommonText_mMessage_25848", "Rank", "ランク", "", ""], ["CommonText_mMessage_25849", "Marshal", "司令官", "", ""], ["CommonText_mMessage_25850", "Members", "メンバー", "", ""], ["CommonText_mMessage_25851", "BP", "戦力", "", ""], ["CommonText_mMessage_25852", "Season&#x27;s Attacks", "シーズン攻撃回数", "", ""], ["CommonText_mMessage_25853", "Actions", "アクション", "", ""], ["CommonText_mMessage_25854", "Appoint", "任命", "", ""], ["CommonText_mMessage_25855", "Dismiss", "解雇", "", ""], ["CommonText_mMessage_25856", "No Access", "アクセス権限がありません", "", ""], ["CommonText_mMessage_25857", "All Marshals gain &lt;color=&quot;#e37b00&quot;&gt;{num} extra attack(s) &lt;/color&gt; per Guild War round. Only the Guild Leader and Vice Leaders can appoint a Marshal during the preparation phase. If no appointments are made, this position will be automatically assigned based on members&#x27; contribution and BP.", "司令官は各ギルド戦争ラウンドで&lt;color=&quot;#e37b00&quot;&gt;{num}回&lt;/color&gt;の追加攻撃を行うことができる。準備フェイズ中は、ギルドリーダーとサブリーダーのみが司令官を任命できる。任命がない場合、貢献度と戦力に応じて自動的に配置される。", "", ""], ["CommonText_mMessage_25858", "Appointed: {num1}/{num2}", "任命済み：{num1}/{num2}", "", ""], ["CommonText_mMessage_25859", "Appointment successful. Player gains {num} extra attack(s) per round.", "任命が完了しました。プレイヤーは1ラウンドにつき{num}回の追加攻撃を獲得します。", "", ""], ["CommonText_mMessage_25860", "Marshal slots are full. Dismiss one to continue.", "司令官の数が上限に達しています。継続するには1人解雇してください。", "", ""], ["CommonText_mMessage_25861", "&lt;color=&quot;#feab53&quot;&gt;Are you sure you want to dismiss this player from the Marshal position?&lt;/color&gt;\\nEach Guild can have up to {num1} Marshals, each gaining {num2} extra attack(s) per round.", "&lt;color=&quot;#feab53&quot;&gt;このプレイヤーを司令官のポジションから解雇しますか？&lt;/color&gt;\\n各ギルドごとに最大{num1}名の司令官を任命でき、1名につき1ラウンドごとに{num2}回の追加攻撃を発動します。", "", ""], ["CommonText_mMessage_25862", "Marshal dismissed successfully. Please appoint a new one.", "司令官を解雇しました。新しい司令官を任命してください。", "", ""], ["CommonText_mMessage_25863", "Guild War Attempts", "ギルド戦争攻撃回数", "", ""], ["CommonText_mMessage_25931", "Points of the Round", "ラウンドポイント", "", ""], ["CommonText_mMessage_26080", "Prioritize Guild War team.", "ギルド戦争チームを優先する。", "", ""], ["CommonText_mMessage_26081", "Playtest mode cannot save battle results or auto-fight.", "試行モードではバトル結果のセーブやオートバトルはできません。", "", ""], ["CommonText_mMessage_60708", "Score Details", "スコア詳細", "", ""], ["Difficulty_mDetail_1100001", "Only heroes from &lt;color=&quot;#e37b00&quot;&gt;The Nightmare Council, The Star Piercers&lt;/color&gt; can challenge this stage.\\nLord Skills of each Faction can only affect up to &lt;color=&quot;#fd4540&quot;&gt;5&lt;/color&gt; heroes.", "&lt;color=&quot;#e37b00&quot;&gt;ナイトメアカウンシル、スターピアサー&lt;/color&gt;の勢力のヒーローのみがこのステージに挑戦できる。\\n各勢力のロードスキルは最大&lt;color=&quot;#fd4540&quot;&gt;5&lt;/color&gt;体のヒーローにのみ効果を与える。", "", ""], ["Difficulty_mDetail_1100003", "Only heroes from &lt;color=&quot;#e37b00&quot;&gt;The Infernal Blast, The North Throne&lt;/color&gt; can challenge this stage.\\nLord Skills of each Faction can only affect up to &lt;color=&quot;#fd4540&quot;&gt;5&lt;/color&gt; heroes.", "&lt;color=&quot;#e37b00&quot;&gt;インファーナルブラスト、ノーススローン&lt;/color&gt;の勢力のヒーローのみがこのステージに挑戦できる。\\n各勢力のロードスキルは最大&lt;color=&quot;#fd4540&quot;&gt;5&lt;/color&gt;体のヒーローにのみ効果を与える。", "", ""], ["Difficulty_mDetail_1100004", "Only heroes from &lt;color=&quot;#e37b00&quot;&gt;The Esoteria Order, The Chaos Dominion, and The Supreme Arbiters&lt;/color&gt; can challenge this stage.\\nLord Skills of each Faction can only affect up to &lt;color=&quot;#fd4540&quot;&gt;5&lt;/color&gt; heroes.", "&lt;color=&quot;#e37b00&quot;&gt;エソテリアオーダー、カオスドミニオン、スプリームアービター&lt;/color&gt;の勢力のヒーローのみがこのステージに挑戦できる。\\n各勢力のロードスキルは最大&lt;color=&quot;#fd4540&quot;&gt;5&lt;/color&gt;体のヒーローにのみ効果を与える。", "", ""], ["Difficulty_mDetail_1200001", "The following heroes are exempt from map info restrictions.", "以下のヒーローはマップ情報の制限を受けない。", "", ""], ["Difficulty_mDetail_1200002", "The following heroes are exempt from map info restrictions.", "以下のヒーローはマップ情報の制限を受けない。", "", ""], ["Difficulty_mDetail_1200003", "The following heroes are exempt from map info restrictions.", "以下のヒーローはマップ情報の制限を受けない。", "", ""], ["Difficulty_mDetail_1200004", "The following heroes are exempt from map info restrictions.", "以下のヒーローはマップ情報の制限を受けない。", "", ""], ["Difficulty_mDetail_1300001", "Erlang Shen cannot be deployed in this special stage.", "このスペシャルステージでは二郎神を配置できない。", "", ""], ["Difficulty_mDetail_32010053", "Mage heroes cannot be included in the team.", "チームにメイジヒーローを編成できない。", "", ""], ["Difficulty_mDetail_32010153", "Destroyers gain the Camaraderie skill. When they die, nearby monsters receive an enhancement.", "デストロイヤーは同志連技を獲得する。戦闘不能になると、近くのモンスターが強化効果を受ける。", "", ""], ["Difficulty_mDetail_32010163", "When the Priest of Thunder appears, he gains Ghost Form for 30 sec.", "雷の司祭が出現すると、30秒間ゴースト状態となる。", "", ""], ["Difficulty_mDetail_32010364", "Boss enemies restore 1% Max HP per sec, while other enemies restore 5% Max HP per sec.", "ボスは毎秒最大HPの1％を、その他の敵は毎秒最大HPの5％を回復する。", "", ""], ["Difficulty_mDetail_32010476", "Langlyn&#x27;s Max HP increases by 50%, but cannot be healed.", "ラングリンの最大HPが50％増加するが、回復を受けられなくなる。", "", ""], ["Difficulty_mDetail_32010477", "Langlyn&#x27;s Max HP increases by 75%, but cannot be healed.", "ラングリンの最大HPが75％増加するが、回復を受けられなくなる。", "", ""], ["Difficulty_mDetail_32010478", "Langlyn&#x27;s Max HP increases by 100%, but cannot be healed.", "ラングリンの最大HPが100％増加するが、回復を受けられなくなる。", "", ""], ["ExpStageUI_mRaidName_8201006", "COTD-1", "COTD-1", "", ""], ["ExpStageUI_mRaidName_8201007", "COTD-2", "COTD-2", "", ""], ["ExpStageUI_mRaidName_8201008", "COTD-3", "COTD-3", "", ""], ["ExpStageUI_mRaidName_8201009", "COTD-4", "COTD-4", "", ""], ["ExpStageUI_mRaidName_8201010", "COTD-5", "COTD-5", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010153", "Destroyers gain the Camaraderie skill. When a Destroyer dies, nearby Destroyers receive an enhancement.", "デストロイヤーは同志連技スキルを獲得する。仲間のデストロイヤーが倒れると、その周囲にいるデストロイヤーが強化される。", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010163", "When the Priest of Thunder appears, he gains Ghost Form for 30 sec.", "雷の司祭が出現すると、30秒間ゴースト状態となる。", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010364", "Boss enemies restore 1% Max HP per sec, while other enemies restore 5% Max HP per sec.", "ボスは毎秒最大HPの1％を、その他の敵は毎秒最大HPの5％を回復する。", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010476", "Langlyn&#x27;s Max HP increases by 50%, but cannot be healed.", "ラングリンの最大HPが50％増加するが、回復を受けられなくなる。", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010477", "Langlyn&#x27;s Max HP increases by 75%, but cannot be healed.", "ラングリンの最大HPが75％増加するが、回復を受けられなくなる。", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010478", "Langlyn&#x27;s Max HP increases by 100%, but cannot be healed.", "ラングリンの最大HPが100％増加するが、回復を受けられなくなる。", "", ""], ["HeroFactionKingSkill_mName_100441_1", "The Cursed Cult", "カースカルト", "", ""], ["HeroFactionKingSkill_mName_100441_2", "The Cursed Cult", "カースカルト", "", ""], ["HeroFactionKingSkill_mName_100441_3", "The Cursed Cult", "カースカルト", "", ""], ["HeroFactionKingSkill_mName_100441_4", "The Cursed Cult", "カースカルト", "", ""], ["HeroFactionKingSkill_mName_100441_5", "The Cursed Cult", "カースカルト", "", ""], ["Item_mItemDesc_110", "Purchase to obtain a 30-Day Monthly Card of Diamonds.", "購入すると30日間のダイヤのマンスリーカードを獲得。", "", ""], ["Item_mItemDesc_111", "Purchase to obtain a 30-Day Monthly Card of Summoning.", "購入すると30日間の召喚のマンスリーカードを獲得。", "", ""], ["Item_mItemDesc_112", "Purchase to obtain a 30-Day Monthly Card of Stamina.", "購入すると30日間のスタミナのマンスリーカードを獲得。", "", ""], ["Item_mItemDesc_31096", "Select 1 event-exclusive hero to join the event. The selected exclusive hero has an increased drop rate &amp; is guaranteed within 200 summons!", "イベントに参加する1体のイベント限定ヒーローを選択。選択した限定ヒーローは排出率が上昇し、200回召喚以内に必ず獲得できる！", "", ""], ["Item_mItemDesc_31097", "&lt;color=&quot;#eadca2&quot;&gt;Special Summon Offer&lt;/color&gt;\\n\\nGet the necessary materials for Hero Summon", "&lt;color=&quot;#eadca2&quot;&gt;ヒーロー召喚の特別オファー&lt;/color&gt;\\n\\nヒーロー召喚に必要な素材を獲得", "", ""], ["Item_mItemDesc_3333", "&lt;color=&quot;#498a40&quot;&gt;Exclusive avatar border for the Gold Dragon Pass.&lt;/color&gt;", "&lt;color=&quot;#498a40&quot;&gt;ゴールドドラゴンパスの限定アバターフレーム。&lt;/color&gt;", "", ""], ["Item_mItemDesc_3519", "Unknown Clue of Erlang Shen. When obtained, it will automatically convert into a random one from Erlang Shen&#x27;s Clues 1-5.", "二郎神の未知の手がかり。入手すると、自動的に二郎神の手がかり1～5のうちランダムな1つに変換される。", "", ""], ["Item_mItemDesc_3521", "Erlang Shen&#x27;s Clue 2.\\n&lt;color=&quot;#498a40&quot;&gt;Usage: Consume this item via Fate&#x27;s Chapters to unlock the corresponding clue.&lt;/color&gt;", "二郎神の手がかり2。\\n&lt;color=&quot;#498a40&quot;&gt;使用方法：運命のチャプターでこのアイテムを消費し、対応する手がかりを解放する。&lt;/color&gt;", "", ""], ["Item_mItemDesc_3522", "Erlang Shen&#x27;s Clue 3.\\n&lt;color=&quot;#498a40&quot;&gt;Usage: Consume this item via Fate&#x27;s Chapters to unlock the corresponding clue.&lt;/color&gt;", "二郎神の手がかり3。\\n&lt;color=&quot;#498a40&quot;&gt;使用方法：運命のチャプターでこのアイテムを消費し、対応する手がかりを解放する。&lt;/color&gt;", "", ""], ["Item_mItemDesc_3523", "Erlang Shen&#x27;s Clue 4.\\n&lt;color=&quot;#498a40&quot;&gt;Usage: Consume this item via Fate&#x27;s Chapters to unlock the corresponding clue.&lt;/color&gt;", "二郎神の手がかり4。\\n&lt;color=&quot;#498a40&quot;&gt;使用方法：運命のチャプターでこのアイテムを消費し、対応する手がかりを解放する。&lt;/color&gt;", "", ""], ["Item_mItemDesc_3524", "Erlang Shen&#x27;s Clue 5.\\n&lt;color=&quot;#498a40&quot;&gt;Usage: Consume this item via Fate&#x27;s Chapters to unlock the corresponding clue.&lt;/color&gt;", "二郎神の手がかり5。\\n&lt;color=&quot;#498a40&quot;&gt;使用方法：運命のチャプターでこのアイテムを消費し、対応する手がかりを解放する。&lt;/color&gt;", "", ""], ["Item_mItemDesc_35473", "You can obtain the following items:\\nMonthly Card of Diamonds (30-Day)\\nDiamond x500", "以下のアイテムを入手できる：\\nダイヤのマンスリーカード（30日間）\\nダイヤ×500", "", ""], ["Item_mItemDesc_35474", "You can obtain the following items:\\nMonthly Card of Summoning (30-Day)\\nRare Summoning Crystal x500", "以下のアイテムを入手できる：\\n召喚のマンスリーカード（30日間）\\nレア召喚クリスタル×500", "", ""], ["Item_mItemDesc_35475", "You can obtain the following items:\\nMonthly Card of Stamina (30-Day)\\nStamina x600\\nAuto-Fight Chance x30", "以下のアイテムを入手できる：\\nスタミナのマンスリーカード（30日間）\\nスタミナ×600\\nオートバトル可能回数×30", "", ""], ["Item_mItemDesc_56310", "Grants a random &lt;color=&quot;#498a40&quot;&gt;Lvl. 2-4&lt;/color&gt; Trial Keystone.", "&lt;color=&quot;#498a40&quot;&gt;レベル2~4&lt;/color&gt;の試練の要石をランダムで獲得する。", "", ""], ["Item_mItemDesc_56311", "Grants a random &lt;color=&quot;#498a40&quot;&gt;Lvl. 2-5&lt;/color&gt; Trial Keystone.", "ランダムで&lt;color=&quot;#498a40&quot;&gt;レベル2~5&lt;/color&gt;の試練の要石を獲得する。", "", ""], ["Item_mItemName_110", "Monthly Card of Diamonds (30-Day)", "ダイヤのマンスリーカード（30日間）", "", ""], ["Item_mItemName_111", "Monthly Card of Summoning (30-Day)", "召喚のマンスリーカード（30日間）", "", ""], ["Item_mItemName_112", "Monthly Card of Stamina (30-Day)", "スタミナのマンスリーカード（30日間）", "", ""], ["Item_mItemName_31096", "Exclusive Lucky Pick", "限定選択英霊", "", ""], ["Item_mItemName_31097", "Turbo Summon Bundle", "ターボ召喚パック", "", ""], ["Item_mItemName_3324", "Avatar Border: Nine-Tailed Nightmare Ranking Champion", "アバターフレーム：「九尾の悪夢」ランキング1位", "", ""], ["Item_mItemName_3325", "Avatar Border: Nine-Tailed Nightmare Ranking Runner-Up", "アバターフレーム：「九尾の悪夢」ランキング2位", "", ""], ["Item_mItemName_3326", "Avatar Border: Nine-Tailed Nightmare Ranking Third Place", "アバターフレーム：「九尾の悪夢」ランキング3位", "", ""], ["Item_mItemName_3333", "Avatar Border: Gold Dragon Pass", "アバターフレーム：ゴールドドラゴンパス", "", ""], ["Item_mItemName_35473", "Monthly Card of Diamonds", "ダイヤのマンスリーカード", "", ""], ["Item_mItemName_35474", "Monthly Card of Summoning", "召喚のマンスリーカード", "", ""], ["Item_mItemName_35475", "Monthly Card of Stamina", "スタミナのマンスリーカード", "", ""], ["Item_mItemName_56310", "Random Trial Keystone (Lvl. 2-4)", "ランダム試練の要石（レベル2~4）", "", ""], ["Item_mItemName_56311", "Random Trial Keystone (Lvl. 2-5)", "ランダム試練の要石（レベル2~5）", "", ""], ["Quest_mQuestTitle_380034", "Obtain a total of 100 Dragon&#x27;s Gold.", "ドラゴンの金貨を合計100獲得する。", "", ""], ["Quest_mQuestTitle_380035", "Obtain a total of 200 Dragon&#x27;s Gold.", "ドラゴンの金貨を合計200獲得する。", "", ""], ["Quest_mQuestTitle_380036", "Obtain a total of 300 Dragon&#x27;s Gold.", "ドラゴンの金貨を合計300獲得する。", "", ""], ["Quest_mQuestTitle_380037", "Obtain a total of 500 Dragon&#x27;s Gold.", "ドラゴンの金貨を合計500獲得する。", "", ""], ["Quest_mQuestTitle_380038", "Obtain a total of 800 Dragon&#x27;s Gold.", "ドラゴンの金貨を合計800獲得する。", "", ""], ["Quest_mQuestTitle_380039", "Obtain a total of 1,000 Dragon&#x27;s Gold.", "ドラゴンの金貨を合計1000獲得する。", "", ""], ["Quest_mQuestTitle_380040", "Obtain a total of 1,500 Dragon&#x27;s Gold.", "ドラゴンの金貨を合計1500獲得する。", "", ""], ["Quest_mQuestTitle_380041", "Obtain a total of 2,000 Dragon&#x27;s Gold.", "ドラゴンの金貨を合計2000獲得する。", "", ""], ["Quest_mQuestTitle_380042", "Obtain a total of 3,000 Dragon&#x27;s Gold.", "ドラゴンの金貨を合計3000獲得する。", "", ""], ["Quest_mQuestTitle_380043", "Obtain a total of 4,000 Dragon&#x27;s Gold.", "ドラゴンの金貨を合計4000獲得する。", "", ""], ["Quest_mQuestTitle_380044", "Obtain a total of 5,000 Dragon&#x27;s Gold.", "ドラゴンの金貨を合計5000獲得する。", "", ""], ["RoleHeadFrame_mSourceDesc_84", "Awarded to the Commander who ranks first on the Points Leaderboard in the Echoes of Woe during the Nine-Tailed Nightmare.", "「九尾の悪夢」期間中、哀嘆の残響のポイントリーダーボードで1位にランクインしたコマンダーに与えられる。", "", ""], ["RoleHeadFrame_mSourceDesc_85", "Awarded to the Commander who ranks second on the Points Leaderboard in the Echoes of Woe during the Nine-Tailed Nightmare.", "「九尾の悪夢」期間中、哀嘆の残響のポイントリーダーボードで2位にランクインしたコマンダーに与えられる。", "", ""], ["RoleHeadFrame_mSourceDesc_86", "Awarded to the Commander who ranks third on the Points Leaderboard in the Echoes of Woe during the Nine-Tailed Nightmare.", "「九尾の悪夢」期間中、哀嘆の残響のポイントリーダーボードで3位にランクインしたコマンダーに与えられる。", "", ""], ["RoleHeadFrame_mSourceDesc_89", "Guild War S10 &quot;Overlord&quot; exclusive avatar border.", "ギルド戦争S10「オーバーロード」限定アバターフレーム。", "", ""], ["RoleHeadFrame_mSourceDesc_91", "Obtained from Gold Dragon Pass.", "ゴールドドラゴンパスで獲得。", "", ""], ["RollDiceBuilding_mName_11_1", "Turn of Luck", "幸運の転機", "", ""], ["RollDiceBuilding_mName_12_1", "Turn of Luck", "幸運の転機", "", ""], ["Skill_mSkillDesc_1908301_1", "Swings claws, dealing DMG to all heroes within 1 tile ahead.", "爪を振り、前方1タイル以内のすべてのヒーローにダメージを与える。", "", ""], ["Skill_mSkillDesc_1908304_1", "Swings claws, dealing DMG to all heroes within 1 tile ahead.", "爪を振り、前方1タイル以内のすべてのヒーローにダメージを与える。", "", ""], ["Skill_mSkillDesc_1908315_1", "When the Nine-Tailed Fox takes fatal DMG, she flees the battlefield and activates the tails on the field to attack. When the tails are defeated, the Nine-Tailed Fox returns to the battlefield. After all tails on the field are defeated, the Nine-Tailed Fox transforms and summons a large number of foxes.", "九尾の狐が致命的なダメージを受けると、バトルフィールドから逃げて、フィールド上の尻尾を起動して攻撃する。尻尾が倒されると、九尾の狐はバトルフィールドに戻ってくる。フィールド上のすべての尻尾が倒された後、九尾の狐は変身し、大量の狐を召喚する。", "", ""], ["Skill_mSkillDesc_1908345_1", "Deals M. DMG to the last deployed unit on the battlefield, prioritizing Defenders.", "バトルフィールドで最後に配置されたユニットに魔法ダメージを与える。ディフェンダーを優先する。", "", ""], ["Skill_mSkillDesc_1908357_1", "Deals M. DMG to the last deployed unit on the battlefield, prioritizing Defenders.", "バトルフィールドで最後に配置されたユニットに魔法ダメージを与える。ディフェンダーを優先する。", "", ""], ["Skill_mSkillDesc_803803_1", "Immune to all &lt;color=&quot;#4A9DF2&quot;&gt;CC Effects&lt;/color&gt; (except Slow).", "全ての&lt;color=&quot;#4A9DF2&quot;&gt;コントロール効果&lt;/color&gt;（減速を除く）に対して免疫を持つ。", "", ""], ["Skill_mSkillDesc_8202053_1", "Reduces the Redeployment Time of allied heroes by &lt;color=&quot;#4A9DF2&quot;&gt;{sk1}%&lt;/color&gt;, but increases their Deployment Cost by &lt;color=&quot;#4A9DF2&quot;&gt;+{sk2}&lt;/color&gt;.", "味方ヒーローの再配置時間が&lt;color=&quot;#4A9DF2&quot;&gt;{sk1}%&lt;/color&gt;短縮するが、配置コストが&lt;color=&quot;#4A9DF2&quot;&gt;{sk2}&lt;/color&gt;増加する。", "", ""], ["Skill_mSkillDesc_8202084_1", "Increases allied heroes&#x27; DMG by &lt;color=&quot;#4A9DF2&quot;&gt;{sk1}%&lt;/color&gt; each round and reduces Basic ATK interval by &lt;color=&quot;#4A9DF2&quot;&gt;{sk1}%&lt;/color&gt;. Vulnerability (P. DMG) and Vulnerability (M. DMG) increase by &lt;color=&quot;#4A9DF2&quot;&gt;{sk2}%&lt;/color&gt; each round.", "ラウンドごとに味方ヒーローのダメージが&lt;color=&quot;#4A9DF2&quot;&gt;{sk1}%&lt;/color&gt;増加し、通常攻撃間隔が&lt;color=&quot;#4A9DF2&quot;&gt;{sk1}%&lt;/color&gt;短縮する。ラウンドごとに脆弱（物理ダメージ）と脆弱（魔法ダメージ）が&lt;color=&quot;#4A9DF2&quot;&gt;{sk2}%&lt;/color&gt;増加する。", "", ""], ["Skill_mSkillDesc_8202103_1", "Allied Hero Deployment Limit +&lt;color=&quot;#4A9DF2&quot;&gt;{sk1}&lt;/color&gt;", "味方ヒーローの配置数上限+&lt;color=&quot;#4A9DF2&quot;&gt;{sk1}&lt;/color&gt;", "", ""], ["Skill_mSkillName_1033701_1", "Accelerated Incubation", "加速した孵化", "", ""], ["Skill_mSkillName_3991865_1", "High Quality", "高品質", "", ""], ["Skill_mSkillName_803610_1", "Freeze", "フリーズ", "", ""], ["Skill_mSkillName_803801_1", "Frostbite Strike", "フロストストライク", "", ""], ["Skill_mSkillName_803803_1", "Control Immunity", "コントロール免疫", "", ""], ["Skill_mSkillName_804001_1", "Frostbite Rupture", "フロストブレイク", "", ""], ["Skill_mSkillName_8202053_1", "Time VS Money", "補償契約", "", ""], ["Skill_mSkillName_8202084_1", "Heating Up", "愈戦愈烈", "", ""], ["Skill_mSkillName_8202103_1", "Rigged Arena", "雄師圧境", "", ""], ["Skill_mSkillSimpleDesc_11015501_1", "Increases ATK by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;, and reduces the number of attacks required to trigger Nature&#x27;s Fury enhanced attack by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;. When in Berserker Stance, Basic ATK restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt; Max HP, and triggering Ground Stomp restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; Max HP.", "攻撃力を&lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;増加させ、自然の怒りの強化攻撃の発動に必要な攻撃回数を&lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;減少させる。バーサーカースタンス時、通常攻撃で最大HPの&lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;を回復し、地割れ発動時に最大HPの&lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt;を回復する。", "", ""], ["Skill_mSkillSimpleDesc_11015501_2", "Increases ATK by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;, and reduces the number of attacks required to trigger Nature&#x27;s Fury enhanced attack by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;. When in Berserker Stance, Basic ATK restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt; Max HP, and triggering Ground Stomp restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; Max HP.", "攻撃力を&lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;増加させ、自然の怒りの強化攻撃の発動に必要な攻撃回数を&lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;減少させる。バーサーカースタンス時、通常攻撃で最大HPの&lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;を回復し、地割れ発動時に最大HPの&lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt;を回復する。", "", ""], ["Skill_mSkillSimpleDesc_11015501_3", "Increases ATK by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;, and reduces the number of attacks required to trigger Nature&#x27;s Fury enhanced attack by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;. When in Berserker Stance, Basic ATK restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt; Max HP, and triggering Ground Stomp restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; Max HP.", "攻撃力を&lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;増加させ、自然の怒りの強化攻撃の発動に必要な攻撃回数を&lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;減少させる。バーサーカースタンス時、通常攻撃で最大HPの&lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;を回復し、地割れ発動時に最大HPの&lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt;を回復する。", "", ""], ["Skill_mSkillSimpleDesc_11015501_4", "Increases ATK by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;, and reduces the number of attacks required to trigger Nature&#x27;s Fury enhanced attack by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;. When in Berserker Stance, Basic ATK restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt; Max HP, and triggering Ground Stomp restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; Max HP.", "攻撃力を&lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;増加させ、自然の怒りの強化攻撃の発動に必要な攻撃回数を&lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;減少させる。バーサーカースタンス時、通常攻撃で最大HPの&lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;を回復し、地割れ発動時に最大HPの&lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt;を回復する。", "", ""], ["Skill_mSkillSimpleDesc_11015501_5", "Increases ATK by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;, and reduces the number of attacks required to trigger Nature&#x27;s Fury enhanced attack by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;. When in Berserker Stance, Basic ATK restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt; Max HP, and triggering Ground Stomp restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; Max HP.", "攻撃力を&lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;増加させ、自然の怒りの強化攻撃の発動に必要な攻撃回数を&lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;減少させる。バーサーカースタンス時、通常攻撃で最大HPの&lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;を回復し、地割れ発動時に最大HPの&lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt;を回復する。", "", ""], ["Skill_mSkillSimpleDesc_11015501_6", "Increases ATK by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;, and reduces the number of attacks required to trigger Nature&#x27;s Fury enhanced attack by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;. When in Berserker Stance, Basic ATK restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt; Max HP, and triggering Ground Stomp restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; Max HP.", "攻撃力を&lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;増加させ、自然の怒りの強化攻撃の発動に必要な攻撃回数を&lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;減少させる。バーサーカースタンス時、通常攻撃で最大HPの&lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;を回復し、地割れ発動時に最大HPの&lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt;を回復する。", "", ""], ["Skill_mSkillSimpleDesc_13000441_1", "Increases faction team members&#x27; basic attributes by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;.\\nIncreases faction team members&#x27; DMG dealt to enemies inflicted with Slow, Stun, Freeze, Immobilized State, and other CC Effects by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt;. \\nIncreases faction team members&#x27; DMG by &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;. When the Lord is on the battlefield and an allied summon dies, increases all faction team members&#x27; DMG by an additional &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; for &lt;color=&quot;#4A9DF2&quot;&gt;{skm5}&lt;/color&gt; sec, stacking up to &lt;color=&quot;#4A9DF2&quot;&gt;{skm6}&lt;/color&gt; time(s).", "同じ勢力の味方の基本ステータスを&lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;増加させる。\\n減速、スタン、フリーズ、拘束、その他のコントロール効果を受けた敵に与える同じ勢力の味方のダメージが&lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt;増加する。\\n同じ勢力の味方のダメージが&lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;増加する。ロードが戦場にいる場合、味方の召喚物が死亡すると、全ての同じ勢力の味方のダメージがさらに&lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt;増加する。持続時間：&lt;color=&quot;#4A9DF2&quot;&gt;{skm5}&lt;/color&gt;秒。最大&lt;color=&quot;#4A9DF2&quot;&gt;{skm6}&lt;/color&gt;スタック。", "", ""], ["Skill_mSkillSimpleDesc_13000441_2", "Increases faction team members&#x27; basic attributes by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;.\\nIncreases faction team members&#x27; DMG dealt to enemies inflicted with Slow, Stun, Freeze, Immobilized State, and other CC Effects by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt;. \\nIncreases faction team members&#x27; DMG by &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;. When the Lord is on the battlefield and an allied summon dies, increases all faction team members&#x27; DMG by an additional &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; for &lt;color=&quot;#4A9DF2&quot;&gt;{skm5}&lt;/color&gt; sec, stacking up to &lt;color=&quot;#4A9DF2&quot;&gt;{skm6}&lt;/color&gt; time(s).", "同じ勢力の味方の基本ステータスを&lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;増加させる。\\n減速、スタン、フリーズ、拘束、その他のコントロール効果を受けた敵に与える同じ勢力の味方のダメージが&lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt;増加する。\\n同じ勢力の味方のダメージが&lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;増加する。ロードが戦場にいる場合、味方の召喚物が死亡すると、全ての同じ勢力の味方のダメージがさらに&lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt;増加する。持続時間：&lt;color=&quot;#4A9DF2&quot;&gt;{skm5}&lt;/color&gt;秒。最大&lt;color=&quot;#4A9DF2&quot;&gt;{skm6}&lt;/color&gt;スタック。", "", ""], ["Skill_mSkillSimpleDesc_13000441_3", "Increases faction team members&#x27; basic attributes by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;.\\nIncreases faction team members&#x27; DMG dealt to enemies inflicted with Slow, Stun, Freeze, Immobilized State, and other CC Effects by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt;. \\nIncreases faction team members&#x27; DMG by &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;. When the Lord is on the battlefield and an allied summon dies, increases all faction team members&#x27; DMG by an additional &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; for &lt;color=&quot;#4A9DF2&quot;&gt;{skm5}&lt;/color&gt; sec, stacking up to &lt;color=&quot;#4A9DF2&quot;&gt;{skm6}&lt;/color&gt; time(s).", "同じ勢力の味方の基本ステータスを&lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;増加させる。\\n減速、スタン、フリーズ、拘束、その他のコントロール効果を受けた敵に与える同じ勢力の味方のダメージが&lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt;増加する。\\n同じ勢力の味方のダメージが&lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;増加する。ロードが戦場にいる場合、味方の召喚物が死亡すると、全ての同じ勢力の味方のダメージがさらに&lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt;増加する。持続時間：&lt;color=&quot;#4A9DF2&quot;&gt;{skm5}&lt;/color&gt;秒。最大&lt;color=&quot;#4A9DF2&quot;&gt;{skm6}&lt;/color&gt;スタック。", "", ""], ["Skill_mSkillSimpleDesc_13000441_4", "Increases faction team members&#x27; basic attributes by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;.\\nIncreases faction team members&#x27; DMG dealt to enemies inflicted with Slow, Stun, Freeze, Immobilized State, and other CC Effects by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt;. \\nIncreases faction team members&#x27; DMG by &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;. When the Lord is on the battlefield and an allied summon dies, increases all faction team members&#x27; DMG by an additional &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; for &lt;color=&quot;#4A9DF2&quot;&gt;{skm5}&lt;/color&gt; sec, stacking up to &lt;color=&quot;#4A9DF2&quot;&gt;{skm6}&lt;/color&gt; time(s).", "同じ勢力の味方の基本ステータスを&lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;増加させる。\\n減速、スタン、フリーズ、拘束、その他のコントロール効果を受けた敵に与える同じ勢力の味方のダメージが&lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt;増加する。\\n同じ勢力の味方のダメージが&lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;増加する。ロードが戦場にいる場合、味方の召喚物が死亡すると、全ての同じ勢力の味方のダメージがさらに&lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt;増加する。持続時間：&lt;color=&quot;#4A9DF2&quot;&gt;{skm5}&lt;/color&gt;秒。最大&lt;color=&quot;#4A9DF2&quot;&gt;{skm6}&lt;/color&gt;スタック。", "", ""], ["Skill_mSkillSimpleDesc_13000441_5", "Increases faction team members&#x27; basic attributes by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;.\\nIncreases faction team members&#x27; DMG dealt to enemies inflicted with Slow, Stun, Freeze, Immobilized State, and other CC Effects by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt;. \\nIncreases faction team members&#x27; DMG by &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;. When the Lord is on the battlefield and an allied summon dies, increases all faction team members&#x27; DMG by an additional &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; for &lt;color=&quot;#4A9DF2&quot;&gt;{skm5}&lt;/color&gt; sec, stacking up to &lt;color=&quot;#4A9DF2&quot;&gt;{skm6}&lt;/color&gt; time(s).", "同じ勢力の味方の基本ステータスを&lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;増加させる。\\n減速、スタン、フリーズ、拘束、その他のコントロール効果を受けた敵に与える同じ勢力の味方のダメージが&lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt;増加する。\\n同じ勢力の味方のダメージが&lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;増加する。ロードが戦場にいる場合、味方の召喚物が死亡すると、全ての同じ勢力の味方のダメージがさらに&lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt;増加する。持続時間：&lt;color=&quot;#4A9DF2&quot;&gt;{skm5}&lt;/color&gt;秒。最大&lt;color=&quot;#4A9DF2&quot;&gt;{skm6}&lt;/color&gt;スタック。", "", ""], ["Skill_mSkillSimpleDesc_8202053_1", "Reduces the Redeployment Time of allied heroes by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;, but increases their Deployment Cost by &lt;color=&quot;#4A9DF2&quot;&gt;+{skm2}&lt;/color&gt;.", "味方ヒーローの再配置時間が&lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;短縮するが、配置コストが&lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;増加する。", "", ""], ["Skill_mSkillSimpleDesc_8202084_1", "Increases allied heroes&#x27; DMG by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt; each round and reduces Basic ATK Interval by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;. Vulnerability (P. DMG) and Vulnerability (M. DMG) increase by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt; each round.", "ラウンドごとに味方ヒーローのダメージが&lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;増加し、通常攻撃間隔が&lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;短縮する。ラウンドごとに脆弱（物理ダメージ）と脆弱（魔法ダメージ）が&lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt;増加する。", "", ""], ["Skill_mSkillSimpleDesc_8202103_1", "Allied Hero Deployment Limit +&lt;color=&quot;#4A9DF2&quot;&gt;{skm1}&lt;/color&gt;", "味方ヒーローの配置数上限+&lt;color=&quot;#4A9DF2&quot;&gt;{skm1}&lt;/color&gt;", "", ""], ["Skill_mSkillSimpleDesc_8203031_1", "Hotspot appears on both players&#x27; battlefields. Heroes standing on the Hotspot have all attributes increased by 20%.", "両プレイヤーの戦場にホットスポットが出現する。ホットスポットに立っているヒーローは、全ステータスが20%増加する。", "", ""], ["Stage_mStageDesc_5003001", "In this epic battle, you will face an unprecedented enemy - Semrah. Hailing from ancient times, Semrah fights in 3 Battle Modes, each posing a tough challenge.", "この壮絶な戦いで、あなたは今までとは異なる敵、セムラと対峙する。古代より生きるセムラは3つの戦闘形態を持ち、どれもあなたに苦難を与える。", "", ""], ["Stage_mStageDesc_5003002", "In this epic battle, you will face an unprecedented enemy - Semrah. Hailing from ancient times, Semrah fights in 3 Battle Modes, each posing a tough challenge.", "この壮絶な戦いで、あなたは今までとは異なる敵、セムラと対峙する。古代より生きるセムラは3つの戦闘形態を持ち、どれもあなたに苦難を与える。", "", ""], ["Stage_mStageDesc_8101001", "Starting from Round 5, &lt;color=&quot;#fd4540&quot;&gt;all monsters gain Invisibility and become untargetable&lt;/color&gt; for 7 sec.", "ラウンド5から、&lt;color=&quot;#fd4540&quot;&gt;全てのモンスターが7秒間透明化し、対象にされなくなる&lt;/color&gt;。", "", ""], ["Stage_mStageDesc_8101002", "Starting from Round 5, &lt;color=&quot;#fd4540&quot;&gt;all monsters gain Invincibility upon taking DMG for the first time, becoming immune to all DMG&lt;/color&gt; for 4 sec.", "ラウンド5から、&lt;color=&quot;#fd4540&quot;&gt;全てのモンスターが初めてダメージを受けると4秒間無敵になり、全てのダメージを受けなくなる&lt;/color&gt;。", "", ""], ["Stage_mStageDesc_8101003", "Starting from Round 5, &lt;color=&quot;#fd4540&quot;&gt;all heroes continuously take True DMG equal to 4% of their Max HP per sec&lt;/color&gt;.", "ラウンド5から、&lt;color=&quot;#fd4540&quot;&gt;全てのヒーローが毎秒最大HPの4%のトゥルーダメージを継続的に受ける&lt;/color&gt;。", "", ""], ["Stage_mStageDesc_8201011", "Team up with your friends to defeat the enemy Boss and fend off the tides of enemies.", "フレンドとチームを組み、敵ボスを倒し、次々と押し寄せる敵に立ち向かいましょう。", "", ""], ["Stage_mStageDesc_8201012", "Team up with your friends to defeat the enemy Boss and fend off the tides of enemies.", "フレンドとチームを組み、敵ボスを倒し、次々と押し寄せる敵に立ち向かいましょう。", "", ""], ["Stage_mStageDesc_8201013", "Team up with your friends to defeat the enemy Boss and fend off the tides of enemies.", "フレンドとチームを組み、敵ボスを倒し、次々と押し寄せる敵に立ち向かいましょう。", "", ""], ["Stage_mStageDesc_8201014", "Team up with your friends to defeat the enemy Boss and fend off the tides of enemies.", "フレンドとチームを組み、敵ボスを倒し、次々と押し寄せる敵に立ち向かいましょう。", "", ""], ["Stage_mStageDesc_8201015", "Team up with your friends to defeat the enemy Boss and fend off the tides of enemies.", "フレンドとチームを組み、敵ボスを倒し、次々と押し寄せる敵に立ち向かいましょう。", "", ""], ["Stage_mStageFailDesc_5003001", "Pay extra attention to Semrah&#x27;s Battle Mode and exploit its weakness.", "セムラの戦闘形態に注意を払い、弱点を見つけましょう。", "", ""], ["Stage_mStageFailDesc_5003002", "Pay extra attention to Semrah&#x27;s Battle Mode and exploit its weakness.", "セムラの戦闘形態に注意を払い、弱点を見つけましょう。", "", ""], ["Stage_mStageIdDesc_5003001", "Apocalypse I - Playtest", "アポカリプスI - プレイテスト", "", ""], ["Stage_mStageIdDesc_5003002", "Apocalypse II - Playtest", "アポカリプスII - プレイテスト", "", ""], ["Stage_mStageIdDesc_8201011", "Stage 1", "ステージ1", "", ""], ["Stage_mStageIdDesc_8201012", "Stage 2", "ステージ2", "", ""], ["Stage_mStageIdDesc_8201013", "Stage 3", "ステージ3", "", ""], ["Stage_mStageIdDesc_8201014", "Stage 4", "ステージ4", "", ""], ["Stage_mStageIdDesc_8201015", "Stage 5", "ステージ5", "", ""], ["Stage_mStageIdDesc_991001", "Test 1-1", "Test 1-1", "", ""], ["Stage_mStageIdDesc_991002", "Test 1-2", "Test 1-2", "", ""], ["Stage_mStageIdDesc_991003", "Test 1-3", "Test1-3", "", ""], ["Stage_mStageName_5003001", "Semrah", "セムラ", "", ""], ["Stage_mStageName_5003002", "Semrah", "セムラ", "", ""], ["Stage_mStageName_8201011", "Co-op Mode", "協力モード", "", ""], ["Stage_mStageName_8201012", "Co-op Mode", "協力モード", "", ""], ["Stage_mStageName_8201013", "Co-op Mode", "協力モード", "", ""], ["Stage_mStageName_8201014", "Co-op Mode", "協力モード", "", ""], ["Stage_mStageName_8201015", "Co-op Mode", "協力モード", "", ""], ["UILanguage_mKeyValue_Form_BackpackIntegration_SubTitle", "Sort", "並べ替え", "", ""], ["UILanguage_mKeyValue_Panel_BackpackEquipPanel_EquipedText", "Equipped", "装備中", "", ""], ["UILanguage_mKeyValue_Panel_MaterialPanel_GetWayTitle_Text", "Access", "Go", "", ""], ["UILanguage_mKeyValue_Panel_MaterialPanel_Text_Use", "Use", "使用", "", ""], ["UnionRaise_mRaiseText_15", "Donate &lt;color=#28d37c&gt;{num}&lt;/color&gt; Mythic Extract(s).", "ミシックエクストラクトを&lt;color=#28d37c&gt;{num}&lt;/color&gt;個寄付する。", "", ""], ["UnionRaise_mRaiseText_16", "Donate &lt;color=#28d37c&gt;{num}&lt;/color&gt; 5-star Psychic Power(s).", "星5精神体を&lt;color=#28d37c&gt;{num}&lt;/color&gt;個寄付する。", "", ""], ["UnionRaise_mRaiseTitle_15", "Promotion Insignia III", "昇格紋章III", "", ""], ["UnionRaise_mRaiseTitle_16", "Hero Star Up", "ヒーロースターアップ", "", ""], ["Unit_mDescribe_37105", "Scalekin mages, adept in the art of poisonous magic, possess the ability to &lt;color=#ff4500&gt;inflict poison on enemies&lt;/color&gt;.", "毒の魔法を使うスケイルキンのメイジ。&lt;color=#ff4500&gt;敵に毒ダメージ&lt;/color&gt;を与える。", "", ""], ["Unit_mDescribe_37106", "Elite Skeleton Archers that can deal massive DMG from afar.", "遠距離から大きなダメージを与えてくる、上位のスケルトンアーチャー。", "", ""], ["Unit_mDescribe_37107", "Small spiders, very aggressive but weak individually.", "小さな蜘蛛。非常に攻撃的だが、単体では弱い。", "", ""], ["Unit_mDescribe_37108", "Toxic Suicides will explode when approaching enemies, &lt;color=#ff4500&gt;dealing moderate AoE DMG and poisoning them&lt;/color&gt;.", "トキシックスーサイドは敵に近づくと爆発し、&lt;color=#ff4500&gt;中程度の範囲ダメージを与え、敵を毒状態にする&lt;/color&gt;。", "", ""], ["Unit_mDescribe_37110", "Clad in giant shields and possessing unyielding skeletal frames, they are renowned for their exceptional DEF.", "屈強な骨格に、巨大な盾を持つ。並外れた防御力で知られている。", "", ""], ["Unit_mDescribe_37112", "Produces a Queen Spider when left out of combat for a while. Eliminate it before it hatches.", "しばらくバトルから離れた後、蜘蛛の女王が生み出される。孵化する前に排除する必要がある。", "", ""], ["Unit_mFeature_10408", "Ludwig has been reborn from the abyss. With a horrifying power granted by his master - the Eldritch God. Ludwig has now lost his humanity.", "ラドウィグは、主である邪神から恐ろしい力を与えられ、深淵から蘇り人間性を失った。", "", ""], ["Unit_mFeature_10409", "Ludwig has been reborn from the abyss. With a horrifying power granted by his master - the Eldritch God. Ludwig has now lost his humanity.", "ラドウィグは、主である邪神から恐ろしい力を与えられ、深淵から蘇り人間性を失った。", "", ""], ["Unit_mFeature_10410", "Ludwig has been reborn from the abyss. With a horrifying power granted by his master - the Eldritch God. Ludwig has now lost his humanity.", "ラドウィグは、主である邪神から恐ろしい力を与えられ、深淵から蘇り人間性を失った。", "", ""], ["Unit_mFeature_37105", "Scalekin mages, adept in the art of poisonous magic, possess the ability to inflict continuous Poison DMG on enemies.", "スケイルキンメイジは毒の魔法を使用し、敵に継続的な毒ダメージを与える。", "", ""], ["Unit_mFeature_37106", "Elite Skeleton Archers that can deal massive DMG from afar.", "遠距離から大きなダメージを与えてくる、上位のスケルトンアーチャー。", "", ""], ["Unit_mFeature_37107", "Small spiders, very aggressive but weak individually.", "小さな蜘蛛。非常に攻撃的だが、単体では弱い。", "", ""], ["Unit_mFeature_37108", "The inferior zraks, whose bodies are filled with corrosive liquids, will launch suicide attacks on enemies.", "体が腐食性の液体で満たされている下級のズラック。敵に自爆攻撃を仕掛ける。", "", ""], ["Unit_mFeature_37110", "Equipped with a giant shield, these stiff skeletons are able to hold off heavy attacks.", "巨大な盾を装備した頑強なスケルトン。激しい攻撃を防ぐことができる。", "", ""], ["Unit_mFeature_37112", "Produces a Queen Spider when left out of combat for a while. Eliminate it before it hatches.", "しばらくバトルから離れた後、蜘蛛の女王が生み出される。孵化する前に排除する必要がある。", "", ""], ["Unit_mName_37105", "Poison Mage", "ポイズンメイジ", "", ""], ["Unit_mName_37106", "Elite Skeleton Archer", "エリートスケルトンアーチャー", "", ""], ["Unit_mName_37107", "Small Arachnid", "スモールアラクニド", "", ""], ["Unit_mName_37108", "Suicide", "スーサイド", "", ""], ["Unit_mName_37110", "Skeletal Giant-Shielder", "スケルトンジャイアントシールダー", "", ""], ["Unit_mName_37112", "Huge Spider Egg", "巨大な蜘蛛の卵", "", ""], ["Unit_mFeature_16474", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "石を操るために生まれた生物。縄張りに侵入した者を容赦なく攻撃する。", "", ""], ["Unit_mFeature_16475", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "石を操るために生まれた生物。縄張りに侵入した者を容赦なく攻撃する。", "", ""], ["Unit_mFeature_16481", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "石を操るために生まれた生物。縄張りに侵入した者を容赦なく攻撃する。", "", ""], ["Unit_mFeature_16487", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "石を操るために生まれた生物。縄張りに侵入した者を容赦なく攻撃する。", "", ""], ["Unit_mFeature_16496", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "石を操るために生まれた生物。縄張りに侵入した者を容赦なく攻撃する。", "", ""], ["Unit_mFeature_16497", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "石を操るために生まれた生物。縄張りに侵入した者を容赦なく攻撃する。", "", ""], ["Unit_mFeature_18133", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "石を操るために生まれた生物。縄張りに侵入した者を容赦なく攻撃する。", "", ""], ["Unit_mFeature_18137", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "石を操るために生まれた生物。縄張りに侵入した者を容赦なく攻撃する。", "", ""], ["Unit_mFeature_11127", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "石を操るために生まれた生物。縄張りに侵入した者を容赦なく攻撃する。", "", ""], ["Stage_mStageDesc_9042001", "The Nine-Tailed Fox, resurrected by the grievance from the Shang Dynasty, wreaks havoc upon the mortal realm with her illusions. Four supreme arrays must be laid to obliterate its true spirit.\\n\\nFire Realm: Molten lava surges as crimson chains, coiling round her nine tails to scorch demonic bones. The fox’s wails crackle like searing thunder.", "商王朝の怨念によって蘇った九尾の狐が、幻術で人間界に災いをもたらしている。その真の魂を滅ぼすには、四つの至高の陣を敷かねばならない。\\n\\n炎の領域：溶けた溶岩が真紅の鎖となり、九尾に巻き付いて妖骨を焼く。燃える雷鳴のように狐の悲鳴が響く。", "", ""], ["Item_mItemName_214901", "Shawl of the Lifegiver", "ライフギバーのショール", "", ""], ["Skill_mSkillSimpleDesc_232170_1", "When the Talent is triggered, increases the hero&#x27;s DMG by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;, with an additional &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt; against Elite and Boss units for &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}&lt;/color&gt; sec.", "タレント発動時、ヒーローのダメージを&lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;増加させ、エリートとボスユニットに対しては追加で&lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt;増加する。この効果は&lt;color=&quot;#4A9DF2&quot;&gt;{skm3}&lt;/color&gt;持続する。", "", ""], ["CommonText_mMessage_25947", "Corresponding Arena Challenge Attack Mode", "対応するアリーナチャレンジアタックモード", "", ""], ["CommonText_mMessage_25948", "Corresponding Arena Challenge Defense Mode", "対応するアリーナチャレンジ防御モード", "", ""], ["Skill_mSkillSimpleDesc_220903_5", "Applies &lt;color=&quot;#28d37c&quot;&gt;[322095]&lt;/color&gt; to &lt;color=&quot;#4A9DF2&quot;&gt;1&lt;/color&gt; ally with the lowest HP percentage in range for &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}&lt;/color&gt; sec.", "範囲内で最もHP割合の低い味方&lt;color=&quot;#4A9DF2&quot;&gt;1&lt;/color&gt;体に&lt;color=&quot;#28d37c&quot;&gt;[322095]&lt;/color&gt;を&lt;color=&quot;#4A9DF2&quot;&gt;{skm1}&lt;/color&gt;秒間付与する。", "", ""], ["Skill_mSkillSimpleDesc_220903_4", "Applies &lt;color=&quot;#28d37c&quot;&gt;[322094]&lt;/color&gt; to &lt;color=&quot;#4A9DF2&quot;&gt;1&lt;/color&gt; ally with the lowest HP percentage in range for &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}&lt;/color&gt; sec.", "範囲内で最もHP割合の低い味方&lt;color=&quot;#4A9DF2&quot;&gt;1&lt;/color&gt;体に&lt;color=&quot;#28d37c&quot;&gt;[322094]&lt;/color&gt;を&lt;color=&quot;#4A9DF2&quot;&gt;{skm1}&lt;/color&gt;秒間付与する。", "", ""], ["Skill_mSkillSimpleDesc_220903_3", "Applies &lt;color=&quot;#28d37c&quot;&gt;[322093]&lt;/color&gt; to &lt;color=&quot;#4A9DF2&quot;&gt;1&lt;/color&gt; ally with the lowest HP percentage in range for &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}&lt;/color&gt; sec.", "範囲内で最もHP割合の低い味方&lt;color=&quot;#4A9DF2&quot;&gt;1&lt;/color&gt;体に&lt;color=&quot;#28d37c&quot;&gt;[322093]&lt;/color&gt;を&lt;color=&quot;#4A9DF2&quot;&gt;{skm1}&lt;/color&gt;秒間付与する。", "", ""], ["Skill_mSkillSimpleDesc_220903_2", "Applies &lt;color=&quot;#28d37c&quot;&gt;[322092]&lt;/color&gt; to &lt;color=&quot;#4A9DF2&quot;&gt;1&lt;/color&gt; ally with the lowest HP percentage in range for &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}&lt;/color&gt; sec.", "範囲内で最もHP割合の低い味方&lt;color=&quot;#4A9DF2&quot;&gt;1&lt;/color&gt;体に&lt;color=&quot;#28d37c&quot;&gt;[322092]&lt;/color&gt;を&lt;color=&quot;#4A9DF2&quot;&gt;{skm1}&lt;/color&gt;秒間付与する。", "", ""], ["LANG_STRID_notice_NineTailedNightmare", "Nine-Tailed Nightmare Event Intro", "九尾の悪夢イベント紹介", "", ""], ["LANG_STRID_push_long9_title_1", "Grimmscale Invasion Launches", "グリムスケイルの侵攻開始", "", ""], ["LANG_STRID_push_long9_title_2", "Commanders can challenge Sauryan, Wing of Chaos infinitely every day. Rewards are based on the highest total damage dealt in a single challenge attempt.", "毎日混沌の翼サウリアンに無制限に挑戦できる。報酬は単回チャレンジ試行で与えた最高総ダメージに基づく。", "", ""], ["LANG_STRID_push_xyx_title_1", "Zombie Invasion Starts!", "ゾンビ侵攻開始！", "", ""], ["LANG_STRID_push_xyx_title_2", "Build your hero&#x27;s skills, equip powerful Relics, and battle through waves of monsters to survive!", "ヒーローのスキルを強化し、強力なレリックを装備して、モンスターウェーブから生き残れ！", "", ""], ["LANG_STRID_notice_jwhpv", "Event Trailer: Nine-Tailed Nightmare", "イベントPV：九尾の悪夢", "", ""], ["LANG_STRID_push_jwhyy1", "Nine-Tailed Nightmare Is Here!", "九尾の悪夢登場！", "", ""], ["LANG_STRID_push_jwhyy2", "The new Legendary heroes Ne Zha and Erlang Shen arrive! Join the events to claim event-exclusive rewards, including Exclusive Artifacts, Summoning Crystals, Avatar, Emote, and more! Plus, Erlang Shen&#x27;s time-limited skin is now available!", "新レジェンドヒーロー哪吒と二郎神が登場！イベントに参加して、専用アーティファクト、召喚クリスタル、アバター、エモートなど、イベント限定報酬を受け取りましょう！さらに、二郎神の期間限定スキンも登場！", "", ""], ["LANG_STRID_notice_NineTailed2", "Nine-Tailed Nightmare Starts!", "九尾の悪夢開始！", "", ""], ["LANG_STRID_notice_NineTailed3", "Join the event to obtain event-exclusive rewards, including Exclusive Artifacts, Avatar, Avatar Border, Summoning Crystals, and more!", "イベントに参加して、専用アーティファクト、アバター、アバターフレーム、召喚クリスタルなど、イベント限定報酬を獲得しましょう！", "", ""], ["LANG_STRID_push_shardsummon_nezha", "Collect shards to assemble Ne Zha&#x27;s Exclusive Artifact: Fire-Tipped Spear!", "シャードを集めて、哪吒の専用アーティファクト「炎槍」を合成しよう！", "", ""], ["LANG_STRID_push_shardsummon_sqhcending", "Artifact Shard Assembly Countdown", "アーティファクトシャード合成カウントダウン", "", ""], ["LANG_STRID_push_shardsummon_nezhaend2", "Last chance to collect shards and assemble Ne Zha&#x27;s Exclusive Artifact: Fire-Tipped Spear! Don&#x27;t miss out!", "ラストチャンス！哪吒の専用アーティファクト「炎槍」のシャードを集めて合成しよう！ぜひ、お見逃しなく！", "", ""], ["LANG_STRID_notice_CreativeShort", "Creative Short", "クリエイティブショート", "", ""], ["LANG_STRID_compete_brief", "After the event starts, Commanders earn League points by participating in the Arena, Guild - Drake&#x27;s Chasm and spending Stamina and can claim Personal Score Rewards. Commanders within the same League compete against each other for ranking rewards. After the event ends, Commanders who have earned points can claim the Basic League Rewards. Members of the League with a higher total score will receive additional Champion League Reward.", "イベント開始後、コマンダーはアリーナ、ギルド - ドレイクの裂け目への参加とスタミナ消費によってリーグポイントを獲得し、個人スコア報酬を受け取ることができます。同一リーグ内のコマンダーはランキング報酬を競い合うことになります。イベント終了後、ポイントを獲得したコマンダーは基本リーグ報酬を受け取ることができます。より高い合計スコアを持つリーグのメンバーは、追加のチャンピオンリーグ報酬を受け取ります。", "", ""], ["LANG_STRID_Anniversary_Discount_Event_Des_01", "Discount Tokens obtained from event quests can be used to randomly discount an item on the event page once. Each item can be discounted up to 3 times.", "イベントクエストから獲得したディスカウントトークンで、イベントページのアイテムを1回ランダムに割引できる。各アイテムは最大3回まで割引可能。", "", ""], ["LANG_STRID_FishingRanking", "&lt;color=#e1e1e1&gt;After the event ends, the top 3 Commanders on the leaderboard will each receive a physical merchandise reward. Contact info will be requested via in-game mail for delivery.&lt;/color&gt;", "&lt;color=#e1e1e1&gt;イベント終了後、リーダーボード上位3位のコマンダーはそれぞれ物理的な商品報酬を受け取る。配送のための連絡先情報はゲーム内メールで確認される。&lt;/color&gt;", "", ""], ["LANG_STRID_notice_nzgl", "Hero Gameplay: Ne Zha", "ヒーローゲームプレイ：哪吒", "", ""], ["LANG_STRID_notice_yjgl", "Hero Gameplay: Erlang Shen", "ヒーローゲームプレイ：二郎神", "", ""], ["LANG_STRID_GDP_title_26", "Celestial Season", "星環シーズン", "", ""], ["LANG_STRID_activity_popup_GDP_htj", "Gold Dragon Pass - Celestial Season", "ゴールドドラゴンパス - 星環シーズン", "", ""], ["LANG_STRID_CompeteEvent_Rule11", "&lt;color=#e1e1e1&gt;Consume general items to gain points.&lt;/color&gt;", "&lt;color=#e1e1e1&gt;一般アイテムを消費してポイントを獲得する。&lt;/color&gt;", "", ""], ["LANG_STRID_CompeteEvent_Rule12", "&lt;color=#e1e1e1&gt;Consume Mythril and Meteorite to gain points.&lt;/color&gt;", "&lt;color=#e1e1e1&gt;ミスリルとメテオライトを消費してポイントを獲得する。&lt;/color&gt;", "", ""], ["LANG_STRID_Moon_Dec_01", "Shadows of Tomorrow", "朧ノ双華", "", ""], ["LANG_STRID_Anniversary_Discount_Event_Detail", "&lt;color=&quot;#cec2b1&quot;&gt;Discount Event&lt;/color&gt;\\nEach use of a Discount Token will apply a &lt;color=&quot;#28d37c&quot;&gt;random discount&lt;/color&gt; to a random item in the event. Participate in event quests to obtain Discount Tokens. All unused Discount Tokens will be removed after the event ends.\\nPlayers may choose to purchase event items at their original prices without using any Discount Tokens.\\n\\nEach time a Discount Token is used, one item will be randomly selected from the three available in the event interface for a discount. After each discount, the price of the currently selected item will be further reduced. &lt;color=&quot;#28d37c&quot;&gt;Each item reaches its maximum discount after being discounted 3 times&lt;/color&gt;.\\nOnly items that have not reached the maximum discount and have not been purchased can continue to participate in the discount event.", "&lt;color=&quot;#cec2b1&quot;&gt;割引イベント&lt;/color&gt;\\n割引トークンを1回使用するごとに、イベント内のランダムなアイテムに&lt;color=&quot;#28d37c&quot;&gt;ランダム割引&lt;/color&gt;が適用される。イベントクエストに参加して割引トークンを獲得しよう。未使用の割引トークンはすべてイベント終了後に削除される。\\nプレイヤーは割引トークンを使用せずに、元の価格でイベントアイテムを購入することも可能。\\n\\n割引トークンを使用するたびに、イベントインターフェースで利用可能な3つのアイテムからランダムに1つが割引対象として選ばれる。割引が適用されるごとに、現在選択されているアイテムの価格がさらに下がる。&lt;color=&quot;#28d37c&quot;&gt;各アイテムは3回割引されると最大割引に到達する&lt;/color&gt;。\\n最大割引に到達していない、かつ購入されていないアイテムのみが割引イベントに継続参加できる。", "", ""]];
+            const formattedData = [["BUFFAttribute_mName_8202044", "DMG Increase", "ダメージ増加", "", ""], ["BUFFAttribute_mName_8202045", "DMG Reduction", "ダメージ軽減", "", ""], ["BUFFAttribute_mTips_322928", "Fire-Tipped Spear ignores {30,num}% of the enemy's DEF. Universe Ring bounces {31,num} extra time(s) and can hit the same target multiple times. Yin-Yang Blade executes common monsters with HP below {32,num}%.", "炎槍は敵の防御力を{30,num}%無視する。ユニバースリングは{31,num}回追加で跳躍し、同じ対象に複数回命中できる。陰陽剣はHPが{32,num}%未満のコモンモンスターを即座に処刑する。", "", ""], ["ChampionshipPlan_mChampionshipDesc_833", "Participate in Artifact Material Raid to win trophies and redeem rewards.", "アーティファクト素材レイドに参加してトロフィーを獲得し、報酬を引き換えましょう。", "", ""], ["ChampionshipPlan_mChampionshipDesc_834", "Level up/star up/promote heroes or upgrade heroes' skills to win trophies and redeem rewards.", "ヒーローをレベルアップ、スターアップ、昇格、またはヒーロースキルをアップグレードさせてトロフィーを獲得し、報酬と引き換えましょう。", "", ""], ["ChampionshipPlan_mChampionshipDesc_835", "Participate in Gear Raid I to win trophies and redeem rewards.", "装備レイドIに参加してトロフィーを獲得し、報酬と引き換えましょう。", "", ""], ["ChampionshipPlan_mChampionshipDesc_836", "Participate in Gear Raid II to win trophies and redeem rewards.", "装備レイドIIに参加してトロフィーを獲得し、報酬と引き換えましょう。", "", ""], ["ChampionshipPlan_mChampionshipDesc_837", "Summon heroes to win trophies and redeem rewards.", "ヒーローを召喚してトロフィーを獲得し、ランダムな報酬と引き換えましょう。", "", ""], ["ChampionshipPlan_mChampionshipDesc_838", "Participate in Artifact Material Raid to win trophies and redeem rewards.", "アーティファクト素材レイドに参加してトロフィーを獲得し、報酬を引き換えましょう。", "", ""], ["ChampionshipPlan_mChampionshipDesc_839", "Participate in Gear Raid III to win trophies and redeem rewards.", "装備レイドIIIに参加してトロフィーを獲得し、報酬と交換しましょう。", "", ""], ["ChampionshipPlan_mChampionshipDesc_840", "Level up/star up/promote heroes or upgrade heroes' skills to win trophies and redeem rewards.", "ヒーローをレベルアップ、スターアップ、昇格、またはヒーロースキルをアップグレードさせてトロフィーを獲得し、報酬と引き換えましょう。", "", ""], ["ChampionshipPlan_mChampionshipDesc_841", "Participate in Gear Raid I to win trophies and redeem rewards.", "装備レイドIに参加してトロフィーを獲得し、報酬と引き換えましょう。", "", ""], ["ChampionshipPlan_mChampionshipDesc_842", "Participate in Gear Raid II to win trophies and redeem rewards.", "装備レイドIIに参加してトロフィーを獲得し、報酬と引き換えましょう。", "", ""], ["ChampionshipPlan_mChampionshipGlobalName_837", "Arrival of Heroes Ultimate Leaderboard", "ヒーローの降臨アルティメットリーダーボード", "", ""], ["ChampionshipPlan_mChampionshipName_833", "Mystery of Artifacts", "アーティファクトの謎", "", ""], ["ChampionshipPlan_mChampionshipName_834", "Hero Training", "ヒーロートレーニング", "", ""], ["ChampionshipPlan_mChampionshipName_835", "The Lost Legacy", "失われし遺産", "", ""], ["ChampionshipPlan_mChampionshipName_836", "Vault in the Sands", "砂の宝物庫", "", ""], ["ChampionshipPlan_mChampionshipName_837", "Arrival of Heroes", "ヒーローの降臨", "", ""], ["ChampionshipPlan_mChampionshipName_838", "Mystery of Artifacts", "アーティファクトの謎", "", ""], ["ChampionshipPlan_mChampionshipName_839", "Forgotten Palace", "失われた場所", "", ""], ["ChampionshipPlan_mChampionshipName_840", "Hero Training", "ヒーロートレーニング", "", ""], ["ChampionshipPlan_mChampionshipName_841", "The Lost Legacy", "失われし遺産", "", ""], ["ChampionshipPlan_mChampionshipName_842", "Vault in the Sands", "砂の宝物庫", "", ""], ["Chapter_mChapterName_4301", "Titanic Ruins - Playtest", "タイタニックルーイン - プレイテスト", "", ""], ["CommonText_mMessage_25116", "Awaken the mystical power within.", "眠りし神秘の力を解き放て。", "", ""], ["CommonText_mMessage_25125", "Take destiny into your own hands.", "運命を自らの手に。", "", ""], ["CommonText_mMessage_25132", "Reveal cards to earn Dragon's Gold by matching the designated patterns.", "カードを公開し、指定されたパターンとマッチングしてドラゴンの金貨を獲得しよう。", "", ""], ["CommonText_mMessage_25133", "Reveal cards and match 3 identical patterns to earn a <span style=\"color: #fdbe36;\">{num}</span>x reward!", "カードを公開して同じ模様を3つ揃えると、<span style=\"color: #fdbe36;\">{num}</span>倍の報酬獲得！", "", ""], ["CommonText_mMessage_25631", "Number:", "数値：", "", ""], ["CommonText_mMessage_25635", "The [?] corresponds to 3 numbers that will be filled into empty slots in sequence—the resulting number will determine the final amount of Dragon's Gold you receive!", "[?]には3つの数字が順番に入力されます。この組み合わせによって受け取れるドラゴンの金貨の最終額が決まります！", "", ""], ["CommonText_mMessage_25773", "Nine-Tailed Nightmare", "九尾の悪夢", "", ""], ["CommonText_mMessage_25828", "Locked", "未解放", "", ""], ["CommonText_mMessage_25829", "Invalid", "無効", "", ""], ["CommonText_mMessage_25830", "New Recruit", "新規募集", "", ""], ["CommonText_mMessage_25846", "Officials", "役職", "", ""], ["CommonText_mMessage_25847", "Guild War Officials Appointment", "ギルド戦争役職任命", "", ""], ["CommonText_mMessage_25848", "Rank", "ランク", "", ""], ["CommonText_mMessage_25849", "Marshal", "司令官", "", ""], ["CommonText_mMessage_25850", "Members", "メンバー", "", ""], ["CommonText_mMessage_25851", "BP", "戦力", "", ""], ["CommonText_mMessage_25852", "Season's Attacks", "シーズン攻撃回数", "", ""], ["CommonText_mMessage_25853", "Actions", "アクション", "", ""], ["CommonText_mMessage_25854", "Appoint", "任命", "", ""], ["CommonText_mMessage_25855", "Dismiss", "解雇", "", ""], ["CommonText_mMessage_25856", "No Access", "アクセス権限がありません", "", ""], ["CommonText_mMessage_25857", "All Marshals gain <span style=\"color: #e37b00;\">{num} extra attack(s) </span> per Guild War round. Only the Guild Leader and Vice Leaders can appoint a Marshal during the preparation phase. If no appointments are made, this position will be automatically assigned based on members' contribution and BP.", "司令官は各ギルド戦争ラウンドで<span style=\"color: #e37b00;\">{num}回</span>の追加攻撃を行うことができる。準備フェイズ中は、ギルドリーダーとサブリーダーのみが司令官を任命できる。任命がない場合、貢献度と戦力に応じて自動的に配置される。", "", ""], ["CommonText_mMessage_25858", "Appointed: {num1}/{num2}", "任命済み：{num1}/{num2}", "", ""], ["CommonText_mMessage_25859", "Appointment successful. Player gains {num} extra attack(s) per round.", "任命が完了しました。プレイヤーは1ラウンドにつき{num}回の追加攻撃を獲得します。", "", ""], ["CommonText_mMessage_25860", "Marshal slots are full. Dismiss one to continue.", "司令官の数が上限に達しています。継続するには1人解雇してください。", "", ""], ["CommonText_mMessage_25861", "<span style=\"color: #feab53;\">Are you sure you want to dismiss this player from the Marshal position?</span><br>Each Guild can have up to {num1} Marshals, each gaining {num2} extra attack(s) per round.", "<span style=\"color: #feab53;\">このプレイヤーを司令官のポジションから解雇しますか？</span><br>各ギルドごとに最大{num1}名の司令官を任命でき、1名につき1ラウンドごとに{num2}回の追加攻撃を発動します。", "", ""], ["CommonText_mMessage_25862", "Marshal dismissed successfully. Please appoint a new one.", "司令官を解雇しました。新しい司令官を任命してください。", "", ""], ["CommonText_mMessage_25863", "Guild War Attempts", "ギルド戦争攻撃回数", "", ""], ["CommonText_mMessage_25931", "Points of the Round", "ラウンドポイント", "", ""], ["CommonText_mMessage_26080", "Prioritize Guild War team.", "ギルド戦争チームを優先する。", "", ""], ["CommonText_mMessage_26081", "Playtest mode cannot save battle results or auto-fight.", "試行モードではバトル結果のセーブやオートバトルはできません。", "", ""], ["CommonText_mMessage_60708", "Score Details", "スコア詳細", "", ""], ["Difficulty_mDetail_1100001", "Only heroes from <span style=\"color: #e37b00;\">The Nightmare Council, The Star Piercers</span> can challenge this stage.<br>Lord Skills of each Faction can only affect up to <span style=\"color: #fd4540;\">5</span> heroes.", "<span style=\"color: #e37b00;\">ナイトメアカウンシル、スターピアサー</span>の勢力のヒーローのみがこのステージに挑戦できる。<br>各勢力のロードスキルは最大<span style=\"color: #fd4540;\">5</span>体のヒーローにのみ効果を与える。", "", ""], ["Difficulty_mDetail_1100003", "Only heroes from <span style=\"color: #e37b00;\">The Infernal Blast, The North Throne</span> can challenge this stage.<br>Lord Skills of each Faction can only affect up to <span style=\"color: #fd4540;\">5</span> heroes.", "<span style=\"color: #e37b00;\">インファーナルブラスト、ノーススローン</span>の勢力のヒーローのみがこのステージに挑戦できる。<br>各勢力のロードスキルは最大<span style=\"color: #fd4540;\">5</span>体のヒーローにのみ効果を与える。", "", ""], ["Difficulty_mDetail_1100004", "Only heroes from <span style=\"color: #e37b00;\">The Esoteria Order, The Chaos Dominion, and The Supreme Arbiters</span> can challenge this stage.<br>Lord Skills of each Faction can only affect up to <span style=\"color: #fd4540;\">5</span> heroes.", "<span style=\"color: #e37b00;\">エソテリアオーダー、カオスドミニオン、スプリームアービター</span>の勢力のヒーローのみがこのステージに挑戦できる。<br>各勢力のロードスキルは最大<span style=\"color: #fd4540;\">5</span>体のヒーローにのみ効果を与える。", "", ""], ["Difficulty_mDetail_1200001", "The following heroes are exempt from map info restrictions.", "以下のヒーローはマップ情報の制限を受けない。", "", ""], ["Difficulty_mDetail_1200002", "The following heroes are exempt from map info restrictions.", "以下のヒーローはマップ情報の制限を受けない。", "", ""], ["Difficulty_mDetail_1200003", "The following heroes are exempt from map info restrictions.", "以下のヒーローはマップ情報の制限を受けない。", "", ""], ["Difficulty_mDetail_1200004", "The following heroes are exempt from map info restrictions.", "以下のヒーローはマップ情報の制限を受けない。", "", ""], ["Difficulty_mDetail_1300001", "Erlang Shen cannot be deployed in this special stage.", "このスペシャルステージでは二郎神を配置できない。", "", ""], ["Difficulty_mDetail_32010053", "Mage heroes cannot be included in the team.", "チームにメイジヒーローを編成できない。", "", ""], ["Difficulty_mDetail_32010153", "Destroyers gain the Camaraderie skill. When they die, nearby monsters receive an enhancement.", "デストロイヤーは同志連技を獲得する。戦闘不能になると、近くのモンスターが強化効果を受ける。", "", ""], ["Difficulty_mDetail_32010163", "When the Priest of Thunder appears, he gains Ghost Form for 30 sec.", "雷の司祭が出現すると、30秒間ゴースト状態となる。", "", ""], ["Difficulty_mDetail_32010364", "Boss enemies restore 1% Max HP per sec, while other enemies restore 5% Max HP per sec.", "ボスは毎秒最大HPの1％を、その他の敵は毎秒最大HPの5％を回復する。", "", ""], ["Difficulty_mDetail_32010476", "Langlyn's Max HP increases by 50%, but cannot be healed.", "ラングリンの最大HPが50％増加するが、回復を受けられなくなる。", "", ""], ["Difficulty_mDetail_32010477", "Langlyn's Max HP increases by 75%, but cannot be healed.", "ラングリンの最大HPが75％増加するが、回復を受けられなくなる。", "", ""], ["Difficulty_mDetail_32010478", "Langlyn's Max HP increases by 100%, but cannot be healed.", "ラングリンの最大HPが100％増加するが、回復を受けられなくなる。", "", ""], ["ExpStageUI_mRaidName_8201006", "COTD-1", "COTD-1", "", ""], ["ExpStageUI_mRaidName_8201007", "COTD-2", "COTD-2", "", ""], ["ExpStageUI_mRaidName_8201008", "COTD-3", "COTD-3", "", ""], ["ExpStageUI_mRaidName_8201009", "COTD-4", "COTD-4", "", ""], ["ExpStageUI_mRaidName_8201010", "COTD-5", "COTD-5", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010153", "Destroyers gain the Camaraderie skill. When a Destroyer dies, nearby Destroyers receive an enhancement.", "デストロイヤーは同志連技スキルを獲得する。仲間のデストロイヤーが倒れると、その周囲にいるデストロイヤーが強化される。", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010163", "When the Priest of Thunder appears, he gains Ghost Form for 30 sec.", "雷の司祭が出現すると、30秒間ゴースト状態となる。", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010364", "Boss enemies restore 1% Max HP per sec, while other enemies restore 5% Max HP per sec.", "ボスは毎秒最大HPの1％を、その他の敵は毎秒最大HPの5％を回復する。", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010476", "Langlyn's Max HP increases by 50%, but cannot be healed.", "ラングリンの最大HPが50％増加するが、回復を受けられなくなる。", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010477", "Langlyn's Max HP increases by 75%, but cannot be healed.", "ラングリンの最大HPが75％増加するが、回復を受けられなくなる。", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010478", "Langlyn's Max HP increases by 100%, but cannot be healed.", "ラングリンの最大HPが100％増加するが、回復を受けられなくなる。", "", ""], ["HeroFactionKingSkill_mName_100441_1", "The Cursed Cult", "カースカルト", "", ""], ["HeroFactionKingSkill_mName_100441_2", "The Cursed Cult", "カースカルト", "", ""], ["HeroFactionKingSkill_mName_100441_3", "The Cursed Cult", "カースカルト", "", ""], ["HeroFactionKingSkill_mName_100441_4", "The Cursed Cult", "カースカルト", "", ""], ["HeroFactionKingSkill_mName_100441_5", "The Cursed Cult", "カースカルト", "", ""], ["Item_mItemDesc_110", "Purchase to obtain a 30-Day Monthly Card of Diamonds.", "購入すると30日間のダイヤのマンスリーカードを獲得。", "", ""], ["Item_mItemDesc_111", "Purchase to obtain a 30-Day Monthly Card of Summoning.", "購入すると30日間の召喚のマンスリーカードを獲得。", "", ""], ["Item_mItemDesc_112", "Purchase to obtain a 30-Day Monthly Card of Stamina.", "購入すると30日間のスタミナのマンスリーカードを獲得。", "", ""], ["Item_mItemDesc_31096", "Select 1 event-exclusive hero to join the event. The selected exclusive hero has an increased drop rate & is guaranteed within 200 summons!", "イベントに参加する1体のイベント限定ヒーローを選択。選択した限定ヒーローは排出率が上昇し、200回召喚以内に必ず獲得できる！", "", ""], ["Item_mItemDesc_31097", "<span style=\"color: #eadca2;\">Special Summon Offer</span><br><br>Get the necessary materials for Hero Summon", "<span style=\"color: #eadca2;\">ヒーロー召喚の特別オファー</span><br><br>ヒーロー召喚に必要な素材を獲得", "", ""], ["Item_mItemDesc_3333", "<span style=\"color: #498a40;\">Exclusive avatar border for the Gold Dragon Pass.</span>", "<span style=\"color: #498a40;\">ゴールドドラゴンパスの限定アバターフレーム。</span>", "", ""], ["Item_mItemDesc_3519", "Unknown Clue of Erlang Shen. When obtained, it will automatically convert into a random one from Erlang Shen's Clues 1-5.", "二郎神の未知の手がかり。入手すると、自動的に二郎神の手がかり1～5のうちランダムな1つに変換される。", "", ""], ["Item_mItemDesc_3521", "Erlang Shen's Clue 2.<br><span style=\"color: #498a40;\">Usage: Consume this item via Fate's Chapters to unlock the corresponding clue.</span>", "二郎神の手がかり2。<br><span style=\"color: #498a40;\">使用方法：運命のチャプターでこのアイテムを消費し、対応する手がかりを解放する。</span>", "", ""], ["Item_mItemDesc_3522", "Erlang Shen's Clue 3.<br><span style=\"color: #498a40;\">Usage: Consume this item via Fate's Chapters to unlock the corresponding clue.</span>", "二郎神の手がかり3。<br><span style=\"color: #498a40;\">使用方法：運命のチャプターでこのアイテムを消費し、対応する手がかりを解放する。</span>", "", ""], ["Item_mItemDesc_3523", "Erlang Shen's Clue 4.<br><span style=\"color: #498a40;\">Usage: Consume this item via Fate's Chapters to unlock the corresponding clue.</span>", "二郎神の手がかり4。<br><span style=\"color: #498a40;\">使用方法：運命のチャプターでこのアイテムを消費し、対応する手がかりを解放する。</span>", "", ""], ["Item_mItemDesc_3524", "Erlang Shen's Clue 5.<br><span style=\"color: #498a40;\">Usage: Consume this item via Fate's Chapters to unlock the corresponding clue.</span>", "二郎神の手がかり5。<br><span style=\"color: #498a40;\">使用方法：運命のチャプターでこのアイテムを消費し、対応する手がかりを解放する。</span>", "", ""], ["Item_mItemDesc_35473", "You can obtain the following items:<br>Monthly Card of Diamonds (30-Day)<br>Diamond x500", "以下のアイテムを入手できる：<br>ダイヤのマンスリーカード（30日間）<br>ダイヤ×500", "", ""], ["Item_mItemDesc_35474", "You can obtain the following items:<br>Monthly Card of Summoning (30-Day)<br>Rare Summoning Crystal x500", "以下のアイテムを入手できる：<br>召喚のマンスリーカード（30日間）<br>レア召喚クリスタル×500", "", ""], ["Item_mItemDesc_35475", "You can obtain the following items:<br>Monthly Card of Stamina (30-Day)<br>Stamina x600<br>Auto-Fight Chance x30", "以下のアイテムを入手できる：<br>スタミナのマンスリーカード（30日間）<br>スタミナ×600<br>オートバトル可能回数×30", "", ""], ["Item_mItemDesc_56310", "Grants a random <span style=\"color: #498a40;\">Lvl. 2-4</span> Trial Keystone.", "<span style=\"color: #498a40;\">レベル2~4</span>の試練の要石をランダムで獲得する。", "", ""], ["Item_mItemDesc_56311", "Grants a random <span style=\"color: #498a40;\">Lvl. 2-5</span> Trial Keystone.", "ランダムで<span style=\"color: #498a40;\">レベル2~5</span>の試練の要石を獲得する。", "", ""], ["Item_mItemName_110", "Monthly Card of Diamonds (30-Day)", "ダイヤのマンスリーカード（30日間）", "", ""], ["Item_mItemName_111", "Monthly Card of Summoning (30-Day)", "召喚のマンスリーカード（30日間）", "", ""], ["Item_mItemName_112", "Monthly Card of Stamina (30-Day)", "スタミナのマンスリーカード（30日間）", "", ""], ["Item_mItemName_31096", "Exclusive Lucky Pick", "限定選択英霊", "", ""], ["Item_mItemName_31097", "Turbo Summon Bundle", "ターボ召喚パック", "", ""], ["Item_mItemName_3324", "Avatar Border: Nine-Tailed Nightmare Ranking Champion", "アバターフレーム：「九尾の悪夢」ランキング1位", "", ""], ["Item_mItemName_3325", "Avatar Border: Nine-Tailed Nightmare Ranking Runner-Up", "アバターフレーム：「九尾の悪夢」ランキング2位", "", ""], ["Item_mItemName_3326", "Avatar Border: Nine-Tailed Nightmare Ranking Third Place", "アバターフレーム：「九尾の悪夢」ランキング3位", "", ""], ["Item_mItemName_3333", "Avatar Border: Gold Dragon Pass", "アバターフレーム：ゴールドドラゴンパス", "", ""], ["Item_mItemName_35473", "Monthly Card of Diamonds", "ダイヤのマンスリーカード", "", ""], ["Item_mItemName_35474", "Monthly Card of Summoning", "召喚のマンスリーカード", "", ""], ["Item_mItemName_35475", "Monthly Card of Stamina", "スタミナのマンスリーカード", "", ""], ["Item_mItemName_56310", "Random Trial Keystone (Lvl. 2-4)", "ランダム試練の要石（レベル2~4）", "", ""], ["Item_mItemName_56311", "Random Trial Keystone (Lvl. 2-5)", "ランダム試練の要石（レベル2~5）", "", ""], ["Quest_mQuestTitle_380034", "Obtain a total of 100 Dragon's Gold.", "ドラゴンの金貨を合計100獲得する。", "", ""], ["Quest_mQuestTitle_380035", "Obtain a total of 200 Dragon's Gold.", "ドラゴンの金貨を合計200獲得する。", "", ""], ["Quest_mQuestTitle_380036", "Obtain a total of 300 Dragon's Gold.", "ドラゴンの金貨を合計300獲得する。", "", ""], ["Quest_mQuestTitle_380037", "Obtain a total of 500 Dragon's Gold.", "ドラゴンの金貨を合計500獲得する。", "", ""], ["Quest_mQuestTitle_380038", "Obtain a total of 800 Dragon's Gold.", "ドラゴンの金貨を合計800獲得する。", "", ""], ["Quest_mQuestTitle_380039", "Obtain a total of 1,000 Dragon's Gold.", "ドラゴンの金貨を合計1000獲得する。", "", ""], ["Quest_mQuestTitle_380040", "Obtain a total of 1,500 Dragon's Gold.", "ドラゴンの金貨を合計1500獲得する。", "", ""], ["Quest_mQuestTitle_380041", "Obtain a total of 2,000 Dragon's Gold.", "ドラゴンの金貨を合計2000獲得する。", "", ""], ["Quest_mQuestTitle_380042", "Obtain a total of 3,000 Dragon's Gold.", "ドラゴンの金貨を合計3000獲得する。", "", ""], ["Quest_mQuestTitle_380043", "Obtain a total of 4,000 Dragon's Gold.", "ドラゴンの金貨を合計4000獲得する。", "", ""], ["Quest_mQuestTitle_380044", "Obtain a total of 5,000 Dragon's Gold.", "ドラゴンの金貨を合計5000獲得する。", "", ""], ["RoleHeadFrame_mSourceDesc_84", "Awarded to the Commander who ranks first on the Points Leaderboard in the Echoes of Woe during the Nine-Tailed Nightmare.", "「九尾の悪夢」期間中、哀嘆の残響のポイントリーダーボードで1位にランクインしたコマンダーに与えられる。", "", ""], ["RoleHeadFrame_mSourceDesc_85", "Awarded to the Commander who ranks second on the Points Leaderboard in the Echoes of Woe during the Nine-Tailed Nightmare.", "「九尾の悪夢」期間中、哀嘆の残響のポイントリーダーボードで2位にランクインしたコマンダーに与えられる。", "", ""], ["RoleHeadFrame_mSourceDesc_86", "Awarded to the Commander who ranks third on the Points Leaderboard in the Echoes of Woe during the Nine-Tailed Nightmare.", "「九尾の悪夢」期間中、哀嘆の残響のポイントリーダーボードで3位にランクインしたコマンダーに与えられる。", "", ""], ["RoleHeadFrame_mSourceDesc_89", "Guild War S10 \"Overlord\" exclusive avatar border.", "ギルド戦争S10「オーバーロード」限定アバターフレーム。", "", ""], ["RoleHeadFrame_mSourceDesc_91", "Obtained from Gold Dragon Pass.", "ゴールドドラゴンパスで獲得。", "", ""], ["RollDiceBuilding_mName_11_1", "Turn of Luck", "幸運の転機", "", ""], ["RollDiceBuilding_mName_12_1", "Turn of Luck", "幸運の転機", "", ""], ["Skill_mSkillDesc_1908301_1", "Swings claws, dealing DMG to all heroes within 1 tile ahead.", "爪を振り、前方1タイル以内のすべてのヒーローにダメージを与える。", "", ""], ["Skill_mSkillDesc_1908304_1", "Swings claws, dealing DMG to all heroes within 1 tile ahead.", "爪を振り、前方1タイル以内のすべてのヒーローにダメージを与える。", "", ""], ["Skill_mSkillDesc_1908315_1", "When the Nine-Tailed Fox takes fatal DMG, she flees the battlefield and activates the tails on the field to attack. When the tails are defeated, the Nine-Tailed Fox returns to the battlefield. After all tails on the field are defeated, the Nine-Tailed Fox transforms and summons a large number of foxes.", "九尾の狐が致命的なダメージを受けると、バトルフィールドから逃げて、フィールド上の尻尾を起動して攻撃する。尻尾が倒されると、九尾の狐はバトルフィールドに戻ってくる。フィールド上のすべての尻尾が倒された後、九尾の狐は変身し、大量の狐を召喚する。", "", ""], ["Skill_mSkillDesc_1908345_1", "Deals M. DMG to the last deployed unit on the battlefield, prioritizing Defenders.", "バトルフィールドで最後に配置されたユニットに魔法ダメージを与える。ディフェンダーを優先する。", "", ""], ["Skill_mSkillDesc_1908357_1", "Deals M. DMG to the last deployed unit on the battlefield, prioritizing Defenders.", "バトルフィールドで最後に配置されたユニットに魔法ダメージを与える。ディフェンダーを優先する。", "", ""], ["Skill_mSkillDesc_803803_1", "Immune to all <span style=\"color: #4A9DF2;\">CC Effects</span> (except Slow).", "全ての<span style=\"color: #4A9DF2;\">コントロール効果</span>（減速を除く）に対して免疫を持つ。", "", ""], ["Skill_mSkillDesc_8202053_1", "Reduces the Redeployment Time of allied heroes by <span style=\"color: #4A9DF2;\">{sk1}%</span>, but increases their Deployment Cost by <span style=\"color: #4A9DF2;\">+{sk2}</span>.", "味方ヒーローの再配置時間が<span style=\"color: #4A9DF2;\">{sk1}%</span>短縮するが、配置コストが<span style=\"color: #4A9DF2;\">{sk2}</span>増加する。", "", ""], ["Skill_mSkillDesc_8202084_1", "Increases allied heroes' DMG by <span style=\"color: #4A9DF2;\">{sk1}%</span> each round and reduces Basic ATK interval by <span style=\"color: #4A9DF2;\">{sk1}%</span>. Vulnerability (P. DMG) and Vulnerability (M. DMG) increase by <span style=\"color: #4A9DF2;\">{sk2}%</span> each round.", "ラウンドごとに味方ヒーローのダメージが<span style=\"color: #4A9DF2;\">{sk1}%</span>増加し、通常攻撃間隔が<span style=\"color: #4A9DF2;\">{sk1}%</span>短縮する。ラウンドごとに脆弱（物理ダメージ）と脆弱（魔法ダメージ）が<span style=\"color: #4A9DF2;\">{sk2}%</span>増加する。", "", ""], ["Skill_mSkillDesc_8202103_1", "Allied Hero Deployment Limit +<span style=\"color: #4A9DF2;\">{sk1}</span>", "味方ヒーローの配置数上限+<span style=\"color: #4A9DF2;\">{sk1}</span>", "", ""], ["Skill_mSkillName_1033701_1", "Accelerated Incubation", "加速した孵化", "", ""], ["Skill_mSkillName_3991865_1", "High Quality", "高品質", "", ""], ["Skill_mSkillName_803610_1", "Freeze", "フリーズ", "", ""], ["Skill_mSkillName_803801_1", "Frostbite Strike", "フロストストライク", "", ""], ["Skill_mSkillName_803803_1", "Control Immunity", "コントロール免疫", "", ""], ["Skill_mSkillName_804001_1", "Frostbite Rupture", "フロストブレイク", "", ""], ["Skill_mSkillName_8202053_1", "Time VS Money", "補償契約", "", ""], ["Skill_mSkillName_8202084_1", "Heating Up", "愈戦愈烈", "", ""], ["Skill_mSkillName_8202103_1", "Rigged Arena", "雄師圧境", "", ""], ["Skill_mSkillSimpleDesc_11015501_1", "Increases ATK by <span style=\"color: #4A9DF2;\">{skm1}%</span>, and reduces the number of attacks required to trigger Nature's Fury enhanced attack by <span style=\"color: #4A9DF2;\">{skm2}</span>. When in Berserker Stance, Basic ATK restores <span style=\"color: #4A9DF2;\">{skm3}%</span> Max HP, and triggering Ground Stomp restores <span style=\"color: #4A9DF2;\">{skm4}%</span> Max HP.", "攻撃力を<span style=\"color: #4A9DF2;\">{skm1}%</span>増加させ、自然の怒りの強化攻撃の発動に必要な攻撃回数を<span style=\"color: #4A9DF2;\">{skm2}</span>減少させる。バーサーカースタンス時、通常攻撃で最大HPの<span style=\"color: #4A9DF2;\">{skm3}%</span>を回復し、地割れ発動時に最大HPの<span style=\"color: #4A9DF2;\">{skm4}%</span>を回復する。", "", ""], ["Skill_mSkillSimpleDesc_11015501_2", "Increases ATK by <span style=\"color: #4A9DF2;\">{skm1}%</span>, and reduces the number of attacks required to trigger Nature's Fury enhanced attack by <span style=\"color: #4A9DF2;\">{skm2}</span>. When in Berserker Stance, Basic ATK restores <span style=\"color: #4A9DF2;\">{skm3}%</span> Max HP, and triggering Ground Stomp restores <span style=\"color: #4A9DF2;\">{skm4}%</span> Max HP.", "攻撃力を<span style=\"color: #4A9DF2;\">{skm1}%</span>増加させ、自然の怒りの強化攻撃の発動に必要な攻撃回数を<span style=\"color: #4A9DF2;\">{skm2}</span>減少させる。バーサーカースタンス時、通常攻撃で最大HPの<span style=\"color: #4A9DF2;\">{skm3}%</span>を回復し、地割れ発動時に最大HPの<span style=\"color: #4A9DF2;\">{skm4}%</span>を回復する。", "", ""], ["Skill_mSkillSimpleDesc_11015501_3", "Increases ATK by <span style=\"color: #4A9DF2;\">{skm1}%</span>, and reduces the number of attacks required to trigger Nature's Fury enhanced attack by <span style=\"color: #4A9DF2;\">{skm2}</span>. When in Berserker Stance, Basic ATK restores <span style=\"color: #4A9DF2;\">{skm3}%</span> Max HP, and triggering Ground Stomp restores <span style=\"color: #4A9DF2;\">{skm4}%</span> Max HP.", "攻撃力を<span style=\"color: #4A9DF2;\">{skm1}%</span>増加させ、自然の怒りの強化攻撃の発動に必要な攻撃回数を<span style=\"color: #4A9DF2;\">{skm2}</span>減少させる。バーサーカースタンス時、通常攻撃で最大HPの<span style=\"color: #4A9DF2;\">{skm3}%</span>を回復し、地割れ発動時に最大HPの<span style=\"color: #4A9DF2;\">{skm4}%</span>を回復する。", "", ""], ["Skill_mSkillSimpleDesc_11015501_4", "Increases ATK by <span style=\"color: #4A9DF2;\">{skm1}%</span>, and reduces the number of attacks required to trigger Nature's Fury enhanced attack by <span style=\"color: #4A9DF2;\">{skm2}</span>. When in Berserker Stance, Basic ATK restores <span style=\"color: #4A9DF2;\">{skm3}%</span> Max HP, and triggering Ground Stomp restores <span style=\"color: #4A9DF2;\">{skm4}%</span> Max HP.", "攻撃力を<span style=\"color: #4A9DF2;\">{skm1}%</span>増加させ、自然の怒りの強化攻撃の発動に必要な攻撃回数を<span style=\"color: #4A9DF2;\">{skm2}</span>減少させる。バーサーカースタンス時、通常攻撃で最大HPの<span style=\"color: #4A9DF2;\">{skm3}%</span>を回復し、地割れ発動時に最大HPの<span style=\"color: #4A9DF2;\">{skm4}%</span>を回復する。", "", ""], ["Skill_mSkillSimpleDesc_11015501_5", "Increases ATK by <span style=\"color: #4A9DF2;\">{skm1}%</span>, and reduces the number of attacks required to trigger Nature's Fury enhanced attack by <span style=\"color: #4A9DF2;\">{skm2}</span>. When in Berserker Stance, Basic ATK restores <span style=\"color: #4A9DF2;\">{skm3}%</span> Max HP, and triggering Ground Stomp restores <span style=\"color: #4A9DF2;\">{skm4}%</span> Max HP.", "攻撃力を<span style=\"color: #4A9DF2;\">{skm1}%</span>増加させ、自然の怒りの強化攻撃の発動に必要な攻撃回数を<span style=\"color: #4A9DF2;\">{skm2}</span>減少させる。バーサーカースタンス時、通常攻撃で最大HPの<span style=\"color: #4A9DF2;\">{skm3}%</span>を回復し、地割れ発動時に最大HPの<span style=\"color: #4A9DF2;\">{skm4}%</span>を回復する。", "", ""], ["Skill_mSkillSimpleDesc_11015501_6", "Increases ATK by <span style=\"color: #4A9DF2;\">{skm1}%</span>, and reduces the number of attacks required to trigger Nature's Fury enhanced attack by <span style=\"color: #4A9DF2;\">{skm2}</span>. When in Berserker Stance, Basic ATK restores <span style=\"color: #4A9DF2;\">{skm3}%</span> Max HP, and triggering Ground Stomp restores <span style=\"color: #4A9DF2;\">{skm4}%</span> Max HP.", "攻撃力を<span style=\"color: #4A9DF2;\">{skm1}%</span>増加させ、自然の怒りの強化攻撃の発動に必要な攻撃回数を<span style=\"color: #4A9DF2;\">{skm2}</span>減少させる。バーサーカースタンス時、通常攻撃で最大HPの<span style=\"color: #4A9DF2;\">{skm3}%</span>を回復し、地割れ発動時に最大HPの<span style=\"color: #4A9DF2;\">{skm4}%</span>を回復する。", "", ""], ["Skill_mSkillSimpleDesc_13000441_1", "Increases faction team members' basic attributes by <span style=\"color: #4A9DF2;\">{skm1}%</span>.<br>Increases faction team members' DMG dealt to enemies inflicted with Slow, Stun, Freeze, Immobilized State, and other CC Effects by <span style=\"color: #4A9DF2;\">{skm2}%</span>. <br>Increases faction team members' DMG by <span style=\"color: #4A9DF2;\">{skm3}%</span>. When the Lord is on the battlefield and an allied summon dies, increases all faction team members' DMG by an additional <span style=\"color: #4A9DF2;\">{skm4}%</span> for <span style=\"color: #4A9DF2;\">{skm5}</span> sec, stacking up to <span style=\"color: #4A9DF2;\">{skm6}</span> time(s).", "同じ勢力の味方の基本ステータスを<span style=\"color: #4A9DF2;\">{skm1}%</span>増加させる。<br>減速、スタン、フリーズ、拘束、その他のコントロール効果を受けた敵に与える同じ勢力の味方のダメージが<span style=\"color: #4A9DF2;\">{skm2}%</span>増加する。<br>同じ勢力の味方のダメージが<span style=\"color: #4A9DF2;\">{skm3}%</span>増加する。ロードが戦場にいる場合、味方の召喚物が死亡すると、全ての同じ勢力の味方のダメージがさらに<span style=\"color: #4A9DF2;\">{skm4}%</span>増加する。持続時間：<span style=\"color: #4A9DF2;\">{skm5}</span>秒。最大<span style=\"color: #4A9DF2;\">{skm6}</span>スタック。", "", ""], ["Skill_mSkillSimpleDesc_13000441_2", "Increases faction team members' basic attributes by <span style=\"color: #4A9DF2;\">{skm1}%</span>.<br>Increases faction team members' DMG dealt to enemies inflicted with Slow, Stun, Freeze, Immobilized State, and other CC Effects by <span style=\"color: #4A9DF2;\">{skm2}%</span>. <br>Increases faction team members' DMG by <span style=\"color: #4A9DF2;\">{skm3}%</span>. When the Lord is on the battlefield and an allied summon dies, increases all faction team members' DMG by an additional <span style=\"color: #4A9DF2;\">{skm4}%</span> for <span style=\"color: #4A9DF2;\">{skm5}</span> sec, stacking up to <span style=\"color: #4A9DF2;\">{skm6}</span> time(s).", "同じ勢力の味方の基本ステータスを<span style=\"color: #4A9DF2;\">{skm1}%</span>増加させる。<br>減速、スタン、フリーズ、拘束、その他のコントロール効果を受けた敵に与える同じ勢力の味方のダメージが<span style=\"color: #4A9DF2;\">{skm2}%</span>増加する。<br>同じ勢力の味方のダメージが<span style=\"color: #4A9DF2;\">{skm3}%</span>増加する。ロードが戦場にいる場合、味方の召喚物が死亡すると、全ての同じ勢力の味方のダメージがさらに<span style=\"color: #4A9DF2;\">{skm4}%</span>増加する。持続時間：<span style=\"color: #4A9DF2;\">{skm5}</span>秒。最大<span style=\"color: #4A9DF2;\">{skm6}</span>スタック。", "", ""], ["Skill_mSkillSimpleDesc_13000441_3", "Increases faction team members' basic attributes by <span style=\"color: #4A9DF2;\">{skm1}%</span>.<br>Increases faction team members' DMG dealt to enemies inflicted with Slow, Stun, Freeze, Immobilized State, and other CC Effects by <span style=\"color: #4A9DF2;\">{skm2}%</span>. <br>Increases faction team members' DMG by <span style=\"color: #4A9DF2;\">{skm3}%</span>. When the Lord is on the battlefield and an allied summon dies, increases all faction team members' DMG by an additional <span style=\"color: #4A9DF2;\">{skm4}%</span> for <span style=\"color: #4A9DF2;\">{skm5}</span> sec, stacking up to <span style=\"color: #4A9DF2;\">{skm6}</span> time(s).", "同じ勢力の味方の基本ステータスを<span style=\"color: #4A9DF2;\">{skm1}%</span>増加させる。<br>減速、スタン、フリーズ、拘束、その他のコントロール効果を受けた敵に与える同じ勢力の味方のダメージが<span style=\"color: #4A9DF2;\">{skm2}%</span>増加する。<br>同じ勢力の味方のダメージが<span style=\"color: #4A9DF2;\">{skm3}%</span>増加する。ロードが戦場にいる場合、味方の召喚物が死亡すると、全ての同じ勢力の味方のダメージがさらに<span style=\"color: #4A9DF2;\">{skm4}%</span>増加する。持続時間：<span style=\"color: #4A9DF2;\">{skm5}</span>秒。最大<span style=\"color: #4A9DF2;\">{skm6}</span>スタック。", "", ""], ["Skill_mSkillSimpleDesc_13000441_4", "Increases faction team members' basic attributes by <span style=\"color: #4A9DF2;\">{skm1}%</span>.<br>Increases faction team members' DMG dealt to enemies inflicted with Slow, Stun, Freeze, Immobilized State, and other CC Effects by <span style=\"color: #4A9DF2;\">{skm2}%</span>. <br>Increases faction team members' DMG by <span style=\"color: #4A9DF2;\">{skm3}%</span>. When the Lord is on the battlefield and an allied summon dies, increases all faction team members' DMG by an additional <span style=\"color: #4A9DF2;\">{skm4}%</span> for <span style=\"color: #4A9DF2;\">{skm5}</span> sec, stacking up to <span style=\"color: #4A9DF2;\">{skm6}</span> time(s).", "同じ勢力の味方の基本ステータスを<span style=\"color: #4A9DF2;\">{skm1}%</span>増加させる。<br>減速、スタン、フリーズ、拘束、その他のコントロール効果を受けた敵に与える同じ勢力の味方のダメージが<span style=\"color: #4A9DF2;\">{skm2}%</span>増加する。<br>同じ勢力の味方のダメージが<span style=\"color: #4A9DF2;\">{skm3}%</span>増加する。ロードが戦場にいる場合、味方の召喚物が死亡すると、全ての同じ勢力の味方のダメージがさらに<span style=\"color: #4A9DF2;\">{skm4}%</span>増加する。持続時間：<span style=\"color: #4A9DF2;\">{skm5}</span>秒。最大<span style=\"color: #4A9DF2;\">{skm6}</span>スタック。", "", ""], ["Skill_mSkillSimpleDesc_13000441_5", "Increases faction team members' basic attributes by <span style=\"color: #4A9DF2;\">{skm1}%</span>.<br>Increases faction team members' DMG dealt to enemies inflicted with Slow, Stun, Freeze, Immobilized State, and other CC Effects by <span style=\"color: #4A9DF2;\">{skm2}%</span>. <br>Increases faction team members' DMG by <span style=\"color: #4A9DF2;\">{skm3}%</span>. When the Lord is on the battlefield and an allied summon dies, increases all faction team members' DMG by an additional <span style=\"color: #4A9DF2;\">{skm4}%</span> for <span style=\"color: #4A9DF2;\">{skm5}</span> sec, stacking up to <span style=\"color: #4A9DF2;\">{skm6}</span> time(s).", "同じ勢力の味方の基本ステータスを<span style=\"color: #4A9DF2;\">{skm1}%</span>増加させる。<br>減速、スタン、フリーズ、拘束、その他のコントロール効果を受けた敵に与える同じ勢力の味方のダメージが<span style=\"color: #4A9DF2;\">{skm2}%</span>増加する。<br>同じ勢力の味方のダメージが<span style=\"color: #4A9DF2;\">{skm3}%</span>増加する。ロードが戦場にいる場合、味方の召喚物が死亡すると、全ての同じ勢力の味方のダメージがさらに<span style=\"color: #4A9DF2;\">{skm4}%</span>増加する。持続時間：<span style=\"color: #4A9DF2;\">{skm5}</span>秒。最大<span style=\"color: #4A9DF2;\">{skm6}</span>スタック。", "", ""], ["Skill_mSkillSimpleDesc_8202053_1", "Reduces the Redeployment Time of allied heroes by <span style=\"color: #4A9DF2;\">{skm1}%</span>, but increases their Deployment Cost by <span style=\"color: #4A9DF2;\">+{skm2}</span>.", "味方ヒーローの再配置時間が<span style=\"color: #4A9DF2;\">{skm1}%</span>短縮するが、配置コストが<span style=\"color: #4A9DF2;\">{skm2}</span>増加する。", "", ""], ["Skill_mSkillSimpleDesc_8202084_1", "Increases allied heroes' DMG by <span style=\"color: #4A9DF2;\">{skm1}%</span> each round and reduces Basic ATK Interval by <span style=\"color: #4A9DF2;\">{skm1}%</span>. Vulnerability (P. DMG) and Vulnerability (M. DMG) increase by <span style=\"color: #4A9DF2;\">{skm2}%</span> each round.", "ラウンドごとに味方ヒーローのダメージが<span style=\"color: #4A9DF2;\">{skm1}%</span>増加し、通常攻撃間隔が<span style=\"color: #4A9DF2;\">{skm1}%</span>短縮する。ラウンドごとに脆弱（物理ダメージ）と脆弱（魔法ダメージ）が<span style=\"color: #4A9DF2;\">{skm2}%</span>増加する。", "", ""], ["Skill_mSkillSimpleDesc_8202103_1", "Allied Hero Deployment Limit +<span style=\"color: #4A9DF2;\">{skm1}</span>", "味方ヒーローの配置数上限+<span style=\"color: #4A9DF2;\">{skm1}</span>", "", ""], ["Skill_mSkillSimpleDesc_8203031_1", "Hotspot appears on both players' battlefields. Heroes standing on the Hotspot have all attributes increased by 20%.", "両プレイヤーの戦場にホットスポットが出現する。ホットスポットに立っているヒーローは、全ステータスが20%増加する。", "", ""], ["Stage_mStageDesc_5003001", "In this epic battle, you will face an unprecedented enemy - Semrah. Hailing from ancient times, Semrah fights in 3 Battle Modes, each posing a tough challenge.", "この壮絶な戦いで、あなたは今までとは異なる敵、セムラと対峙する。古代より生きるセムラは3つの戦闘形態を持ち、どれもあなたに苦難を与える。", "", ""], ["Stage_mStageDesc_5003002", "In this epic battle, you will face an unprecedented enemy - Semrah. Hailing from ancient times, Semrah fights in 3 Battle Modes, each posing a tough challenge.", "この壮絶な戦いで、あなたは今までとは異なる敵、セムラと対峙する。古代より生きるセムラは3つの戦闘形態を持ち、どれもあなたに苦難を与える。", "", ""], ["Stage_mStageDesc_8101001", "Starting from Round 5, <span style=\"color: #fd4540;\">all monsters gain Invisibility and become untargetable</span> for 7 sec.", "ラウンド5から、<span style=\"color: #fd4540;\">全てのモンスターが7秒間透明化し、対象にされなくなる</span>。", "", ""], ["Stage_mStageDesc_8101002", "Starting from Round 5, <span style=\"color: #fd4540;\">all monsters gain Invincibility upon taking DMG for the first time, becoming immune to all DMG</span> for 4 sec.", "ラウンド5から、<span style=\"color: #fd4540;\">全てのモンスターが初めてダメージを受けると4秒間無敵になり、全てのダメージを受けなくなる</span>。", "", ""], ["Stage_mStageDesc_8101003", "Starting from Round 5, <span style=\"color: #fd4540;\">all heroes continuously take True DMG equal to 4% of their Max HP per sec</span>.", "ラウンド5から、<span style=\"color: #fd4540;\">全てのヒーローが毎秒最大HPの4%のトゥルーダメージを継続的に受ける</span>。", "", ""], ["Stage_mStageDesc_8201011", "Team up with your friends to defeat the enemy Boss and fend off the tides of enemies.", "フレンドとチームを組み、敵ボスを倒し、次々と押し寄せる敵に立ち向かいましょう。", "", ""], ["Stage_mStageDesc_8201012", "Team up with your friends to defeat the enemy Boss and fend off the tides of enemies.", "フレンドとチームを組み、敵ボスを倒し、次々と押し寄せる敵に立ち向かいましょう。", "", ""], ["Stage_mStageDesc_8201013", "Team up with your friends to defeat the enemy Boss and fend off the tides of enemies.", "フレンドとチームを組み、敵ボスを倒し、次々と押し寄せる敵に立ち向かいましょう。", "", ""], ["Stage_mStageDesc_8201014", "Team up with your friends to defeat the enemy Boss and fend off the tides of enemies.", "フレンドとチームを組み、敵ボスを倒し、次々と押し寄せる敵に立ち向かいましょう。", "", ""], ["Stage_mStageDesc_8201015", "Team up with your friends to defeat the enemy Boss and fend off the tides of enemies.", "フレンドとチームを組み、敵ボスを倒し、次々と押し寄せる敵に立ち向かいましょう。", "", ""], ["Stage_mStageFailDesc_5003001", "Pay extra attention to Semrah's Battle Mode and exploit its weakness.", "セムラの戦闘形態に注意を払い、弱点を見つけましょう。", "", ""], ["Stage_mStageFailDesc_5003002", "Pay extra attention to Semrah's Battle Mode and exploit its weakness.", "セムラの戦闘形態に注意を払い、弱点を見つけましょう。", "", ""], ["Stage_mStageIdDesc_5003001", "Apocalypse I - Playtest", "アポカリプスI - プレイテスト", "", ""], ["Stage_mStageIdDesc_5003002", "Apocalypse II - Playtest", "アポカリプスII - プレイテスト", "", ""], ["Stage_mStageIdDesc_8201011", "Stage 1", "ステージ1", "", ""], ["Stage_mStageIdDesc_8201012", "Stage 2", "ステージ2", "", ""], ["Stage_mStageIdDesc_8201013", "Stage 3", "ステージ3", "", ""], ["Stage_mStageIdDesc_8201014", "Stage 4", "ステージ4", "", ""], ["Stage_mStageIdDesc_8201015", "Stage 5", "ステージ5", "", ""], ["Stage_mStageIdDesc_991001", "Test 1-1", "Test 1-1", "", ""], ["Stage_mStageIdDesc_991002", "Test 1-2", "Test 1-2", "", ""], ["Stage_mStageIdDesc_991003", "Test 1-3", "Test1-3", "", ""], ["Stage_mStageName_5003001", "Semrah", "セムラ", "", ""], ["Stage_mStageName_5003002", "Semrah", "セムラ", "", ""], ["Stage_mStageName_8201011", "Co-op Mode", "協力モード", "", ""], ["Stage_mStageName_8201012", "Co-op Mode", "協力モード", "", ""], ["Stage_mStageName_8201013", "Co-op Mode", "協力モード", "", ""], ["Stage_mStageName_8201014", "Co-op Mode", "協力モード", "", ""], ["Stage_mStageName_8201015", "Co-op Mode", "協力モード", "", ""], ["UILanguage_mKeyValue_Form_BackpackIntegration_SubTitle", "Sort", "並べ替え", "", ""], ["UILanguage_mKeyValue_Panel_BackpackEquipPanel_EquipedText", "Equipped", "装備中", "", ""], ["UILanguage_mKeyValue_Panel_MaterialPanel_GetWayTitle_Text", "Access", "Go", "", ""], ["UILanguage_mKeyValue_Panel_MaterialPanel_Text_Use", "Use", "使用", "", ""], ["UnionRaise_mRaiseText_15", "Donate <color=#28d37c>{num}</color> Mythic Extract(s).", "ミシックエクストラクトを<color=#28d37c>{num}</color>個寄付する。", "", ""], ["UnionRaise_mRaiseText_16", "Donate <color=#28d37c>{num}</color> 5-star Psychic Power(s).", "星5精神体を<color=#28d37c>{num}</color>個寄付する。", "", ""], ["UnionRaise_mRaiseTitle_15", "Promotion Insignia III", "昇格紋章III", "", ""], ["UnionRaise_mRaiseTitle_16", "Hero Star Up", "ヒーロースターアップ", "", ""], ["Unit_mDescribe_37105", "Scalekin mages, adept in the art of poisonous magic, possess the ability to <color=#ff4500>inflict poison on enemies</color>.", "毒の魔法を使うスケイルキンのメイジ。<color=#ff4500>敵に毒ダメージ</color>を与える。", "", ""], ["Unit_mDescribe_37106", "Elite Skeleton Archers that can deal massive DMG from afar.", "遠距離から大きなダメージを与えてくる、上位のスケルトンアーチャー。", "", ""], ["Unit_mDescribe_37107", "Small spiders, very aggressive but weak individually.", "小さな蜘蛛。非常に攻撃的だが、単体では弱い。", "", ""], ["Unit_mDescribe_37108", "Toxic Suicides will explode when approaching enemies, <color=#ff4500>dealing moderate AoE DMG and poisoning them</color>.", "トキシックスーサイドは敵に近づくと爆発し、<color=#ff4500>中程度の範囲ダメージを与え、敵を毒状態にする</color>。", "", ""], ["Unit_mDescribe_37110", "Clad in giant shields and possessing unyielding skeletal frames, they are renowned for their exceptional DEF.", "屈強な骨格に、巨大な盾を持つ。並外れた防御力で知られている。", "", ""], ["Unit_mDescribe_37112", "Produces a Queen Spider when left out of combat for a while. Eliminate it before it hatches.", "しばらくバトルから離れた後、蜘蛛の女王が生み出される。孵化する前に排除する必要がある。", "", ""], ["Unit_mFeature_10408", "Ludwig has been reborn from the abyss. With a horrifying power granted by his master - the Eldritch God. Ludwig has now lost his humanity.", "ラドウィグは、主である邪神から恐ろしい力を与えられ、深淵から蘇り人間性を失った。", "", ""], ["Unit_mFeature_10409", "Ludwig has been reborn from the abyss. With a horrifying power granted by his master - the Eldritch God. Ludwig has now lost his humanity.", "ラドウィグは、主である邪神から恐ろしい力を与えられ、深淵から蘇り人間性を失った。", "", ""], ["Unit_mFeature_10410", "Ludwig has been reborn from the abyss. With a horrifying power granted by his master - the Eldritch God. Ludwig has now lost his humanity.", "ラドウィグは、主である邪神から恐ろしい力を与えられ、深淵から蘇り人間性を失った。", "", ""], ["Unit_mFeature_37105", "Scalekin mages, adept in the art of poisonous magic, possess the ability to inflict continuous Poison DMG on enemies.", "スケイルキンメイジは毒の魔法を使用し、敵に継続的な毒ダメージを与える。", "", ""], ["Unit_mFeature_37106", "Elite Skeleton Archers that can deal massive DMG from afar.", "遠距離から大きなダメージを与えてくる、上位のスケルトンアーチャー。", "", ""], ["Unit_mFeature_37107", "Small spiders, very aggressive but weak individually.", "小さな蜘蛛。非常に攻撃的だが、単体では弱い。", "", ""], ["Unit_mFeature_37108", "The inferior zraks, whose bodies are filled with corrosive liquids, will launch suicide attacks on enemies.", "体が腐食性の液体で満たされている下級のズラック。敵に自爆攻撃を仕掛ける。", "", ""], ["Unit_mFeature_37110", "Equipped with a giant shield, these stiff skeletons are able to hold off heavy attacks.", "巨大な盾を装備した頑強なスケルトン。激しい攻撃を防ぐことができる。", "", ""], ["Unit_mFeature_37112", "Produces a Queen Spider when left out of combat for a while. Eliminate it before it hatches.", "しばらくバトルから離れた後、蜘蛛の女王が生み出される。孵化する前に排除する必要がある。", "", ""], ["Unit_mName_37105", "Poison Mage", "ポイズンメイジ", "", ""], ["Unit_mName_37106", "Elite Skeleton Archer", "エリートスケルトンアーチャー", "", ""], ["Unit_mName_37107", "Small Arachnid", "スモールアラクニド", "", ""], ["Unit_mName_37108", "Suicide", "スーサイド", "", ""], ["Unit_mName_37110", "Skeletal Giant-Shielder", "スケルトンジャイアントシールダー", "", ""], ["Unit_mName_37112", "Huge Spider Egg", "巨大な蜘蛛の卵", "", ""], ["Unit_mFeature_16474", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "石を操るために生まれた生物。縄張りに侵入した者を容赦なく攻撃する。", "", ""], ["Unit_mFeature_16475", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "石を操るために生まれた生物。縄張りに侵入した者を容赦なく攻撃する。", "", ""], ["Unit_mFeature_16481", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "石を操るために生まれた生物。縄張りに侵入した者を容赦なく攻撃する。", "", ""], ["Unit_mFeature_16487", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "石を操るために生まれた生物。縄張りに侵入した者を容赦なく攻撃する。", "", ""], ["Unit_mFeature_16496", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "石を操るために生まれた生物。縄張りに侵入した者を容赦なく攻撃する。", "", ""], ["Unit_mFeature_16497", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "石を操るために生まれた生物。縄張りに侵入した者を容赦なく攻撃する。", "", ""], ["Unit_mFeature_18133", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "石を操るために生まれた生物。縄張りに侵入した者を容赦なく攻撃する。", "", ""], ["Unit_mFeature_18137", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "石を操るために生まれた生物。縄張りに侵入した者を容赦なく攻撃する。", "", ""], ["Unit_mFeature_11127", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "石を操るために生まれた生物。縄張りに侵入した者を容赦なく攻撃する。", "", ""], ["Stage_mStageDesc_9042001", "The Nine-Tailed Fox, resurrected by the grievance from the Shang Dynasty, wreaks havoc upon the mortal realm with her illusions. Four supreme arrays must be laid to obliterate its true spirit.<br><br>Fire Realm: Molten lava surges as crimson chains, coiling round her nine tails to scorch demonic bones. The fox’s wails crackle like searing thunder.", "商王朝の怨念によって蘇った九尾の狐が、幻術で人間界に災いをもたらしている。その真の魂を滅ぼすには、四つの至高の陣を敷かねばならない。<br><br>炎の領域：溶けた溶岩が真紅の鎖となり、九尾に巻き付いて妖骨を焼く。燃える雷鳴のように狐の悲鳴が響く。", "", ""], ["Item_mItemName_214901", "Shawl of the Lifegiver", "ライフギバーのショール", "", ""], ["Skill_mSkillSimpleDesc_232170_1", "When the Talent is triggered, increases the hero's DMG by <span style=\"color: #4A9DF2;\">{skm1}%</span>, with an additional <span style=\"color: #4A9DF2;\">{skm2}%</span> against Elite and Boss units for <span style=\"color: #4A9DF2;\">{skm3}</span> sec.", "タレント発動時、ヒーローのダメージを<span style=\"color: #4A9DF2;\">{skm1}%</span>増加させ、エリートとボスユニットに対しては追加で<span style=\"color: #4A9DF2;\">{skm2}%</span>増加する。この効果は<span style=\"color: #4A9DF2;\">{skm3}</span>持続する。", "", ""], ["CommonText_mMessage_25947", "Corresponding Arena Challenge Attack Mode", "対応するアリーナチャレンジアタックモード", "", ""], ["CommonText_mMessage_25948", "Corresponding Arena Challenge Defense Mode", "対応するアリーナチャレンジ防御モード", "", ""], ["Skill_mSkillSimpleDesc_220903_5", "Applies <span style=\"color: #28d37c;\">[322095]</span> to <span style=\"color: #4A9DF2;\">1</span> ally with the lowest HP percentage in range for <span style=\"color: #4A9DF2;\">{skm1}</span> sec.", "範囲内で最もHP割合の低い味方<span style=\"color: #4A9DF2;\">1</span>体に<span style=\"color: #28d37c;\">[322095]</span>を<span style=\"color: #4A9DF2;\">{skm1}</span>秒間付与する。", "", ""], ["Skill_mSkillSimpleDesc_220903_4", "Applies <span style=\"color: #28d37c;\">[322094]</span> to <span style=\"color: #4A9DF2;\">1</span> ally with the lowest HP percentage in range for <span style=\"color: #4A9DF2;\">{skm1}</span> sec.", "範囲内で最もHP割合の低い味方<span style=\"color: #4A9DF2;\">1</span>体に<span style=\"color: #28d37c;\">[322094]</span>を<span style=\"color: #4A9DF2;\">{skm1}</span>秒間付与する。", "", ""], ["Skill_mSkillSimpleDesc_220903_3", "Applies <span style=\"color: #28d37c;\">[322093]</span> to <span style=\"color: #4A9DF2;\">1</span> ally with the lowest HP percentage in range for <span style=\"color: #4A9DF2;\">{skm1}</span> sec.", "範囲内で最もHP割合の低い味方<span style=\"color: #4A9DF2;\">1</span>体に<span style=\"color: #28d37c;\">[322093]</span>を<span style=\"color: #4A9DF2;\">{skm1}</span>秒間付与する。", "", ""], ["Skill_mSkillSimpleDesc_220903_2", "Applies <span style=\"color: #28d37c;\">[322092]</span> to <span style=\"color: #4A9DF2;\">1</span> ally with the lowest HP percentage in range for <span style=\"color: #4A9DF2;\">{skm1}</span> sec.", "範囲内で最もHP割合の低い味方<span style=\"color: #4A9DF2;\">1</span>体に<span style=\"color: #28d37c;\">[322092]</span>を<span style=\"color: #4A9DF2;\">{skm1}</span>秒間付与する。", "", ""], ["LANG_STRID_notice_NineTailedNightmare", "Nine-Tailed Nightmare Event Intro", "九尾の悪夢イベント紹介", "", ""], ["LANG_STRID_push_long9_title_1", "Grimmscale Invasion Launches", "グリムスケイルの侵攻開始", "", ""], ["LANG_STRID_push_long9_title_2", "Commanders can challenge Sauryan, Wing of Chaos infinitely every day. Rewards are based on the highest total damage dealt in a single challenge attempt.", "毎日混沌の翼サウリアンに無制限に挑戦できる。報酬は単回チャレンジ試行で与えた最高総ダメージに基づく。", "", ""], ["LANG_STRID_push_xyx_title_1", "Zombie Invasion Starts!", "ゾンビ侵攻開始！", "", ""], ["LANG_STRID_push_xyx_title_2", "Build your hero's skills, equip powerful Relics, and battle through waves of monsters to survive!", "ヒーローのスキルを強化し、強力なレリックを装備して、モンスターウェーブから生き残れ！", "", ""], ["LANG_STRID_notice_jwhpv", "Event Trailer: Nine-Tailed Nightmare", "イベントPV：九尾の悪夢", "", ""], ["LANG_STRID_push_jwhyy1", "Nine-Tailed Nightmare Is Here!", "九尾の悪夢登場！", "", ""], ["LANG_STRID_push_jwhyy2", "The new Legendary heroes Ne Zha and Erlang Shen arrive! Join the events to claim event-exclusive rewards, including Exclusive Artifacts, Summoning Crystals, Avatar, Emote, and more! Plus, Erlang Shen's time-limited skin is now available!", "新レジェンドヒーロー哪吒と二郎神が登場！イベントに参加して、専用アーティファクト、召喚クリスタル、アバター、エモートなど、イベント限定報酬を受け取りましょう！さらに、二郎神の期間限定スキンも登場！", "", ""], ["LANG_STRID_notice_NineTailed2", "Nine-Tailed Nightmare Starts!", "九尾の悪夢開始！", "", ""], ["LANG_STRID_notice_NineTailed3", "Join the event to obtain event-exclusive rewards, including Exclusive Artifacts, Avatar, Avatar Border, Summoning Crystals, and more!", "イベントに参加して、専用アーティファクト、アバター、アバターフレーム、召喚クリスタルなど、イベント限定報酬を獲得しましょう！", "", ""], ["LANG_STRID_push_shardsummon_nezha", "Collect shards to assemble Ne Zha's Exclusive Artifact: Fire-Tipped Spear!", "シャードを集めて、哪吒の専用アーティファクト「炎槍」を合成しよう！", "", ""], ["LANG_STRID_push_shardsummon_sqhcending", "Artifact Shard Assembly Countdown", "アーティファクトシャード合成カウントダウン", "", ""], ["LANG_STRID_push_shardsummon_nezhaend2", "Last chance to collect shards and assemble Ne Zha's Exclusive Artifact: Fire-Tipped Spear! Don't miss out!", "ラストチャンス！哪吒の専用アーティファクト「炎槍」のシャードを集めて合成しよう！ぜひ、お見逃しなく！", "", ""], ["LANG_STRID_notice_CreativeShort", "Creative Short", "クリエイティブショート", "", ""], ["LANG_STRID_compete_brief", "After the event starts, Commanders earn League points by participating in the Arena, Guild - Drake's Chasm and spending Stamina and can claim Personal Score Rewards. Commanders within the same League compete against each other for ranking rewards. After the event ends, Commanders who have earned points can claim the Basic League Rewards. Members of the League with a higher total score will receive additional Champion League Reward.", "イベント開始後、コマンダーはアリーナ、ギルド - ドレイクの裂け目への参加とスタミナ消費によってリーグポイントを獲得し、個人スコア報酬を受け取ることができます。同一リーグ内のコマンダーはランキング報酬を競い合うことになります。イベント終了後、ポイントを獲得したコマンダーは基本リーグ報酬を受け取ることができます。より高い合計スコアを持つリーグのメンバーは、追加のチャンピオンリーグ報酬を受け取ります。", "", ""], ["LANG_STRID_Anniversary_Discount_Event_Des_01", "Discount Tokens obtained from event quests can be used to randomly discount an item on the event page once. Each item can be discounted up to 3 times.", "イベントクエストから獲得したディスカウントトークンで、イベントページのアイテムを1回ランダムに割引できる。各アイテムは最大3回まで割引可能。", "", ""], ["LANG_STRID_FishingRanking", "<color=#e1e1e1>After the event ends, the top 3 Commanders on the leaderboard will each receive a physical merchandise reward. Contact info will be requested via in-game mail for delivery.</color>", "<color=#e1e1e1>イベント終了後、リーダーボード上位3位のコマンダーはそれぞれ物理的な商品報酬を受け取る。配送のための連絡先情報はゲーム内メールで確認される。</color>", "", ""], ["LANG_STRID_notice_nzgl", "Hero Gameplay: Ne Zha", "ヒーローゲームプレイ：哪吒", "", ""], ["LANG_STRID_notice_yjgl", "Hero Gameplay: Erlang Shen", "ヒーローゲームプレイ：二郎神", "", ""], ["LANG_STRID_GDP_title_26", "Celestial Season", "星環シーズン", "", ""], ["LANG_STRID_activity_popup_GDP_htj", "Gold Dragon Pass - Celestial Season", "ゴールドドラゴンパス - 星環シーズン", "", ""], ["LANG_STRID_CompeteEvent_Rule11", "<color=#e1e1e1>Consume general items to gain points.</color>", "<color=#e1e1e1>一般アイテムを消費してポイントを獲得する。</color>", "", ""], ["LANG_STRID_CompeteEvent_Rule12", "<color=#e1e1e1>Consume Mythril and Meteorite to gain points.</color>", "<color=#e1e1e1>ミスリルとメテオライトを消費してポイントを獲得する。</color>", "", ""], ["LANG_STRID_Moon_Dec_01", "Shadows of Tomorrow", "朧ノ双華", "", ""], ["LANG_STRID_Anniversary_Discount_Event_Detail", "<span style=\"color: #cec2b1;\">Discount Event</span><br>Each use of a Discount Token will apply a <span style=\"color: #28d37c;\">random discount</span> to a random item in the event. Participate in event quests to obtain Discount Tokens. All unused Discount Tokens will be removed after the event ends.<br>Players may choose to purchase event items at their original prices without using any Discount Tokens.<br><br>Each time a Discount Token is used, one item will be randomly selected from the three available in the event interface for a discount. After each discount, the price of the currently selected item will be further reduced. <span style=\"color: #28d37c;\">Each item reaches its maximum discount after being discounted 3 times</span>.<br>Only items that have not reached the maximum discount and have not been purchased can continue to participate in the discount event.", "<span style=\"color: #cec2b1;\">割引イベント</span><br>割引トークンを1回使用するごとに、イベント内のランダムなアイテムに<span style=\"color: #28d37c;\">ランダム割引</span>が適用される。イベントクエストに参加して割引トークンを獲得しよう。未使用の割引トークンはすべてイベント終了後に削除される。<br>プレイヤーは割引トークンを使用せずに、元の価格でイベントアイテムを購入することも可能。<br><br>割引トークンを使用するたびに、イベントインターフェースで利用可能な3つのアイテムからランダムに1つが割引対象として選ばれる。割引が適用されるごとに、現在選択されているアイテムの価格がさらに下がる。<span style=\"color: #28d37c;\">各アイテムは3回割引されると最大割引に到達する</span>。<br>最大割引に到達していない、かつ購入されていないアイテムのみが割引イベントに継続参加できる。", "", ""]];
+            let showingRaw = false;
+            let tableData = formattedData;
+            let dataTable;
+        
+            function getStateKey(index) {
+                return "state_StringZ Visualizer - Japan_row_" + index; 
+            }
+            
+            function getNotesKey(index) {
+                return "notes_StringZ Visualizer - Japan_row_" + index;
+            }
+        
+            function generateRowWithState(row, idx) {
+                const savedState = localStorage.getItem(getStateKey(idx)) || "";
+                const savedNotes = localStorage.getItem(getNotesKey(idx)) || "";
+                
+                const selectHTML = '<select class="state-select ' + savedState.toLowerCase() + '">' +
+                    '<option value="" ' + (savedState === "" ? "selected" : "") + '></option>' +
+                    '<option value="Pass" ' + (savedState === "Pass" ? "selected" : "") + '>Pass</option>' +
+                    '<option value="Fail" ' + (savedState === "Fail" ? "selected" : "") + '>Fail</option>' +
+                    '</select>';
+                
+                const notesHTML = '<input type="text" class="notes-input" value="' + 
+                    savedNotes.replace(/"/g, '&quot;') + 
+                    '" placeholder="Personal notes..." maxlength="200">';
+                
+                const newRow = row.slice();
+                const stateIndex = headers.indexOf("State") + 1;
+                const notesIndex = headers.indexOf("Notes") + 1;
+                newRow[stateIndex] = selectHTML;
+                newRow[notesIndex] = notesHTML;
+                return newRow;
+            }
+        
+            function renderData(data) {
+                tableData = data;
+                const transformed = data.map((row, idx) => {
+                  const rowWithNumber = [idx + 1, ...row];
+                  return generateRowWithState(rowWithNumber, idx);
+                });
+        
+                if (!dataTable) {
+                    const columnsWithNumber = [{ title: '#' }, ...headers.map(h => ({ title: h }))];
+                    dataTable = $('#myTable').DataTable({
+                        data: transformed,
+                        columns: columnsWithNumber,
+                        scrollX: true,
+                        paging: true,
+                        searching: true,
+                        ordering: true,
+                        deferRender: true,
+                        lengthMenu: [[-1, 10, 25, 50], ["All", 10, 25, 50]],
+                        order: [],
+                        columnDefs: [
+                            {
+                                targets: headers.indexOf("State"),
+                                orderable: true
+                            }
+                        ]
+                    });
+        
+                    $('#myTable tbody').on('change', 'select.state-select', function () {
+                        const rowIdx = dataTable.row($(this).closest('tr')).index();
+                        const value = $(this).val();
+                        localStorage.setItem(getStateKey(rowIdx), value);
+                        this.className = "state-select " + value.toLowerCase();
+                    });
+                    
+                    $('#myTable tbody').on('input', 'input.notes-input', function () {
+                        const rowIdx = dataTable.row($(this).closest('tr')).index();
+                        const value = $(this).val();
+                        localStorage.setItem(getNotesKey(rowIdx), value);
+                    });
+
+                    $('#myTable tbody').on('keydown', 'input.notes-input', function(e) {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        $(this).blur(); // Remove focus from notes
+                      }
+                    });
+                } else {
+                    const currentPage = dataTable.page();
+                    const currentLength = dataTable.page.len();
+                    dataTable.clear().rows.add(transformed).draw(false);
+                    dataTable.page.len(currentLength).draw();
+                    dataTable.page(currentPage).draw(false);
+                }
+            }
+        
+            function toggleData() {
+                showingRaw = !showingRaw;
+                renderData(showingRaw ? rawData : formattedData);
+                
+                // Update button text
+                const btn = document.querySelector('.toggle-btn');
+                btn.textContent = showingRaw ? 'Show Formatted' : 'Show Raw';
+            }
+        
+            function clearAllStates() {
+                const total = tableData.length;
+                let clearedCount = 0;
+                
+                for (let i = 0; i < total; i++) {
+                    const stateKey = getStateKey(i);
+                    const notesKey = getNotesKey(i);
+                    
+                    if (localStorage.getItem(stateKey)) {
+                        localStorage.removeItem(stateKey);
+                        clearedCount++;
+                    }
+                    if (localStorage.getItem(notesKey)) {
+                        localStorage.removeItem(notesKey);
+                    }
+                }
+                
+                renderData(tableData);
+                
+                // Better user feedback
+                if (clearedCount > 0) {
+                    alert(`✅ Cleared ${clearedCount} review states and all notes!`);
+                } else {
+                    alert('ℹ️ No review states to clear.');
+                }
+            }
+        
+            function getProgress() {
+                const total = tableData.length;
+                let reviewed = 0;
+                let passed = 0;
+                let failed = 0;
+                
+                for (let i = 0; i < total; i++) {
+                    const state = localStorage.getItem(getStateKey(i));
+                    if (state) {
+                        reviewed++;
+                        if (state === 'Pass') passed++;
+                        if (state === 'Fail') failed++;
+                    }
+                }
+                
+                return { total, reviewed, passed, failed };
+            }
+            
+            function updateProgressDisplay() {
+                const progress = getProgress();
+                const percentage = Math.round((progress.reviewed / progress.total) * 100);
+                
+                // Update the info banner with progress
+                const banner = document.querySelector('.info-banner p');
+                if (banner) {
+                    const originalText = banner.textContent.split('•')[0] + '•';
+                    banner.innerHTML = `${originalText} 📊 <strong>${progress.reviewed}/${progress.total}</strong> reviewed (<strong>${percentage}%</strong>) • ✅ <strong>${progress.passed}</strong> passed • ❌ <strong>${progress.failed}</strong> failed`;
+                }
+            }
+        
+            function toggleDarkMode() {
+                const body = document.body;
+                const btn = document.querySelector('.dark-mode-btn');
+                const isDark = body.getAttribute('data-theme') === 'dark';
+                
+                if (isDark) {
+                    body.removeAttribute('data-theme');
+                    btn.textContent = '🌙 Dark';
+                    localStorage.setItem('visualizer-theme', 'light');
+                } else {
+                    body.setAttribute('data-theme', 'dark');
+                    btn.textContent = '☀️ Light'; 
+                    localStorage.setItem('visualizer-theme', 'dark');
+                }
+            }
+            
+            function initializeTheme() {
+                const savedTheme = localStorage.getItem('visualizer-theme');
+                const btn = document.querySelector('.dark-mode-btn');
+                
+                if (savedTheme === 'dark') {
+                    document.body.setAttribute('data-theme', 'dark');
+                    btn.textContent = '☀️ Light';
+                } else {
+                    btn.textContent = '🌙 Dark';
+                }
+            }
+
+            // New copyToClipboard function to copy ONLY the rawText
+            // Can be updated to copy depending on the Formatting/Raw toggle
+            function copyToClipboard(text, element) {
+                const rowIndex = dataTable.row(element).index();
+                const cellIndex = $(element).index();
+
+                let rawText = text;
+                if (!showingRaw && rawData[rowIndex]) {
+                    rawText = rawData[rowIndex][cellIndex - 1];
+                }
+    
+                // Decode HTML entities to get original text
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = rawText;
+                const decodedText = tempDiv.textContent || tempDiv.innerText || rawText;
+
+                navigator.clipboard.writeText(decodedText).then(() => {
+                    // Show feedback
+                    const feedback = document.createElement('div');
+                    feedback.className = 'copy-feedback show';
+                    feedback.textContent = 'Copied!';
+                    element.style.position = 'relative';
+                    element.appendChild(feedback);
+
+                    setTimeout(() => {
+                        feedback.classList.remove('show');
+                        setTimeout(() => {
+                            if (feedback.parentNode) {
+                                feedback.parentNode.removeChild(feedback);
+                            }
+                            $(element).removeClass('copyable-cell');
+                        }, 300);
+                    }, 1000);
+                });
+            }        
+
+            $(document).ready(function () {
+              initializeTheme();
+              renderData(formattedData);
+              $('#clearState').click(clearAllStates);
+  
+              // Update progress on page load
+              updateProgressDisplay();
+  
+              // Update progress when states change
+              $('#myTable tbody').on('change', 'select.state-select', function () {
+                  setTimeout(updateProgressDisplay, 100);
+              });
+
+              $('#myTable tbody').on('mouseenter', 'td:nth-child(2), td:nth-child(3), td:nth-child(4)', function() {
+                $(this).addClass('copyable-cell');
+              }).on('mouseleave', 'td:nth-child(2), td:nth-child(3), td:nth-child(4)', function() {
+                if (!$(this).find('.copy-feedback').length) {
+                  $(this).removeClass('copyable-cell');
+                }
+              }).on('click', 'td:nth-child(2), td:nth-child(3), td:nth-child(4)', function() {
+                const text = $(this).text().trim();
+                if (text) {
+                  copyToClipboard(text, this);
+                }
+              });
+
+              // Initialize keyboard navigation and show initial hint
+              initKeyboardNavigation();
+              showInitialHint();
+            });
+
+            // Keyboard shortcuts
+            let currentRowIndex = 0;
+            let isKeyboardMode = false;
+
+            function initKeyboardNavigation() {
+              $(document).keydown(function(e) {
+                // Important, don't interfere when typing in inputs
+                if (e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT') return;
+
+                // Even more important! DO NOT INTERFERE WITH BROWSER SHORTCUTS
+                if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+                // Don't interfere with Fn keys either
+                if (e.key.startsWith('F') && e.key.length > 1) return;
+
+                const table = $('#myTable').DataTable();
+                const totalRows = table.rows().count();
+
+                switch(e.key.toLowerCase()) {
+                  case 'p':
+                    e.preventDefault();
+                    markCurrentRow('Pass');
+                    break;
+                  case 'f':
+                    e.preventDefault();
+                    markCurrentRow('Fail');
+                    break;
+                  case 'c':
+                    e.preventDefault();
+                    clearCurrentRow();
+                    break;
+                  case 'arrowdown':
+                  case 'j':
+                    e.preventDefault();
+                    navigateRow(1);
+                    break;
+                  case 'arrowup':
+                  case 'k':
+                    e.preventDefault();
+                    navigateRow(-1);
+                    break;
+                  case 'enter':
+                    e.preventDefault();
+                    focusNotes();
+                    break;
+                  case 'escape':
+                    e.preventDefault();
+                    exitKeyboardMode();
+                    break;
+                  case ' ':
+                    e.preventDefault();
+                    enterKeyboardMode();
+                    break;
+                }
+              });
+            }
+
+            function markCurrentRow(state) {
+              if (!isKeyboardMode) return;
+
+              const currentRow = getCurrentRow();
+              if (currentRow.length) {
+                const select = currentRow.find('.state-select');
+                select.val(state).trigger('change');
+                navigateRow(1);
+              }
+            }
+
+            function clearCurrentRow() {
+              if (!isKeyboardMode) return;
+
+              const currentRow = getCurrentRow();
+              if (currentRow.length) {
+                currentRow.find('.state-select').val('').trigger('change');
+                // currentRow.find('.notes-input').val('').trigger('input');
+              }
+            }
+
+            function navigateRow(direction) {
+              if (!isKeyboardMode) return;
+
+              const table = $('#myTable').DataTable();
+              const totalRows = table.rows().count();
+
+              currentRowIndex += direction;
+              if (currentRowIndex < 0) currentRowIndex = 0;
+              if (currentRowIndex >= totalRows) currentRowIndex = totalRows - 1;
+
+              highlightCurrentRow();
+              scrollToCurrentRow();
+            }
+
+            function getCurrentRow() {
+              const table = $('#myTable').DataTable();
+              return $(table.row(currentRowIndex).node());
+            }
+
+            function highlightCurrentRow() {
+              $('#myTable tbody tr').removeClass('keyboard-focus');
+
+              const currentRow = getCurrentRow();
+              currentRow.addClass('keyboard-focus');
+            }
+
+            function scrollToCurrentRow() {
+              const currentRow = getCurrentRow();
+              if (currentRow.length) {
+                currentRow[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }
+            }
+
+            function focusNotes() {
+              if (!isKeyboardMode) return;
+
+              const currentRow = getCurrentRow();
+              const notesInput = currentRow.find('.notes-input');
+              if (notesInput.length) {
+                notesInput.focus();
+              }
+            }
+
+            function enterKeyboardMode() {
+              isKeyboardMode = true;
+              <!-- currentRowIndex = 0; -->
+              highlightCurrentRow();
+              showKeyboardHint();
+            }
+
+            function exitKeyboardMode() {
+              isKeyboardMode = false;
+              $('#myTable tbody tr').removeClass('keyboard-focus')
+              hideKeyboardHint();
+            }
+
+            function showInitialHint() {
+                $('.keyboard-hint').remove();
+    
+                $('body').append(`
+                    <div class="keyboard-hint" style="
+                        position: fixed; 
+                        top: 15px; 
+                        right: 10px; 
+                        background: var(--bg-banner); 
+                        color: var(--text-primary);
+                        padding: 8px 12px; 
+                        border-radius: 4px; 
+                        font-size: 13px;
+                        font-weight: 500;
+                        z-index: 9999;
+                        border: 1px solid var(--border-color);
+                        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                    ">
+                        Press <kbd>Space</kbd> to start keyboard navigation
+                    </div>
+                `);
+
+                // Auto-hide if not in keyboard mode
+                setTimeout(() => {
+                  if (!isKeyboardMode) {
+                    $('.keyboard-hint').fadeOut(1000, function() {
+                      $(this).remove();
+                    });
+                  }
+                }, 4000);
+            }
+
+            function showKeyboardHint() {
+              $('.keyboard-hint').remove();
+  
+              $('body').append(`
+                  <div class="keyboard-hint" style="
+                      position: fixed; 
+                      top: 15px; 
+                      right: 10px; 
+                      background: var(--bg-banner); 
+                      color: var(--text-primary);
+                      padding: 8px 12px; 
+                      border-radius: 4px; 
+                      font-size: 13px;
+                      font-weight: 500;
+                      z-index: 9999;
+                      border: 1px solid var(--border-color);
+                      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                  ">
+                      Press <kbd>Esc</kbd> to exit keyboard mode
+                  </div>
+              `);
+
+              $('body').append(`
+              <div class="shortcut-summary" style="
+                  position: fixed;
+                  top: 60px;
+                  right: 10px;
+                  background: #007bff;
+                  color: white;
+                  padding: 10px 12px;
+                  border-radius: 6px;
+                  font-size: 11px;
+                  z-index: 9998;
+                  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+                  font-family: monospace;
+              ">
+                  <kbd style="background: rgba(255,255,255,0.2);">P</kbd>ass 
+                  <kbd style="background: rgba(255,255,255,0.2);">F</kbd>ail 
+                  <kbd style="background: rgba(255,255,255,0.2);">C</kbd>lear 
+                  <kbd style="background: rgba(255,255,255,0.2);">↑↓</kbd>Nav 
+                  <kbd style="background: rgba(255,255,255,0.2);">⏎</kbd>Notes
+              </div>
+            `);
+
+              setTimeout(() => {
+                $('.shortcut-summary').fadeOut(800, function() {
+                  $(this).remove();
+                });
+              }, 5000);
+            }            
+
+            function hideKeyboardHint() {
+              $('#keyboard-hint').remove();
+              $('.shortcut-summary').remove();
+              showInitialHint();
+            }
+    </script>
+  </body>
+</html>

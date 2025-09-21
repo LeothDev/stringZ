@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>StringZ Visualizer - Korean</title>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <style>
+      :root {
+        /* Light mode colors */
+        --bg-primary: #f8f9fa;
+        --bg-secondary: white;
+        --bg-banner: #f8f9fa;
+        --text-primary: #333;
+        --text-secondary: #6c757d;
+        --text-muted: #495057;
+        --border-color: #dee2e6;
+        --table-header-bg: #f8f9fa;
+        --table-border: #dee2e6;
+        --button-bg: #6c757d;
+        --button-hover: #5a6268;
+        --input-bg: white;
+      }
+      
+      [data-theme="dark"] {
+        /* Dark mode colors */
+        --bg-primary: #1a1a1a;
+        --bg-secondary: #2d2d2d;
+        --bg-banner: #343a40;
+        --text-primary: #f8f9fa;
+        --text-secondary: #adb5bd;
+        --text-muted: #ced4da;
+        --border-color: #495057;
+        --table-header-bg: #343a40;
+        --table-border: #495057;
+        --button-bg: #495057;
+        --button-hover: #5a6268;
+        --input-bg: #343a40;
+      }
+      
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: var(--bg-primary);
+        margin: 0;
+        padding: 0;
+        color: var(--text-primary);
+        transition: background-color 0.3s ease, color 0.3s ease;
+      }
+      
+      .toggle-btn {
+        position: fixed;
+        top: 15px;
+        left: 15px;
+        z-index: 9999;
+        padding: 8px 16px;
+        background-color: var(--button-bg);
+        color: white;
+        border: 1px solid var(--button-bg);
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        font-size: 14px;
+        transition: background-color 0.2s ease;
+      }
+      
+      .toggle-btn:hover {
+        background-color: var(--button-hover);
+        border-color: var(--button-hover);
+      }
+      
+      .dark-mode-btn {
+        position: fixed;
+        top: 15px;
+        left: 150px;
+        z-index: 9999;
+        padding: 8px 16px;
+        background-color: var(--button-bg);
+        color: white;
+        border: 1px solid var(--button-bg);
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        font-size: 14px;
+        transition: background-color 0.2s ease;
+      }
+      
+      .dark-mode-btn:hover {
+        background-color: var(--button-hover);
+        border-color: var(--button-hover);
+      }
+      
+      #clearState {
+        float: left;
+        margin-right: 15px;
+        margin-bottom: 15px;
+        padding: 8px 16px;
+        background-color: #dc3545;
+        color: white;
+        border: 1px solid #dc3545;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        font-size: 14px;
+        transition: background-color 0.2s ease;
+      }
+      
+      #clearState:hover {
+        background-color: #c82333;
+        border-color: #bd2130;
+      }
+      
+      .container {
+        padding: 70px 30px 30px 30px;
+        background: var(--bg-secondary);
+        margin: 0;
+        min-height: 100vh;
+        transition: background-color 0.3s ease;
+      }
+      
+      .info-banner {
+        background-color: var(--bg-banner);
+        border: 1px solid var(--border-color);
+        color: var(--text-muted);
+        padding: 20px;
+        margin-bottom: 25px;
+        border-radius: 4px;
+        text-align: center;
+        transition: background-color 0.3s ease, border-color 0.3s ease;
+      }
+      
+      .info-banner h2 {
+        margin: 0 0 10px 0;
+        font-size: 24px;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+      
+      .info-banner p {
+        margin: 0;
+        font-size: 14px;
+        color: var(--text-secondary);
+      }
+      
+      #myTable {
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        overflow: hidden;
+        transition: border-color 0.3s ease;
+      }
+      
+      #myTable td {
+        user-select: text !important;
+        padding: 12px 8px;
+        vertical-align: top;
+        border-bottom: 1px solid var(--table-border);
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+        transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+      }
+      
+      #myTable th {
+        background-color: var(--table-header-bg);
+        border-bottom: 2px solid var(--border-color);
+        color: var(--text-muted);
+        font-weight: 600;
+        padding: 15px 8px;
+        text-align: center;
+        transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+      }
+      
+      /* Enhanced styling for different columns */
+      #myTable td:first-child {
+        text-align: center;
+        font-family: 'Courier New', monospace;
+        font-size: 12px;
+        color: var(--text-secondary);
+        /*<!-- max-width: 120px; -->*/
+        width: 50px;
+      }
+      
+      #myTable td:nth-child(2) {
+        font-family: 'Courier New', monospace;
+        font-size: 12px;
+        color: var(--text-secondary);
+        text-align: left;
+        /*line-height: 1.4;*/
+        max-width: 120px;
+      }
+
+      #myTable td:nth-child(3), #myTable td:nth-child(4) {
+        line-height: 1.4;
+        max-width: 300px;
+        word-wrap: break-word;
+        text-align: left;
+      }
+      
+      #myTable td:nth-child(5) {
+        text-align: center;
+        font-weight: 600;
+        color: var(--text-muted);
+        font-size: 14px;
+        width: 80px;
+      }
+      
+      #myTable td:nth-child(6) {
+        min-width: 120px;
+        max-width: 150px;
+        text-align: center;
+      }
+
+      #myTable td:nth-child(7) {
+        min-width: 150px;
+        max-width: 200px;
+      }
+      
+      select.state-select {
+        width: 100%;
+        font-weight: 500;
+        padding: 6px 8px;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        font-size: 14px;
+        background-color: var(--input-bg);
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+      }
+      
+      input.notes-input {
+        width: 100%;
+        padding: 6px 8px;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        font-size: 12px;
+        background-color: var(--input-bg);
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+      }
+      
+      input.notes-input:focus {
+        outline: none;
+        border-color: #80bdff;
+        box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+      }
+      
+      input.notes-input::placeholder {
+        color: var(--text-secondary);
+        font-style: italic;
+      }
+      
+      select.state-select:focus {
+        outline: none;
+        border-color: #80bdff;
+        box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+      }
+      
+      select.state-select.pass {
+        color: #28a745;
+        border-color: #28a745;
+      }
+      
+      select.state-select.fail {
+        color: #dc3545;
+        border-color: #dc3545;
+      }
+      
+      /* DataTables styling */
+      .dataTables_wrapper {
+        color: var(--text-primary);
+      }
+      
+      .dataTables_wrapper .dataTables_length,
+      .dataTables_wrapper .dataTables_filter,
+      .dataTables_wrapper .dataTables_info,
+      .dataTables_wrapper .dataTables_paginate {
+        margin: 15px 0;
+      }
+      
+      .dataTables_wrapper .dataTables_filter input {
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        padding: 6px 12px;
+        margin-left: 8px;
+        background-color: var(--input-bg);
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+      }
+      
+      .dataTables_wrapper .dataTables_length select {
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        padding: 4px 8px;
+        margin: 0 8px;
+        background-color: var(--input-bg);
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+      }
+      
+      .dataTables_wrapper .dataTables_paginate .paginate_button {
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        padding: 6px 12px;
+        margin: 0 2px;
+        background-color: var(--input-bg);
+        color: var(--text-primary) !important;
+        transition: all 0.3s ease;
+      }
+      
+      .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+        background-color: var(--bg-banner);
+        border-color: var(--text-secondary);
+      }
+      
+      .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+        background-color: #007bff;
+        border-color: #007bff;
+        color: white !important;
+      }
+
+      /* Copy feature styling */
+    .copyable-cell {
+        cursor: pointer;
+        position: relative;
+        transition: background-color 0.2s ease;
+    }
+
+    .copyable-cell:hover {
+        background-color: rgba(0, 123, 255, 0.1) !important;
+    }
+
+    .copy-feedback {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #28a745;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        z-index: 1000;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .copy-feedback.show {
+        opacity: 1;
+    }
+
+    .keyboard-focus {
+      background-color: rgba(0, 123, 255, 0.08) !important;
+      border: 2px solid #007bff !important;
+      box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2) !important;
+    }
+
+    .keyboard-focus td {
+      background-color: rgba(0, 123, 255, 0.05) !important;
+    }
+
+    kbd {
+      background-color: var(--button-bg);
+      color: white;
+      padding: 2px 4px;
+      border-radius: 3px;
+      font-size: 11px;
+      font-family: monospace;
+    }
+    </style>
+  </head>
+  <body>
+    <button class="toggle-btn" onclick="toggleData()">Show Raw</button>
+    <button class="dark-mode-btn" onclick="toggleDarkMode()">🌙 Dark</button>
+    <div class="container">
+      <div class="info-banner">
+        <h2>StringZ Visualizer - Korean</h2>
+        <p>📊
+          <strong>270</strong>
+          strings • 🌍
+          <strong>EN</strong>
+          →
+          <strong>Korean</strong>
+          • 📝
+          <strong>2,464</strong>
+          words • 🛠️ Generated by StringZ</p>
+      </div>
+      <button id="clearState">Clear All States</button>
+      <table id="myTable" class="display" style="width:100%"></table>
+    </div>
+    <script>
+      const headers = ["strId", "EN", "Korean", "State", "Notes"];
+            const rawData = [["BUFFAttribute_mName_8202044", "DMG Increase", "피해 증가", "", ""], ["BUFFAttribute_mName_8202045", "DMG Reduction", "피해 감소", "", ""], ["BUFFAttribute_mTips_322928", "Fire-Tipped Spear ignores {30,num}% of the enemy&#x27;s DEF. Universe Ring bounces {31,num} extra time(s) and can hit the same target multiple times. Yin-Yang Blade executes common monsters with HP below {32,num}%.", "화첨창이 적의 방어를 {30,num}% 무시한다. 건곤권이 추가로 {31,num}회 바운스 공격하며, 같은 대상에게 중복으로 바운스할 수 있다. 음양검이 HP가 {32,num}% 미만인 일반 몬스터를 참살한다.", "", ""], ["ChampionshipPlan_mChampionshipDesc_833", "Participate in Artifact Material Raid to win trophies and redeem rewards.", "아티팩트 재료 던전에 참여해 트로피를 얻고 보상과 교환하세요!", "", ""], ["ChampionshipPlan_mChampionshipDesc_834", "Level up/star up/promote heroes or upgrade heroes&#x27; skills to win trophies and redeem rewards.", "영웅을 레벨업, 승급, 진급시키고 스킬을 레벨업하여 트로피를 얻고 보상과 교환하세요!", "", ""], ["ChampionshipPlan_mChampionshipDesc_835", "Participate in Gear Raid I to win trophies and redeem rewards.", "장비 던전 I에 참여해 트로피를 얻고 보상과 교환하세요!", "", ""], ["ChampionshipPlan_mChampionshipDesc_836", "Participate in Gear Raid II to win trophies and redeem rewards.", "장비 던전 II에 참여해 트로피를 얻고 보상과 교환하세요!", "", ""], ["ChampionshipPlan_mChampionshipDesc_837", "Summon heroes to win trophies and redeem rewards.", "영웅을 소환해 트로피를 얻고 보상과 교환하세요!", "", ""], ["ChampionshipPlan_mChampionshipDesc_838", "Participate in Artifact Material Raid to win trophies and redeem rewards.", "아티팩트 재료 던전에 참여해 트로피를 얻고 보상과 교환하세요!", "", ""], ["ChampionshipPlan_mChampionshipDesc_839", "Participate in Gear Raid III to win trophies and redeem rewards.", "장비 던전 III에 참여해 트로피를 얻고 보상과 교환하세요!", "", ""], ["ChampionshipPlan_mChampionshipDesc_840", "Level up/star up/promote heroes or upgrade heroes&#x27; skills to win trophies and redeem rewards.", "영웅을 레벨업, 승급, 진급시키고 스킬을 레벨업하여 트로피를 얻고 보상과 교환하세요!", "", ""], ["ChampionshipPlan_mChampionshipDesc_841", "Participate in Gear Raid I to win trophies and redeem rewards.", "장비 던전 I에 참여해 트로피를 얻고 보상과 교환하세요!", "", ""], ["ChampionshipPlan_mChampionshipDesc_842", "Participate in Gear Raid II to win trophies and redeem rewards.", "장비 던전 II에 참여해 트로피를 얻고 보상과 교환하세요!", "", ""], ["ChampionshipPlan_mChampionshipGlobalName_837", "Arrival of Heroes Ultimate Leaderboard", "영웅 강림 정상 랭킹", "", ""], ["ChampionshipPlan_mChampionshipName_833", "Mystery of Artifacts", "아티팩트 비경", "", ""], ["ChampionshipPlan_mChampionshipName_834", "Hero Training", "영웅 육성", "", ""], ["ChampionshipPlan_mChampionshipName_835", "The Lost Legacy", "잃어버린 유산", "", ""], ["ChampionshipPlan_mChampionshipName_836", "Vault in the Sands", "모래바다 보물창고", "", ""], ["ChampionshipPlan_mChampionshipName_837", "Arrival of Heroes", "영웅 강림", "", ""], ["ChampionshipPlan_mChampionshipName_838", "Mystery of Artifacts", "아티팩트 비경", "", ""], ["ChampionshipPlan_mChampionshipName_839", "Forgotten Palace", "잃어버린 땅", "", ""], ["ChampionshipPlan_mChampionshipName_840", "Hero Training", "영웅 육성", "", ""], ["ChampionshipPlan_mChampionshipName_841", "The Lost Legacy", "잃어버린 유산", "", ""], ["ChampionshipPlan_mChampionshipName_842", "Vault in the Sands", "모래바다 보물창고", "", ""], ["Chapter_mChapterName_4301", "Titanic Ruins - Playtest", "타이탄 폐허-게스트 플레이", "", ""], ["CommonText_mMessage_25116", "Awaken the mystical power within.", "신비로운 마법의 힘을 깨웁니다.", "", ""], ["CommonText_mMessage_25125", "Take destiny into your own hands.", "운명을 손에 거머쥐세요.", "", ""], ["CommonText_mMessage_25132", "Reveal cards to earn Dragon&#x27;s Gold by matching the designated patterns.", "카드를 공개하여 지정된 도안과 동일하면, 대응하는 수량의 드래곤 골드를 획득할 수 있습니다.", "", ""], ["CommonText_mMessage_25133", "Reveal cards and match 3 identical patterns to earn a &lt;color=&quot;#fdbe36&quot;&gt;{num}&lt;/color&gt;x reward!", "카드를 공개하여 동일한 도안 3개가 나오면, &lt;color=&quot;#fdbe36&quot;&gt;{num}&lt;/color&gt;배 보상을 획득할 수 있습니다.", "", ""], ["CommonText_mMessage_25631", "Number:", "포인트:", "", ""], ["CommonText_mMessage_25635", "The [?] corresponds to 3 numbers that will be filled into empty slots in sequence—the resulting number will determine the final amount of Dragon&#x27;s Gold you receive!", "[?]에 대응하는 숫자 3개가 차례로 빈 위치에 채워집니다. 이로 생성되는 숫자로 최종 획득할 드래곤 골드의 수량이 결정됩니다!", "", ""], ["CommonText_mMessage_25773", "Nine-Tailed Nightmare", "아홉 꼬리의 재앙", "", ""], ["CommonText_mMessage_25828", "Locked", "잠김", "", ""], ["CommonText_mMessage_25829", "Invalid", "만료됨", "", ""], ["CommonText_mMessage_25830", "New Recruit", "신규 모집 획득", "", ""], ["CommonText_mMessage_25846", "Officials", "관리자", "", ""], ["CommonText_mMessage_25847", "Guild War Officials Appointment", "길드전 관리자 임명", "", ""], ["CommonText_mMessage_25848", "Rank", "직책", "", ""], ["CommonText_mMessage_25849", "Marshal", "통솔자", "", ""], ["CommonText_mMessage_25850", "Members", "멤버", "", ""], ["CommonText_mMessage_25851", "BP", "전투력", "", ""], ["CommonText_mMessage_25852", "Season&#x27;s Attacks", "시즌 공격 상황", "", ""], ["CommonText_mMessage_25853", "Actions", "조작", "", ""], ["CommonText_mMessage_25854", "Appoint", "임명", "", ""], ["CommonText_mMessage_25855", "Dismiss", "해임", "", ""], ["CommonText_mMessage_25856", "No Access", "권한 없음", "", ""], ["CommonText_mMessage_25857", "All Marshals gain &lt;color=&quot;#e37b00&quot;&gt;{num} extra attack(s) &lt;/color&gt; per Guild War round. Only the Guild Leader and Vice Leaders can appoint a Marshal during the preparation phase. If no appointments are made, this position will be automatically assigned based on members&#x27; contribution and BP.", "모든 통솔자는 길드전에서 1라운드마다 &lt;color=&quot;#e37b00&quot;&gt;추가로 {num}회의 공격 횟수를 획득&lt;/color&gt;할 수 있습니다. 통솔자는 길드장과 부길드장만이 준비 기간에 임명할 수 있으며, 임명되지 않을 경우 기여도와 전투력에 따라 자동 배정됩니다.", "", ""], ["CommonText_mMessage_25858", "Appointed: {num1}/{num2}", "임명 완료: {num1}/{num2}", "", ""], ["CommonText_mMessage_25859", "Appointment successful. Player gains {num} extra attack(s) per round.", "임명이 완료되었습니다. 해당 플레이어는 각 라운드에서 공격 횟수가 {num}회 증가합니다.", "", ""], ["CommonText_mMessage_25860", "Marshal slots are full. Dismiss one to continue.", "통솔자 수가 상한에 도달했습니다. 다른 통솔자를 해임한 후 임명해 주세요.", "", ""], ["CommonText_mMessage_25861", "&lt;color=&quot;#feab53&quot;&gt;Are you sure you want to dismiss this player from the Marshal position?&lt;/color&gt;\\nEach Guild can have up to {num1} Marshals, each gaining {num2} extra attack(s) per round.", "&lt;color=&quot;#feab53&quot;&gt;해당 플레이어의 통솔자 직책을 해임하시겠습니까?&lt;/color&gt;\\n각 길드는 최대 {num1}명의 통솔자를 보유할 수 있으며, 통솔자는 각 라운드에서 공격 횟수가 {num2}회 증가합니다.", "", ""], ["CommonText_mMessage_25862", "Marshal dismissed successfully. Please appoint a new one.", "통솔자 해임이 완료되었습니다. 다른 통솔자를 임명해 주세요.", "", ""], ["CommonText_mMessage_25863", "Guild War Attempts", "길드전 횟수", "", ""], ["CommonText_mMessage_25931", "Points of the Round", "이번 포인트", "", ""], ["CommonText_mMessage_26080", "Prioritize Guild War team.", "길드전의 팀 우선 사용", "", ""], ["CommonText_mMessage_26081", "Playtest mode cannot save battle results or auto-fight.", "게스트 플레이 모드에서는 대전 결과 저장 및 자동 전투 불가", "", ""], ["CommonText_mMessage_60708", "Score Details", "포인트 통계", "", ""], ["Difficulty_mDetail_1100001", "Only heroes from &lt;color=&quot;#e37b00&quot;&gt;The Nightmare Council, The Star Piercers&lt;/color&gt; can challenge this stage.\\nLord Skills of each Faction can only affect up to &lt;color=&quot;#fd4540&quot;&gt;5&lt;/color&gt; heroes.", "&lt;color=&quot;#e37b00&quot;&gt;악몽 의회, 관성의 화살&lt;/color&gt; 진영의 영웅만 사용하여 도전할 수 있는 던전.\\n각 진영의 영주 스킬은 최대 &lt;color=&quot;#fd4540&quot;&gt;5&lt;/color&gt;명의 영웅에게만 효과가 적용된다.", "", ""], ["Difficulty_mDetail_1100003", "Only heroes from &lt;color=&quot;#e37b00&quot;&gt;The Infernal Blast, The North Throne&lt;/color&gt; can challenge this stage.\\nLord Skills of each Faction can only affect up to &lt;color=&quot;#fd4540&quot;&gt;5&lt;/color&gt; heroes.", "&lt;color=&quot;#e37b00&quot;&gt;연옥 폭파, 북쪽 경계 왕좌&lt;/color&gt; 진영의 영웅만 사용하여 도전할 수 있는 던전.\\n각 진영의 영주 스킬은 최대 &lt;color=&quot;#fd4540&quot;&gt;5&lt;/color&gt;명의 영웅에게만 효과가 적용된다.", "", ""], ["Difficulty_mDetail_1100004", "Only heroes from &lt;color=&quot;#e37b00&quot;&gt;The Esoteria Order, The Chaos Dominion, and The Supreme Arbiters&lt;/color&gt; can challenge this stage.\\nLord Skills of each Faction can only affect up to &lt;color=&quot;#fd4540&quot;&gt;5&lt;/color&gt; heroes.", "&lt;color=&quot;#e37b00&quot;&gt;비법회, 혼돈 정복자, 최고 중재자&lt;/color&gt; 진영의 영웅만 사용하여 도전할 수 있는 던전.\\n각 진영의 영주 스킬은 최대 &lt;color=&quot;#fd4540&quot;&gt;5&lt;/color&gt;명의 영웅에게만 효과가 적용된다.", "", ""], ["Difficulty_mDetail_1200001", "The following heroes are exempt from map info restrictions.", "다음 영웅은 맵 정보 제한을 받지 않는다.", "", ""], ["Difficulty_mDetail_1200002", "The following heroes are exempt from map info restrictions.", "다음 영웅은 맵 정보 제한을 받지 않는다.", "", ""], ["Difficulty_mDetail_1200003", "The following heroes are exempt from map info restrictions.", "다음 영웅은 맵 정보 제한을 받지 않는다.", "", ""], ["Difficulty_mDetail_1200004", "The following heroes are exempt from map info restrictions.", "다음 영웅은 맵 정보 제한을 받지 않는다.", "", ""], ["Difficulty_mDetail_1300001", "Erlang Shen cannot be deployed in this special stage.", "특수 스테이지이므로 이랑신은 출전할 수 없다.", "", ""], ["Difficulty_mDetail_32010053", "Mage heroes cannot be included in the team.", "편대에 마법사 영웅을 편성할 수 없다.", "", ""], ["Difficulty_mDetail_32010153", "Destroyers gain the Camaraderie skill. When they die, nearby monsters receive an enhancement.", "파멸자가 일심동체 스킬을 획득한다. 사망하면 주위의 몬스터가 강화 효과를 획득한다.", "", ""], ["Difficulty_mDetail_32010163", "When the Priest of Thunder appears, he gains Ghost Form for 30 sec.", "번개의 제사장이 등장할 시, 30초간 지속되는 유령 형태를 획득한다.", "", ""], ["Difficulty_mDetail_32010364", "Boss enemies restore 1% Max HP per sec, while other enemies restore 5% Max HP per sec.", "보스는 초당 최대 HP의 1%를 회복하고, 보스가 아닌 적은 초당 최대 HP의 5%를 회복한다.", "", ""], ["Difficulty_mDetail_32010476", "Langlyn&#x27;s Max HP increases by 50%, but cannot be healed.", "란린의 최대 HP가 50% 증가하지만, 치유를 받을 수 없다.", "", ""], ["Difficulty_mDetail_32010477", "Langlyn&#x27;s Max HP increases by 75%, but cannot be healed.", "란린의 최대 HP가 75% 증가하지만, 치유를 받을 수 없다.", "", ""], ["Difficulty_mDetail_32010478", "Langlyn&#x27;s Max HP increases by 100%, but cannot be healed.", "란린의 최대 HP가 100% 증가하지만, 치유를 받을 수 없다.", "", ""], ["ExpStageUI_mRaidName_8201006", "COTD-1", "COTD-1", "", ""], ["ExpStageUI_mRaidName_8201007", "COTD-2", "COTD-2", "", ""], ["ExpStageUI_mRaidName_8201008", "COTD-3", "COTD-3", "", ""], ["ExpStageUI_mRaidName_8201009", "COTD-4", "COTD-4", "", ""], ["ExpStageUI_mRaidName_8201010", "COTD-5", "COTD-5", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010153", "Destroyers gain the Camaraderie skill. When a Destroyer dies, nearby Destroyers receive an enhancement.", "파멸자가 일심동체 스킬을 획득한다. 다른 파멸자가 사망하면 주위의 파멸자가 강화 효과를 획득한다.", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010163", "When the Priest of Thunder appears, he gains Ghost Form for 30 sec.", "번개의 제사장이 등장할 시, 30초간 지속되는 유령 형태를 획득한다.", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010364", "Boss enemies restore 1% Max HP per sec, while other enemies restore 5% Max HP per sec.", "보스는 초당 최대 HP의 1%를 회복하고, 보스가 아닌 적은 초당 최대 HP의 5%를 회복한다.", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010476", "Langlyn&#x27;s Max HP increases by 50%, but cannot be healed.", "란린의 최대 HP가 50% 증가하지만, 치유를 받을 수 없다.", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010477", "Langlyn&#x27;s Max HP increases by 75%, but cannot be healed.", "란린의 최대 HP가 75% 증가하지만, 치유를 받을 수 없다.", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010478", "Langlyn&#x27;s Max HP increases by 100%, but cannot be healed.", "란린의 최대 HP가 100% 증가하지만, 치유를 받을 수 없다.", "", ""], ["HeroFactionKingSkill_mName_100441_1", "The Cursed Cult", "저주신교", "", ""], ["HeroFactionKingSkill_mName_100441_2", "The Cursed Cult", "저주신교", "", ""], ["HeroFactionKingSkill_mName_100441_3", "The Cursed Cult", "저주신교", "", ""], ["HeroFactionKingSkill_mName_100441_4", "The Cursed Cult", "저주신교", "", ""], ["HeroFactionKingSkill_mName_100441_5", "The Cursed Cult", "저주신교", "", ""], ["Item_mItemDesc_110", "Purchase to obtain a 30-Day Monthly Card of Diamonds.", "구매하여 다이아 월간 카드 30일을 획득할 수 있다.", "", ""], ["Item_mItemDesc_111", "Purchase to obtain a 30-Day Monthly Card of Summoning.", "구매하여 소환 월간 카드 30일을 획득할 수 있다.", "", ""], ["Item_mItemDesc_112", "Purchase to obtain a 30-Day Monthly Card of Stamina.", "구매하여 체력 월간 카드 30일을 획득할 수 있다.", "", ""], ["Item_mItemDesc_31096", "Select 1 event-exclusive hero to join the event. The selected exclusive hero has an increased drop rate &amp; is guaranteed within 200 summons!", "한정 영웅 1명을 선택하여 이벤트에 참여할 수 있으며, 선택한 한정 영웅의 드롭 확률이 상승하고, 뽑기 200회 이내에 확정으로 획득한다!", "", ""], ["Item_mItemDesc_31097", "&lt;color=&quot;#eadca2&quot;&gt;Special Summon Offer&lt;/color&gt;\\n\\nGet the necessary materials for Hero Summon", "&lt;color=&quot;#eadca2&quot;&gt;영웅 소환 혜택&lt;/color&gt;\\n\\n영웅 소환의 필수 자원을 획득한다.", "", ""], ["Item_mItemDesc_3333", "&lt;color=&quot;#498a40&quot;&gt;Exclusive avatar border for the Gold Dragon Pass.&lt;/color&gt;", "&lt;color=&quot;#498a40&quot;&gt;골드 드래곤 패스 전용 한정 프레임&lt;/color&gt;", "", ""], ["Item_mItemDesc_3519", "Unknown Clue of Erlang Shen. When obtained, it will automatically convert into a random one from Erlang Shen&#x27;s Clues 1-5.", "알 수 없는 이랑신의 스토리 단서, 획득 시 이랑신 스토리 단서 1~5 중 1개로 자동 및 랜덤으로 전환된다.", "", ""], ["Item_mItemDesc_3521", "Erlang Shen&#x27;s Clue 2.\\n&lt;color=&quot;#498a40&quot;&gt;Usage: Consume this item via Fate&#x27;s Chapters to unlock the corresponding clue.&lt;/color&gt;", "이랑신의 스토리 단서 2.\\n&lt;color=&quot;#498a40&quot;&gt;사용 방법: [운명의 챕터] 이벤트. 해당 아이템을 소모해 대응하는 단서 해제&lt;/color&gt;", "", ""], ["Item_mItemDesc_3522", "Erlang Shen&#x27;s Clue 3.\\n&lt;color=&quot;#498a40&quot;&gt;Usage: Consume this item via Fate&#x27;s Chapters to unlock the corresponding clue.&lt;/color&gt;", "이랑신의 스토리 단서 3.\\n&lt;color=&quot;#498a40&quot;&gt;사용 방법: [운명의 챕터] 이벤트. 해당 아이템을 소모해 대응하는 단서 해제&lt;/color&gt;", "", ""], ["Item_mItemDesc_3523", "Erlang Shen&#x27;s Clue 4.\\n&lt;color=&quot;#498a40&quot;&gt;Usage: Consume this item via Fate&#x27;s Chapters to unlock the corresponding clue.&lt;/color&gt;", "이랑신의 스토리 단서 4.\\n&lt;color=&quot;#498a40&quot;&gt;사용 방법: [운명의 챕터] 이벤트. 해당 아이템을 소모해 대응하는 단서 해제&lt;/color&gt;", "", ""], ["Item_mItemDesc_3524", "Erlang Shen&#x27;s Clue 5.\\n&lt;color=&quot;#498a40&quot;&gt;Usage: Consume this item via Fate&#x27;s Chapters to unlock the corresponding clue.&lt;/color&gt;", "이랑신의 스토리 단서 5.\\n&lt;color=&quot;#498a40&quot;&gt;사용 방법: [운명의 챕터] 이벤트. 해당 아이템을 소모해 대응하는 단서 해제&lt;/color&gt;", "", ""], ["Item_mItemDesc_35473", "You can obtain the following items:\\nMonthly Card of Diamonds (30-Day)\\nDiamond x500", "다음 아이템을 획득할 수 있다.\\n다이아 월간 카드(30일)\\n다이아 x500", "", ""], ["Item_mItemDesc_35474", "You can obtain the following items:\\nMonthly Card of Summoning (30-Day)\\nRare Summoning Crystal x500", "다음 아이템을 획득할 수 있다.\\n소환 월간 카드(30일)\\n레어 소환 수정 x500", "", ""], ["Item_mItemDesc_35475", "You can obtain the following items:\\nMonthly Card of Stamina (30-Day)\\nStamina x600\\nAuto-Fight Chance x30", "다음 아이템을 획득할 수 있다.\\n체력 월간 카드(30일)\\n체력 x600\\n자동 전투 횟수 x30", "", ""], ["Item_mItemDesc_56310", "Grants a random &lt;color=&quot;#498a40&quot;&gt;Lvl. 2-4&lt;/color&gt; Trial Keystone.", "랜덤으로 &lt;color=&quot;#498a40&quot;&gt;Lv.2~Lv.4&lt;/color&gt;의 시련의 석판을 획득할 수 있다.", "", ""], ["Item_mItemDesc_56311", "Grants a random &lt;color=&quot;#498a40&quot;&gt;Lvl. 2-5&lt;/color&gt; Trial Keystone.", "랜덤으로 &lt;color=&quot;#498a40&quot;&gt;Lv.2~Lv.5&lt;/color&gt;의 시련의 석판을 획득할 수 있다.", "", ""], ["Item_mItemName_110", "Monthly Card of Diamonds (30-Day)", "다이아 월간 카드(30일)", "", ""], ["Item_mItemName_111", "Monthly Card of Summoning (30-Day)", "소환 월간 카드(30일)", "", ""], ["Item_mItemName_112", "Monthly Card of Stamina (30-Day)", "체력 월간 카드(30일)", "", ""], ["Item_mItemName_31096", "Exclusive Lucky Pick", "한정 선택 소환 이벤트", "", ""], ["Item_mItemName_31097", "Turbo Summon Bundle", "소환 가속 패키지", "", ""], ["Item_mItemName_3324", "Avatar Border: Nine-Tailed Nightmare Ranking Champion", "&#x27;아홉 꼬리의 재앙&#x27; 포인트 랭킹 1위 프레임", "", ""], ["Item_mItemName_3325", "Avatar Border: Nine-Tailed Nightmare Ranking Runner-Up", "&#x27;아홉 꼬리의 재앙&#x27; 포인트 랭킹 2위 프레임", "", ""], ["Item_mItemName_3326", "Avatar Border: Nine-Tailed Nightmare Ranking Third Place", "&#x27;아홉 꼬리의 재앙&#x27; 포인트 랭킹 3위 프레임", "", ""], ["Item_mItemName_3333", "Avatar Border: Gold Dragon Pass", "&#x27;골드 드래곤 패스&#x27; 한정 프레임", "", ""], ["Item_mItemName_35473", "Monthly Card of Diamonds", "다이아 월간 카드", "", ""], ["Item_mItemName_35474", "Monthly Card of Summoning", "소환 월간 카드", "", ""], ["Item_mItemName_35475", "Monthly Card of Stamina", "체력 월간 카드", "", ""], ["Item_mItemName_56310", "Random Trial Keystone (Lvl. 2-4)", "랜덤 시련의 석판(Lv.2~Lv.4)", "", ""], ["Item_mItemName_56311", "Random Trial Keystone (Lvl. 2-5)", "랜덤 시련의 석판(Lv.2~Lv.5)", "", ""], ["Quest_mQuestTitle_380034", "Obtain a total of 100 Dragon&#x27;s Gold.", "누적 100 드래곤 골드 획득", "", ""], ["Quest_mQuestTitle_380035", "Obtain a total of 200 Dragon&#x27;s Gold.", "누적 200 드래곤 골드 획득", "", ""], ["Quest_mQuestTitle_380036", "Obtain a total of 300 Dragon&#x27;s Gold.", "누적 300 드래곤 골드 획득", "", ""], ["Quest_mQuestTitle_380037", "Obtain a total of 500 Dragon&#x27;s Gold.", "누적 500 드래곤 골드 획득", "", ""], ["Quest_mQuestTitle_380038", "Obtain a total of 800 Dragon&#x27;s Gold.", "누적 800 드래곤 골드 획득", "", ""], ["Quest_mQuestTitle_380039", "Obtain a total of 1,000 Dragon&#x27;s Gold.", "누적 1,000 드래곤 골드 획득", "", ""], ["Quest_mQuestTitle_380040", "Obtain a total of 1,500 Dragon&#x27;s Gold.", "누적 1,500 드래곤 골드 획득", "", ""], ["Quest_mQuestTitle_380041", "Obtain a total of 2,000 Dragon&#x27;s Gold.", "누적 2,000 드래곤 골드 획득", "", ""], ["Quest_mQuestTitle_380042", "Obtain a total of 3,000 Dragon&#x27;s Gold.", "누적 3,000 드래곤 골드 획득", "", ""], ["Quest_mQuestTitle_380043", "Obtain a total of 4,000 Dragon&#x27;s Gold.", "누적 4,000 드래곤 골드 획득", "", ""], ["Quest_mQuestTitle_380044", "Obtain a total of 5,000 Dragon&#x27;s Gold.", "누적 5,000 드래곤 골드 획득", "", ""], ["RoleHeadFrame_mSourceDesc_84", "Awarded to the Commander who ranks first on the Points Leaderboard in the Echoes of Woe during the Nine-Tailed Nightmare.", "&#x27;아홉 꼬리의 재앙&#x27; 이벤트의 은허의 원령 여우 던전에서 포인트 총 랭킹 1위를 달성한 지휘관에게 주어진다.", "", ""], ["RoleHeadFrame_mSourceDesc_85", "Awarded to the Commander who ranks second on the Points Leaderboard in the Echoes of Woe during the Nine-Tailed Nightmare.", "&#x27;아홉 꼬리의 재앙&#x27; 이벤트의 은허의 원령 여우 던전에서 포인트 총 랭킹 2위를 달성한 지휘관에게 주어진다.", "", ""], ["RoleHeadFrame_mSourceDesc_86", "Awarded to the Commander who ranks third on the Points Leaderboard in the Echoes of Woe during the Nine-Tailed Nightmare.", "&#x27;아홉 꼬리의 재앙&#x27; 이벤트의 은허의 원령 여우 던전에서 포인트 총 랭킹 3위를 달성한 지휘관에게 주어진다.", "", ""], ["RoleHeadFrame_mSourceDesc_89", "Guild War S10 &quot;Overlord&quot; exclusive avatar border.", "&#x27;길드전 S10 시즌&#x27; 챌린저 티어 한정 프레임", "", ""], ["RoleHeadFrame_mSourceDesc_91", "Obtained from Gold Dragon Pass.", "골드 드래곤 패스에서 획득", "", ""], ["RollDiceBuilding_mName_11_1", "Turn of Luck", "운수 호전", "", ""], ["RollDiceBuilding_mName_12_1", "Turn of Luck", "운수 호전", "", ""], ["Skill_mSkillDesc_1908301_1", "Swings claws, dealing DMG to all heroes within 1 tile ahead.", "발톱을 휘둘러, 앞에 있는 1칸 범위 내 모든 영웅 유닛에게 피해를 입힌다.", "", ""], ["Skill_mSkillDesc_1908304_1", "Swings claws, dealing DMG to all heroes within 1 tile ahead.", "발톱을 휘둘러, 앞에 있는 1칸 범위 내 모든 영웅 유닛에게 피해를 입힌다.", "", ""], ["Skill_mSkillDesc_1908315_1", "When the Nine-Tailed Fox takes fatal DMG, she flees the battlefield and activates the tails on the field to attack. When the tails are defeated, the Nine-Tailed Fox returns to the battlefield. After all tails on the field are defeated, the Nine-Tailed Fox transforms and summons a large number of foxes.", "구미호는 치명 피해를 받을 때마다 전장을 이탈하며, 동시에 필드에 있는 꼬리가 활성화되어 공격을 시전한다. 꼬리를 처치하면, 구미호가 다시 등장한다. 필드에 있는 모든 꼬리를 처치하면, 구미호는 변신하며 대량의 여우를 소환한다.", "", ""], ["Skill_mSkillDesc_1908345_1", "Deals M. DMG to the last deployed unit on the battlefield, prioritizing Defenders.", "필드에 가장 마지막에 배치된 유닛에게 마법 피해를 입히며, 수호자 직업을 우선으로 선택한다.", "", ""], ["Skill_mSkillDesc_1908357_1", "Deals M. DMG to the last deployed unit on the battlefield, prioritizing Defenders.", "필드에 가장 마지막에 배치된 유닛에게 마법 피해를 입히며, 수호자 직업을 우선으로 선택한다.", "", ""], ["Skill_mSkillDesc_803803_1", "Immune to all &lt;color=&quot;#4A9DF2&quot;&gt;CC Effects&lt;/color&gt; (except Slow).", "감속 이외의 모든 &lt;color=&quot;#4A9DF2&quot;&gt;제어 효과&lt;/color&gt;를 면역한다.", "", ""], ["Skill_mSkillDesc_8202053_1", "Reduces the Redeployment Time of allied heroes by &lt;color=&quot;#4A9DF2&quot;&gt;{sk1}%&lt;/color&gt;, but increases their Deployment Cost by &lt;color=&quot;#4A9DF2&quot;&gt;+{sk2}&lt;/color&gt;.", "아군 영웅의 재배치 시간이 &lt;color=&quot;#4A9DF2&quot;&gt;{sk1}%&lt;/color&gt; 감소하지만, 출전 비용이 &lt;color=&quot;#4A9DF2&quot;&gt;{sk2} 증가&lt;/color&gt;한다.", "", ""], ["Skill_mSkillDesc_8202084_1", "Increases allied heroes&#x27; DMG by &lt;color=&quot;#4A9DF2&quot;&gt;{sk1}%&lt;/color&gt; each round and reduces Basic ATK interval by &lt;color=&quot;#4A9DF2&quot;&gt;{sk1}%&lt;/color&gt;. Vulnerability (P. DMG) and Vulnerability (M. DMG) increase by &lt;color=&quot;#4A9DF2&quot;&gt;{sk2}%&lt;/color&gt; each round.", "아군 영웅이 적에게 입히는 피해가 매 라운드마다 &lt;color=&quot;#4A9DF2&quot;&gt;{sk1}%&lt;/color&gt; 상승하며, 일반 공격의 간격이 &lt;color=&quot;#4A9DF2&quot;&gt;{sk1}%&lt;/color&gt; 감소한다. 동시에 물리 취약 및 마법 취약도 매 라운드마다 &lt;color=&quot;#4A9DF2&quot;&gt;{sk2}%&lt;/color&gt; 상승한다.", "", ""], ["Skill_mSkillDesc_8202103_1", "Allied Hero Deployment Limit +&lt;color=&quot;#4A9DF2&quot;&gt;{sk1}&lt;/color&gt;", "아군이 배치 가능한 영웅 수량이 &lt;color=&quot;#4A9DF2&quot;&gt;{sk1} 증가&lt;/color&gt;한다.", "", ""], ["Skill_mSkillName_1033701_1", "Accelerated Incubation", "급속 부화", "", ""], ["Skill_mSkillName_3991865_1", "High Quality", "고급", "", ""], ["Skill_mSkillName_803610_1", "Freeze", "빙결", "", ""], ["Skill_mSkillName_803801_1", "Frostbite Strike", "서리침식의 일격", "", ""], ["Skill_mSkillName_803803_1", "Control Immunity", "제어 면역", "", ""], ["Skill_mSkillName_804001_1", "Frostbite Rupture", "서리침식의 폭발", "", ""], ["Skill_mSkillName_8202053_1", "Time VS Money", "대가의 계약", "", ""], ["Skill_mSkillName_8202084_1", "Heating Up", "격전 지속", "", ""], ["Skill_mSkillName_8202103_1", "Rigged Arena", "강군압경", "", ""], ["Skill_mSkillSimpleDesc_11015501_1", "Increases ATK by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;, and reduces the number of attacks required to trigger Nature&#x27;s Fury enhanced attack by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;. When in Berserker Stance, Basic ATK restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt; Max HP, and triggering Ground Stomp restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; Max HP.", "공격력이 &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt; 상승한다. 정글의 분노의 강화 공격 발동에 필요한 공격 횟수가 &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;회 감소한다. 포효자 형태일 시, 일반 공격으로 자신 최대 HP의 &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;만큼 HP를 회복한다. 광폭 타격 발동 시, 자신 최대 HP의 &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt;만큼 HP를 회복한다.", "", ""], ["Skill_mSkillSimpleDesc_11015501_2", "Increases ATK by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;, and reduces the number of attacks required to trigger Nature&#x27;s Fury enhanced attack by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;. When in Berserker Stance, Basic ATK restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt; Max HP, and triggering Ground Stomp restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; Max HP.", "공격력이 &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt; 상승한다. 정글의 분노의 강화 공격 발동에 필요한 공격 횟수가 &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;회 감소한다. 포효자 형태일 시, 일반 공격으로 자신 최대 HP의 &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;만큼 HP를 회복한다. 광폭 타격 발동 시, 자신 최대 HP의 &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt;만큼 HP를 회복한다.", "", ""], ["Skill_mSkillSimpleDesc_11015501_3", "Increases ATK by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;, and reduces the number of attacks required to trigger Nature&#x27;s Fury enhanced attack by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;. When in Berserker Stance, Basic ATK restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt; Max HP, and triggering Ground Stomp restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; Max HP.", "공격력이 &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt; 상승한다. 정글의 분노의 강화 공격 발동에 필요한 공격 횟수가 &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;회 감소한다. 포효자 형태일 시, 일반 공격으로 자신 최대 HP의 &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;만큼 HP를 회복한다. 광폭 타격 발동 시, 자신 최대 HP의 &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt;만큼 HP를 회복한다.", "", ""], ["Skill_mSkillSimpleDesc_11015501_4", "Increases ATK by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;, and reduces the number of attacks required to trigger Nature&#x27;s Fury enhanced attack by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;. When in Berserker Stance, Basic ATK restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt; Max HP, and triggering Ground Stomp restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; Max HP.", "공격력이 &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt; 상승한다. 정글의 분노의 강화 공격 발동에 필요한 공격 횟수가 &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;회 감소한다. 포효자 형태일 시, 일반 공격으로 자신 최대 HP의 &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;만큼 HP를 회복한다. 광폭 타격 발동 시, 자신 최대 HP의 &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt;만큼 HP를 회복한다.", "", ""], ["Skill_mSkillSimpleDesc_11015501_5", "Increases ATK by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;, and reduces the number of attacks required to trigger Nature&#x27;s Fury enhanced attack by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;. When in Berserker Stance, Basic ATK restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt; Max HP, and triggering Ground Stomp restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; Max HP.", "공격력이 &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt; 상승한다. 정글의 분노의 강화 공격 발동에 필요한 공격 횟수가 &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;회 감소한다. 포효자 형태일 시, 일반 공격으로 자신 최대 HP의 &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;만큼 HP를 회복한다. 광폭 타격 발동 시, 자신 최대 HP의 &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt;만큼 HP를 회복한다.", "", ""], ["Skill_mSkillSimpleDesc_11015501_6", "Increases ATK by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;, and reduces the number of attacks required to trigger Nature&#x27;s Fury enhanced attack by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;. When in Berserker Stance, Basic ATK restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt; Max HP, and triggering Ground Stomp restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; Max HP.", "공격력이 &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt; 상승한다. 정글의 분노의 강화 공격 발동에 필요한 공격 횟수가 &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;회 감소한다. 포효자 형태일 시, 일반 공격으로 자신 최대 HP의 &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;만큼 HP를 회복한다. 광폭 타격 발동 시, 자신 최대 HP의 &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt;만큼 HP를 회복한다.", "", ""], ["Skill_mSkillSimpleDesc_13000441_1", "Increases faction team members&#x27; basic attributes by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;.\\nIncreases faction team members&#x27; DMG dealt to enemies inflicted with Slow, Stun, Freeze, Immobilized State, and other CC Effects by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt;. \\nIncreases faction team members&#x27; DMG by &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;. When the Lord is on the battlefield and an allied summon dies, increases all faction team members&#x27; DMG by an additional &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; for &lt;color=&quot;#4A9DF2&quot;&gt;{skm5}&lt;/color&gt; sec, stacking up to &lt;color=&quot;#4A9DF2&quot;&gt;{skm6}&lt;/color&gt; time(s).", "진영 소대 멤버의 기본 속성이 &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt; 상승한다.\\n진영 소대 멤버가 감속, 기절, 빙결, 속박 등 제어 효과를 받은 적에게 입히는 피해가 &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt; 증가한다.\\n진영 소대 멤버의 입히는 피해가 &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt; 증가한다. 영주가 필드에 있는 상태에서 아군 소환물이 사망할 시, 모든 진영 소대 멤버의 피해가 추가로 &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; 증가하며, &lt;color=&quot;#4A9DF2&quot;&gt;{skm5}&lt;/color&gt;초간 지속된다. 최대 &lt;color=&quot;#4A9DF2&quot;&gt;{skm6}&lt;/color&gt;스택 중첩 가능하다.", "", ""], ["Skill_mSkillSimpleDesc_13000441_2", "Increases faction team members&#x27; basic attributes by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;.\\nIncreases faction team members&#x27; DMG dealt to enemies inflicted with Slow, Stun, Freeze, Immobilized State, and other CC Effects by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt;. \\nIncreases faction team members&#x27; DMG by &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;. When the Lord is on the battlefield and an allied summon dies, increases all faction team members&#x27; DMG by an additional &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; for &lt;color=&quot;#4A9DF2&quot;&gt;{skm5}&lt;/color&gt; sec, stacking up to &lt;color=&quot;#4A9DF2&quot;&gt;{skm6}&lt;/color&gt; time(s).", "진영 소대 멤버의 기본 속성이 &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt; 상승한다.\\n진영 소대 멤버가 감속, 기절, 빙결, 속박 등 제어 효과를 받은 적에게 입히는 피해가 &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt; 증가한다.\\n진영 소대 멤버의 입히는 피해가 &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt; 증가한다. 영주가 필드에 있는 상태에서 아군 소환물이 사망할 시, 모든 진영 소대 멤버의 피해가 추가로 &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; 증가하며, &lt;color=&quot;#4A9DF2&quot;&gt;{skm5}&lt;/color&gt;초간 지속된다. 최대 &lt;color=&quot;#4A9DF2&quot;&gt;{skm6}&lt;/color&gt;스택 중첩 가능하다.", "", ""], ["Skill_mSkillSimpleDesc_13000441_3", "Increases faction team members&#x27; basic attributes by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;.\\nIncreases faction team members&#x27; DMG dealt to enemies inflicted with Slow, Stun, Freeze, Immobilized State, and other CC Effects by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt;. \\nIncreases faction team members&#x27; DMG by &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;. When the Lord is on the battlefield and an allied summon dies, increases all faction team members&#x27; DMG by an additional &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; for &lt;color=&quot;#4A9DF2&quot;&gt;{skm5}&lt;/color&gt; sec, stacking up to &lt;color=&quot;#4A9DF2&quot;&gt;{skm6}&lt;/color&gt; time(s).", "진영 소대 멤버의 기본 속성이 &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt; 상승한다.\\n진영 소대 멤버가 감속, 기절, 빙결, 속박 등 제어 효과를 받은 적에게 입히는 피해가 &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt; 증가한다.\\n진영 소대 멤버의 입히는 피해가 &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt; 증가한다. 영주가 필드에 있는 상태에서 아군 소환물이 사망할 시, 모든 진영 소대 멤버의 피해가 추가로 &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; 증가하며, &lt;color=&quot;#4A9DF2&quot;&gt;{skm5}&lt;/color&gt;초간 지속된다. 최대 &lt;color=&quot;#4A9DF2&quot;&gt;{skm6}&lt;/color&gt;스택 중첩 가능하다.", "", ""], ["Skill_mSkillSimpleDesc_13000441_4", "Increases faction team members&#x27; basic attributes by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;.\\nIncreases faction team members&#x27; DMG dealt to enemies inflicted with Slow, Stun, Freeze, Immobilized State, and other CC Effects by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt;. \\nIncreases faction team members&#x27; DMG by &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;. When the Lord is on the battlefield and an allied summon dies, increases all faction team members&#x27; DMG by an additional &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; for &lt;color=&quot;#4A9DF2&quot;&gt;{skm5}&lt;/color&gt; sec, stacking up to &lt;color=&quot;#4A9DF2&quot;&gt;{skm6}&lt;/color&gt; time(s).", "진영 소대 멤버의 기본 속성이 &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt; 상승한다.\\n진영 소대 멤버가 감속, 기절, 빙결, 속박 등 제어 효과를 받은 적에게 입히는 피해가 &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt; 증가한다.\\n진영 소대 멤버의 입히는 피해가 &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt; 증가한다. 영주가 필드에 있는 상태에서 아군 소환물이 사망할 시, 모든 진영 소대 멤버의 피해가 추가로 &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; 증가하며, &lt;color=&quot;#4A9DF2&quot;&gt;{skm5}&lt;/color&gt;초간 지속된다. 최대 &lt;color=&quot;#4A9DF2&quot;&gt;{skm6}&lt;/color&gt;스택 중첩 가능하다.", "", ""], ["Skill_mSkillSimpleDesc_13000441_5", "Increases faction team members&#x27; basic attributes by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;.\\nIncreases faction team members&#x27; DMG dealt to enemies inflicted with Slow, Stun, Freeze, Immobilized State, and other CC Effects by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt;. \\nIncreases faction team members&#x27; DMG by &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;. When the Lord is on the battlefield and an allied summon dies, increases all faction team members&#x27; DMG by an additional &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; for &lt;color=&quot;#4A9DF2&quot;&gt;{skm5}&lt;/color&gt; sec, stacking up to &lt;color=&quot;#4A9DF2&quot;&gt;{skm6}&lt;/color&gt; time(s).", "진영 소대 멤버의 기본 속성이 &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt; 상승한다.\\n진영 소대 멤버가 감속, 기절, 빙결, 속박 등 제어 효과를 받은 적에게 입히는 피해가 &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt; 증가한다.\\n진영 소대 멤버의 입히는 피해가 &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt; 증가한다. 영주가 필드에 있는 상태에서 아군 소환물이 사망할 시, 모든 진영 소대 멤버의 피해가 추가로 &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; 증가하며, &lt;color=&quot;#4A9DF2&quot;&gt;{skm5}&lt;/color&gt;초간 지속된다. 최대 &lt;color=&quot;#4A9DF2&quot;&gt;{skm6}&lt;/color&gt;스택 중첩 가능하다.", "", ""], ["Skill_mSkillSimpleDesc_8202053_1", "Reduces the Redeployment Time of allied heroes by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;, but increases their Deployment Cost by &lt;color=&quot;#4A9DF2&quot;&gt;+{skm2}&lt;/color&gt;.", "아군 영웅의 재배치 시간이 &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt; 감소하지만, 출전 비용이 &lt;color=&quot;#4A9DF2&quot;&gt;{skm2} 증가&lt;/color&gt;한다.", "", ""], ["Skill_mSkillSimpleDesc_8202084_1", "Increases allied heroes&#x27; DMG by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt; each round and reduces Basic ATK Interval by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;. Vulnerability (P. DMG) and Vulnerability (M. DMG) increase by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt; each round.", "아군 영웅이 적에게 입히는 피해가 매 라운드마다 &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt; 상승하며, 일반 공격의 간격이 &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt; 감소한다. 동시에 물리 취약 및 마법 취약도 매 라운드마다 &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt; 상승한다.", "", ""], ["Skill_mSkillSimpleDesc_8202103_1", "Allied Hero Deployment Limit +&lt;color=&quot;#4A9DF2&quot;&gt;{skm1}&lt;/color&gt;", "아군이 배치 가능한 영웅 수량이 &lt;color=&quot;#4A9DF2&quot;&gt;{skm1} 증가&lt;/color&gt;한다.", "", ""], ["Skill_mSkillSimpleDesc_8203031_1", "Hotspot appears on both players&#x27; battlefields. Heroes standing on the Hotspot have all attributes increased by 20%.", "양측 플레이어의 전장에 증폭 진지가 나타난다. 이 증폭 진지에 출전된 영웅은 모든 속성이 20% 상승한다.", "", ""], ["Stage_mStageDesc_5003001", "In this epic battle, you will face an unprecedented enemy - Semrah. Hailing from ancient times, Semrah fights in 3 Battle Modes, each posing a tough challenge.", "이 장대한 전투에서는 이제껏 경험해 보지 못한 적인 세멜라를 마주하게 될 것입니다. 고대의 세멜라는 3가지 전투 모드가 존재하며, 모두 극도로 어려운 도전이 될 것입니다.", "", ""], ["Stage_mStageDesc_5003002", "In this epic battle, you will face an unprecedented enemy - Semrah. Hailing from ancient times, Semrah fights in 3 Battle Modes, each posing a tough challenge.", "이 장대한 전투에서는 이제껏 경험해 보지 못한 적인 세멜라를 마주하게 될 것입니다. 고대의 세멜라는 3가지 전투 모드가 존재하며, 모두 극도로 어려운 도전이 될 것입니다.", "", ""], ["Stage_mStageDesc_8101001", "Starting from Round 5, &lt;color=&quot;#fd4540&quot;&gt;all monsters gain Invisibility and become untargetable&lt;/color&gt; for 7 sec.", "라운드5 시작 시, 7초 동안 &lt;color=&quot;#fd4540&quot;&gt;모든 몬스터가 은신 효과를 획득하여, 대상으로 선택되지 않는다&lt;/color&gt;.", "", ""], ["Stage_mStageDesc_8101002", "Starting from Round 5, &lt;color=&quot;#fd4540&quot;&gt;all monsters gain Invincibility upon taking DMG for the first time, becoming immune to all DMG&lt;/color&gt; for 4 sec.", "라운드5 시작 시, 4초 동안 &lt;color=&quot;#fd4540&quot;&gt;모든 몬스터가 처음으로 피해를 받은 후 무적 효과를 획득하여, 모든 피해를 면역한다&lt;/color&gt;.", "", ""], ["Stage_mStageDesc_8101003", "Starting from Round 5, &lt;color=&quot;#fd4540&quot;&gt;all heroes continuously take True DMG equal to 4% of their Max HP per sec&lt;/color&gt;.", "라운드5 시작 시, &lt;color=&quot;#fd4540&quot;&gt;모든 영웅이 초당 최대 HP의 4%에 해당하는 고정 피해를 지속적으로 받는다&lt;/color&gt;.", "", ""], ["Stage_mStageDesc_8201011", "Team up with your friends to defeat the enemy Boss and fend off the tides of enemies.", "친구들과 함께 적군 보스를 처치하고, 파도처럼 밀려오는 적들을 막아보세요.", "", ""], ["Stage_mStageDesc_8201012", "Team up with your friends to defeat the enemy Boss and fend off the tides of enemies.", "친구들과 함께 적군 보스를 처치하고, 파도처럼 밀려오는 적들을 막아보세요.", "", ""], ["Stage_mStageDesc_8201013", "Team up with your friends to defeat the enemy Boss and fend off the tides of enemies.", "친구들과 함께 적군 보스를 처치하고, 파도처럼 밀려오는 적들을 막아보세요.", "", ""], ["Stage_mStageDesc_8201014", "Team up with your friends to defeat the enemy Boss and fend off the tides of enemies.", "친구들과 함께 적군 보스를 처치하고, 파도처럼 밀려오는 적들을 막아보세요.", "", ""], ["Stage_mStageDesc_8201015", "Team up with your friends to defeat the enemy Boss and fend off the tides of enemies.", "친구들과 함께 적군 보스를 처치하고, 파도처럼 밀려오는 적들을 막아보세요.", "", ""], ["Stage_mStageFailDesc_5003001", "Pay extra attention to Semrah&#x27;s Battle Mode and exploit its weakness.", "세멜라의 전투 모드에 주의해 보세요. 각 모드는 돌파할 수 있는 약점이 존재합니다.", "", ""], ["Stage_mStageFailDesc_5003002", "Pay extra attention to Semrah&#x27;s Battle Mode and exploit its weakness.", "세멜라의 전투 모드에 주의해 보세요. 각 모드는 돌파할 수 있는 약점이 존재합니다.", "", ""], ["Stage_mStageIdDesc_5003001", "Apocalypse I - Playtest", "종말 I-게스트 플레이", "", ""], ["Stage_mStageIdDesc_5003002", "Apocalypse II - Playtest", "종말 II-게스트 플레이", "", ""], ["Stage_mStageIdDesc_8201011", "Stage 1", "스테이지 1", "", ""], ["Stage_mStageIdDesc_8201012", "Stage 2", "스테이지 2", "", ""], ["Stage_mStageIdDesc_8201013", "Stage 3", "스테이지 3", "", ""], ["Stage_mStageIdDesc_8201014", "Stage 4", "스테이지 4", "", ""], ["Stage_mStageIdDesc_8201015", "Stage 5", "스테이지 5", "", ""], ["Stage_mStageIdDesc_991001", "Test 1-1", "Test1-1", "", ""], ["Stage_mStageIdDesc_991002", "Test 1-2", "Test1-2", "", ""], ["Stage_mStageIdDesc_991003", "Test 1-3", "Test1-3", "", ""], ["Stage_mStageName_5003001", "Semrah", "세멜라", "", ""], ["Stage_mStageName_5003002", "Semrah", "세멜라", "", ""], ["Stage_mStageName_8201011", "Co-op Mode", "협력 모드", "", ""], ["Stage_mStageName_8201012", "Co-op Mode", "협력 모드", "", ""], ["Stage_mStageName_8201013", "Co-op Mode", "협력 모드", "", ""], ["Stage_mStageName_8201014", "Co-op Mode", "협력 모드", "", ""], ["Stage_mStageName_8201015", "Co-op Mode", "협력 모드", "", ""], ["UILanguage_mKeyValue_Form_BackpackIntegration_SubTitle", "Sort", "정렬", "", ""], ["UILanguage_mKeyValue_Panel_BackpackEquipPanel_EquipedText", "Equipped", "장착 중", "", ""], ["UILanguage_mKeyValue_Panel_MaterialPanel_GetWayTitle_Text", "Access", "Access", "", ""], ["UILanguage_mKeyValue_Panel_MaterialPanel_Text_Use", "Use", "사용", "", ""], ["UnionRaise_mRaiseText_15", "Donate &lt;color=#28d37c&gt;{num}&lt;/color&gt; Mythic Extract(s).", "신화 정수 &lt;color=#28d37c&gt;{num}&lt;/color&gt;개 수집", "", ""], ["UnionRaise_mRaiseText_16", "Donate &lt;color=#28d37c&gt;{num}&lt;/color&gt; 5-star Psychic Power(s).", "5성 심령체 &lt;color=#28d37c&gt;{num}&lt;/color&gt;개 수집", "", ""], ["UnionRaise_mRaiseTitle_15", "Promotion Insignia III", "진급 재료 III", "", ""], ["UnionRaise_mRaiseTitle_16", "Hero Star Up", "캐릭터 승급", "", ""], ["Unit_mDescribe_37105", "Scalekin mages, adept in the art of poisonous magic, possess the ability to &lt;color=#ff4500&gt;inflict poison on enemies&lt;/color&gt;.", "맹독 마법을 다루는 스케일킨 마법사. &lt;color=#ff4500&gt;공격으로 적을 중독시킬 수 있다&lt;/color&gt;.", "", ""], ["Unit_mDescribe_37106", "Elite Skeleton Archers that can deal massive DMG from afar.", "정예 스켈레톤 궁수. 비교적 높은 원거리 피해를 입힌다.", "", ""], ["Unit_mDescribe_37107", "Small spiders, very aggressive but weak individually.", "소형 거미. 공격 욕구는 강하지만 개체 실력이 약하다.", "", ""], ["Unit_mDescribe_37108", "Toxic Suicides will explode when approaching enemies, &lt;color=#ff4500&gt;dealing moderate AoE DMG and poisoning them&lt;/color&gt;.", "맹독 폭발충은 적에게 다가가 자폭하여 &lt;color=#ff4500&gt;소량의 범위 피해를 입히고 적을 중독시킨다&lt;/color&gt;.", "", ""], ["Unit_mDescribe_37110", "Clad in giant shields and possessing unyielding skeletal frames, they are renowned for their exceptional DEF.", "거대한 방패를 들고 있는 스켈레톤 병사. 방어 능력이 매우 강하다.", "", ""], ["Unit_mDescribe_37112", "Produces a Queen Spider when left out of combat for a while. Eliminate it before it hatches.", "일정 시간 후 스파이더 퀸이 부화하므로, 부화하기 전에 처치해야 한다.", "", ""], ["Unit_mFeature_10408", "Ludwig has been reborn from the abyss. With a horrifying power granted by his master - the Eldritch God. Ludwig has now lost his humanity.", "루드비히는 심연에서 새로운 삶은 맞이했고, 그의 주인은 무서운 사탄의 힘을 부여했다. 지금의 루드비히는 인간성을 완전히 상실한 괴물이다.", "", ""], ["Unit_mFeature_10409", "Ludwig has been reborn from the abyss. With a horrifying power granted by his master - the Eldritch God. Ludwig has now lost his humanity.", "루드비히는 심연에서 새로운 삶은 맞이했고, 그의 주인은 무서운 사탄의 힘을 부여했다. 지금의 루드비히는 인간성을 완전히 상실한 괴물이다.", "", ""], ["Unit_mFeature_10410", "Ludwig has been reborn from the abyss. With a horrifying power granted by his master - the Eldritch God. Ludwig has now lost his humanity.", "루드비히는 심연에서 새로운 삶은 맞이했고, 그의 주인은 무서운 사탄의 힘을 부여했다. 지금의 루드비히는 인간성을 완전히 상실한 괴물이다.", "", ""], ["Unit_mFeature_37105", "Scalekin mages, adept in the art of poisonous magic, possess the ability to inflict continuous Poison DMG on enemies.", "맹독 마법을 다루는 스케일킨 마법사. 적에게 지속적인 독성 피해를 입힌다.", "", ""], ["Unit_mFeature_37106", "Elite Skeleton Archers that can deal massive DMG from afar.", "정예 스켈레톤 궁수. 비교적 높은 원거리 피해를 입힌다.", "", ""], ["Unit_mFeature_37107", "Small spiders, very aggressive but weak individually.", "소형 거미. 공격 욕구는 강하지만 개체 실력이 약하다.", "", ""], ["Unit_mFeature_37108", "The inferior zraks, whose bodies are filled with corrosive liquids, will launch suicide attacks on enemies.", "벌레족의 하급 구성원. 체내에 부식성이 강한 액체가 가득하며, 적에게 자폭 공격을 시전한다.", "", ""], ["Unit_mFeature_37110", "Equipped with a giant shield, these stiff skeletons are able to hold off heavy attacks.", "거대한 방패를 들고 있는 스켈레톤 병사. 거대한 방패로 방어하며, 강력한 공격을 막아낼 수 있다.", "", ""], ["Unit_mFeature_37112", "Produces a Queen Spider when left out of combat for a while. Eliminate it before it hatches.", "일정 시간 후 스파이더 퀸이 부화하므로, 부화하기 전에 처치해야 한다.", "", ""], ["Unit_mName_37105", "Poison Mage", "맹독 마법사", "", ""], ["Unit_mName_37106", "Elite Skeleton Archer", "정예 스켈레톤 궁수", "", ""], ["Unit_mName_37107", "Small Arachnid", "아라크니드", "", ""], ["Unit_mName_37108", "Suicide", "폭발충", "", ""], ["Unit_mName_37110", "Skeletal Giant-Shielder", "스켈레톤 실드 병사", "", ""], ["Unit_mName_37112", "Huge Spider Egg", "거대한 벌레알", "", ""], ["Unit_mFeature_16474", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "암석 조종 능력을 타고난 생물. 자신의 영지를 침략하는 적에게 무차별 공격을 시전한다.", "", ""], ["Unit_mFeature_16475", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "암석 조종 능력을 타고난 생물. 자신의 영지를 침략하는 적에게 무차별 공격을 시전한다.", "", ""], ["Unit_mFeature_16481", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "암석 조종 능력을 타고난 생물. 자신의 영지를 침략하는 적에게 무차별 공격을 시전한다.", "", ""], ["Unit_mFeature_16487", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "암석 조종 능력을 타고난 생물. 자신의 영지를 침략하는 적에게 무차별 공격을 시전한다.", "", ""], ["Unit_mFeature_16496", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "암석 조종 능력을 타고난 생물. 자신의 영지를 침략하는 적에게 무차별 공격을 시전한다.", "", ""], ["Unit_mFeature_16497", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "암석 조종 능력을 타고난 생물. 자신의 영지를 침략하는 적에게 무차별 공격을 시전한다.", "", ""], ["Unit_mFeature_18133", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "암석 조종 능력을 타고난 생물. 자신의 영지를 침략하는 적에게 무차별 공격을 시전한다.", "", ""], ["Unit_mFeature_18137", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "암석 조종 능력을 타고난 생물. 자신의 영지를 침략하는 적에게 무차별 공격을 시전한다.", "", ""], ["Unit_mFeature_11127", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "암석 조종 능력을 타고난 생물. 자신의 영지를 침략하는 적에게 무차별 공격을 시전한다.", "", ""], ["Stage_mStageDesc_9042001", "The Nine-Tailed Fox, resurrected by the grievance from the Shang Dynasty, wreaks havoc upon the mortal realm with her illusions. Four supreme arrays must be laid to obliterate its true spirit.\\n\\nFire Realm: Molten lava surges as crimson chains, coiling round her nine tails to scorch demonic bones. The fox’s wails crackle like searing thunder.", "구미호가 은상의 원한으로 환생하여, 현혹술로 인간 세상을 어지럽혔다. 사대 절진을 펼쳐 그 영물을 소멸시켜야 한다.\\n\\n불지옥 영역: 땅에서 솟은 용암이 붉은 사슬로 변해, 휘감아오는 아홉 꼬리가 요골을 불태우니, 여우 요괴의 애곡이 천둥과 같았다.", "", ""], ["Item_mItemName_214901", "Shawl of the Lifegiver", "불굴의 용기", "", ""], ["Skill_mSkillSimpleDesc_232170_1", "When the Talent is triggered, increases the hero&#x27;s DMG by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;, with an additional &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt; against Elite and Boss units for &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}&lt;/color&gt; sec.", "재능 발동 시, 자신의 피해가 &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt; 증가하고, 정예와 보스 유닛에 대한 피해가 추가로 &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt; 증가하며, &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}&lt;/color&gt;초간 지속된다.", "", ""], ["CommonText_mMessage_25947", "Corresponding Arena Challenge Attack Mode", "아레나 해당 도전 공격 모드", "", ""], ["CommonText_mMessage_25948", "Corresponding Arena Challenge Defense Mode", "아레나 해당 도전 방어 모드", "", ""], ["Skill_mSkillSimpleDesc_220903_5", "Applies &lt;color=&quot;#28d37c&quot;&gt;[322095]&lt;/color&gt; to &lt;color=&quot;#4A9DF2&quot;&gt;1&lt;/color&gt; ally with the lowest HP percentage in range for &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}&lt;/color&gt; sec.", "범위 내 HP 비율이 가장 낮은 아군 &lt;color=&quot;#4A9DF2&quot;&gt;1&lt;/color&gt;명에게 &lt;color=&quot;#28d37c&quot;&gt;[322095]&lt;/color&gt;을(를) 부여하며, &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}&lt;/color&gt;초간 지속된다.", "", ""], ["Skill_mSkillSimpleDesc_220903_4", "Applies &lt;color=&quot;#28d37c&quot;&gt;[322094]&lt;/color&gt; to &lt;color=&quot;#4A9DF2&quot;&gt;1&lt;/color&gt; ally with the lowest HP percentage in range for &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}&lt;/color&gt; sec.", "범위 내 HP 비율이 가장 낮은 아군 &lt;color=&quot;#4A9DF2&quot;&gt;1&lt;/color&gt;명에게 &lt;color=&quot;#28d37c&quot;&gt;[322094]&lt;/color&gt;을(를) 부여하며, &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}&lt;/color&gt;초간 지속된다.", "", ""], ["Skill_mSkillSimpleDesc_220903_3", "Applies &lt;color=&quot;#28d37c&quot;&gt;[322093]&lt;/color&gt; to &lt;color=&quot;#4A9DF2&quot;&gt;1&lt;/color&gt; ally with the lowest HP percentage in range for &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}&lt;/color&gt; sec.", "범위 내 HP 비율이 가장 낮은 아군 &lt;color=&quot;#4A9DF2&quot;&gt;1&lt;/color&gt;명에게 &lt;color=&quot;#28d37c&quot;&gt;[322093]&lt;/color&gt;을(를) 부여하며, &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}&lt;/color&gt;초간 지속된다.", "", ""], ["Skill_mSkillSimpleDesc_220903_2", "Applies &lt;color=&quot;#28d37c&quot;&gt;[322092]&lt;/color&gt; to &lt;color=&quot;#4A9DF2&quot;&gt;1&lt;/color&gt; ally with the lowest HP percentage in range for &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}&lt;/color&gt; sec.", "범위 내 HP 비율이 가장 낮은 아군 &lt;color=&quot;#4A9DF2&quot;&gt;1&lt;/color&gt;명에게 &lt;color=&quot;#28d37c&quot;&gt;[322092]&lt;/color&gt;을(를) 부여하며, &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}&lt;/color&gt;초간 지속된다.", "", ""], ["LANG_STRID_notice_NineTailedNightmare", "Nine-Tailed Nightmare Event Intro", "아홉 꼬리의 재앙 이벤트 소개", "", ""], ["LANG_STRID_push_long9_title_1", "Grimmscale Invasion Launches", "사르얀의 전투 도전 오픈", "", ""], ["LANG_STRID_push_long9_title_2", "Commanders can challenge Sauryan, Wing of Chaos infinitely every day. Rewards are based on the highest total damage dealt in a single challenge attempt.", "지휘관들은 【혼돈의 힘·사르얀】을 무제한으로 도전할 수 있으며, 매일 단일 최고 피해에 따라 각종 귀중한 보상을 획득할 수 있습니다.", "", ""], ["LANG_STRID_push_xyx_title_1", "Zombie Invasion Starts!", "좀비 포위 완료! 이벤트 오픈", "", ""], ["LANG_STRID_push_xyx_title_2", "Build your hero&#x27;s skills, equip powerful Relics, and battle through waves of monsters to survive!", "영웅 스킬을 구축하고, 적합한 유물을 선택하여 습격하는 몬스터를 격퇴하고 끝까지 생존하세요!", "", ""], ["LANG_STRID_notice_jwhpv", "Event Trailer: Nine-Tailed Nightmare", "아홉 꼬리의 재앙 이벤트 트레일러", "", ""], ["LANG_STRID_push_jwhyy1", "Nine-Tailed Nightmare Is Here!", "아홉 꼬리의 재앙 이벤트 출현!", "", ""], ["LANG_STRID_push_jwhyy2", "The new Legendary heroes Ne Zha and Erlang Shen arrive! Join the events to claim event-exclusive rewards, including Exclusive Artifacts, Summoning Crystals, Avatar, Emote, and more! Plus, Erlang Shen&#x27;s time-limited skin is now available!", "신규 레전더리 영웅 「나타」「이랑신」 등장! 시리즈 이벤트에 참여하여 전용 아티팩트, 각종 소환 수정, 아바타, 이모티콘 등 이벤트 한정 보상을 수령하세요. 이랑신 스킨도 한정 출시!", "", ""], ["LANG_STRID_notice_NineTailed2", "Nine-Tailed Nightmare Starts!", "아홉 꼬리의 재앙 이벤트 오픈", "", ""], ["LANG_STRID_notice_NineTailed3", "Join the event to obtain event-exclusive rewards, including Exclusive Artifacts, Avatar, Avatar Border, Summoning Crystals, and more!", "이벤트에 참여하여 전용 아티팩트, 아바타, 프레임 등 이벤트 한정 보상과 각종 소환 수정 등의 보상을 획득하세요!", "", ""], ["LANG_STRID_push_shardsummon_nezha", "Collect shards to assemble Ne Zha&#x27;s Exclusive Artifact: Fire-Tipped Spear!", "조각을 모아 나타 전용 아티팩트 「화첨창」을 합성하세요!", "", ""], ["LANG_STRID_push_shardsummon_sqhcending", "Artifact Shard Assembly Countdown", "아티팩트 조각 합성 카운트다운", "", ""], ["LANG_STRID_push_shardsummon_nezhaend2", "Last chance to collect shards and assemble Ne Zha&#x27;s Exclusive Artifact: Fire-Tipped Spear! Don&#x27;t miss out!", "조각을 모아 나타 전용 아티팩트 「화첨창」을 합성하세요! 마지막 기회를 놓치지 마세요!", "", ""], ["LANG_STRID_notice_CreativeShort", "Creative Short", "창의 단편극", "", ""], ["LANG_STRID_compete_brief", "After the event starts, Commanders earn League points by participating in the Arena, Guild - Drake&#x27;s Chasm and spending Stamina and can claim Personal Score Rewards. Commanders within the same League compete against each other for ranking rewards. After the event ends, Commanders who have earned points can claim the Basic League Rewards. Members of the League with a higher total score will receive additional Champion League Reward.", "이벤트 시작 후 지휘관님은 아레나 참여, 길드-드래곤 유적, 체력 소모 등을 통해 연맹 포인트를 획득하여 개인 포인트 보상을 수령할 수 있습니다. 동시에 연맹 내 지휘관님들은 서로 경쟁하여 랭킹 보상을 획득하게 됩니다. 이벤트 종료 후 포인트를 획득한 지휘관님은 기본 연맹 보상을 수령할 수 있으며, 총 포인트가 더 높은 연맹 멤버는 연맹 승리 보상을 추가로 받을 수 있습니다.", "", ""], ["LANG_STRID_Anniversary_Discount_Event_Des_01", "Discount Tokens obtained from event quests can be used to randomly discount an item on the event page once. Each item can be discounted up to 3 times.", "이벤트 퀘스트에서 획득한 할인 코인을 사용하면 이벤트 페이지 내 상품에 무작위로 1회 할인이 적용되며, 각 상품은 최대 3회까지 할인받을 수 있습니다.", "", ""], ["LANG_STRID_FishingRanking", "&lt;color=#e1e1e1&gt;After the event ends, the top 3 Commanders on the leaderboard will each receive a physical merchandise reward. Contact info will be requested via in-game mail for delivery.&lt;/color&gt;", "&lt;color=#e1e1e1&gt;이벤트 종료 후 랭킹 TOP 3 지휘관님께는 실물 굿즈 보상을 각각 지급하며, 추후 게임 내 우편을 통해 주소 기입 관련 연락을 드릴 예정입니다.&lt;/color&gt;", "", ""], ["LANG_STRID_notice_nzgl", "Hero Gameplay: Ne Zha", "영웅 콘텐츠: 나타", "", ""], ["LANG_STRID_notice_yjgl", "Hero Gameplay: Erlang Shen", "영웅 콘텐츠: 이랑신", "", ""], ["LANG_STRID_GDP_title_26", "Celestial Season", "환천 시즌", "", ""], ["LANG_STRID_activity_popup_GDP_htj", "Gold Dragon Pass - Celestial Season", "골드 드래곤 패스-환천 시즌", "", ""], ["LANG_STRID_CompeteEvent_Rule11", "&lt;color=#e1e1e1&gt;Consume general items to gain points.&lt;/color&gt;", "&lt;color=#e1e1e1&gt;통용 아이템을 소모하여 포인트 획득&lt;/color&gt;", "", ""], ["LANG_STRID_CompeteEvent_Rule12", "&lt;color=#e1e1e1&gt;Consume Mythril and Meteorite to gain points.&lt;/color&gt;", "&lt;color=#e1e1e1&gt;미스릴, 운석을 소모하여 포인트 획득&lt;/color&gt;", "", ""], ["LANG_STRID_Moon_Dec_01", "Shadows of Tomorrow", "몽롱한 달의 쌍화", "", ""], ["LANG_STRID_Anniversary_Discount_Event_Detail", "&lt;color=&quot;#cec2b1&quot;&gt;Discount Event&lt;/color&gt;\\nEach use of a Discount Token will apply a &lt;color=&quot;#28d37c&quot;&gt;random discount&lt;/color&gt; to a random item in the event. Participate in event quests to obtain Discount Tokens. All unused Discount Tokens will be removed after the event ends.\\nPlayers may choose to purchase event items at their original prices without using any Discount Tokens.\\n\\nEach time a Discount Token is used, one item will be randomly selected from the three available in the event interface for a discount. After each discount, the price of the currently selected item will be further reduced. &lt;color=&quot;#28d37c&quot;&gt;Each item reaches its maximum discount after being discounted 3 times&lt;/color&gt;.\\nOnly items that have not reached the maximum discount and have not been purchased can continue to participate in the discount event.", "&lt;color=&quot;#cec2b1&quot;&gt;할인 이벤트&lt;/color&gt;\\n할인 코인을 사용할 때마다 이벤트 내 상품에 &lt;color=&quot;#28d37c&quot;&gt;무작위 할인&lt;/color&gt;이 적용됩니다. 이벤트 퀘스트에 참여하면 이벤트 할인 코인을 획득할 수 있으며, 각 기간의 이벤트 할인 코인은 이벤트 종료 후 삭제됩니다.\\n플레이어는 할인 코인을 사용하지 않고 원가로 이벤트 상품을 구매할 수 있습니다.\\n\\n할인 코인을 사용할 때마다 이벤트 화면의 3개 상품 중 1개가 무작위로 선택되어 할인됩니다. 할인을 적용할 때마다 현재 선택된 상품의 가격이 더 낮아지며, &lt;color=&quot;#28d37c&quot;&gt;각 상품은 3회 할인 후 최대 할인에 도달합니다&lt;/color&gt;.\\n최대 할인에 도달하지 않았고 구매되지 않은 상품만 계속 할인에 참여할 수 있습니다.", "", ""]];
+            const formattedData = [["BUFFAttribute_mName_8202044", "DMG Increase", "피해 증가", "", ""], ["BUFFAttribute_mName_8202045", "DMG Reduction", "피해 감소", "", ""], ["BUFFAttribute_mTips_322928", "Fire-Tipped Spear ignores {30,num}% of the enemy's DEF. Universe Ring bounces {31,num} extra time(s) and can hit the same target multiple times. Yin-Yang Blade executes common monsters with HP below {32,num}%.", "화첨창이 적의 방어를 {30,num}% 무시한다. 건곤권이 추가로 {31,num}회 바운스 공격하며, 같은 대상에게 중복으로 바운스할 수 있다. 음양검이 HP가 {32,num}% 미만인 일반 몬스터를 참살한다.", "", ""], ["ChampionshipPlan_mChampionshipDesc_833", "Participate in Artifact Material Raid to win trophies and redeem rewards.", "아티팩트 재료 던전에 참여해 트로피를 얻고 보상과 교환하세요!", "", ""], ["ChampionshipPlan_mChampionshipDesc_834", "Level up/star up/promote heroes or upgrade heroes' skills to win trophies and redeem rewards.", "영웅을 레벨업, 승급, 진급시키고 스킬을 레벨업하여 트로피를 얻고 보상과 교환하세요!", "", ""], ["ChampionshipPlan_mChampionshipDesc_835", "Participate in Gear Raid I to win trophies and redeem rewards.", "장비 던전 I에 참여해 트로피를 얻고 보상과 교환하세요!", "", ""], ["ChampionshipPlan_mChampionshipDesc_836", "Participate in Gear Raid II to win trophies and redeem rewards.", "장비 던전 II에 참여해 트로피를 얻고 보상과 교환하세요!", "", ""], ["ChampionshipPlan_mChampionshipDesc_837", "Summon heroes to win trophies and redeem rewards.", "영웅을 소환해 트로피를 얻고 보상과 교환하세요!", "", ""], ["ChampionshipPlan_mChampionshipDesc_838", "Participate in Artifact Material Raid to win trophies and redeem rewards.", "아티팩트 재료 던전에 참여해 트로피를 얻고 보상과 교환하세요!", "", ""], ["ChampionshipPlan_mChampionshipDesc_839", "Participate in Gear Raid III to win trophies and redeem rewards.", "장비 던전 III에 참여해 트로피를 얻고 보상과 교환하세요!", "", ""], ["ChampionshipPlan_mChampionshipDesc_840", "Level up/star up/promote heroes or upgrade heroes' skills to win trophies and redeem rewards.", "영웅을 레벨업, 승급, 진급시키고 스킬을 레벨업하여 트로피를 얻고 보상과 교환하세요!", "", ""], ["ChampionshipPlan_mChampionshipDesc_841", "Participate in Gear Raid I to win trophies and redeem rewards.", "장비 던전 I에 참여해 트로피를 얻고 보상과 교환하세요!", "", ""], ["ChampionshipPlan_mChampionshipDesc_842", "Participate in Gear Raid II to win trophies and redeem rewards.", "장비 던전 II에 참여해 트로피를 얻고 보상과 교환하세요!", "", ""], ["ChampionshipPlan_mChampionshipGlobalName_837", "Arrival of Heroes Ultimate Leaderboard", "영웅 강림 정상 랭킹", "", ""], ["ChampionshipPlan_mChampionshipName_833", "Mystery of Artifacts", "아티팩트 비경", "", ""], ["ChampionshipPlan_mChampionshipName_834", "Hero Training", "영웅 육성", "", ""], ["ChampionshipPlan_mChampionshipName_835", "The Lost Legacy", "잃어버린 유산", "", ""], ["ChampionshipPlan_mChampionshipName_836", "Vault in the Sands", "모래바다 보물창고", "", ""], ["ChampionshipPlan_mChampionshipName_837", "Arrival of Heroes", "영웅 강림", "", ""], ["ChampionshipPlan_mChampionshipName_838", "Mystery of Artifacts", "아티팩트 비경", "", ""], ["ChampionshipPlan_mChampionshipName_839", "Forgotten Palace", "잃어버린 땅", "", ""], ["ChampionshipPlan_mChampionshipName_840", "Hero Training", "영웅 육성", "", ""], ["ChampionshipPlan_mChampionshipName_841", "The Lost Legacy", "잃어버린 유산", "", ""], ["ChampionshipPlan_mChampionshipName_842", "Vault in the Sands", "모래바다 보물창고", "", ""], ["Chapter_mChapterName_4301", "Titanic Ruins - Playtest", "타이탄 폐허-게스트 플레이", "", ""], ["CommonText_mMessage_25116", "Awaken the mystical power within.", "신비로운 마법의 힘을 깨웁니다.", "", ""], ["CommonText_mMessage_25125", "Take destiny into your own hands.", "운명을 손에 거머쥐세요.", "", ""], ["CommonText_mMessage_25132", "Reveal cards to earn Dragon's Gold by matching the designated patterns.", "카드를 공개하여 지정된 도안과 동일하면, 대응하는 수량의 드래곤 골드를 획득할 수 있습니다.", "", ""], ["CommonText_mMessage_25133", "Reveal cards and match 3 identical patterns to earn a <span style=\"color: #fdbe36;\">{num}</span>x reward!", "카드를 공개하여 동일한 도안 3개가 나오면, <span style=\"color: #fdbe36;\">{num}</span>배 보상을 획득할 수 있습니다.", "", ""], ["CommonText_mMessage_25631", "Number:", "포인트:", "", ""], ["CommonText_mMessage_25635", "The [?] corresponds to 3 numbers that will be filled into empty slots in sequence—the resulting number will determine the final amount of Dragon's Gold you receive!", "[?]에 대응하는 숫자 3개가 차례로 빈 위치에 채워집니다. 이로 생성되는 숫자로 최종 획득할 드래곤 골드의 수량이 결정됩니다!", "", ""], ["CommonText_mMessage_25773", "Nine-Tailed Nightmare", "아홉 꼬리의 재앙", "", ""], ["CommonText_mMessage_25828", "Locked", "잠김", "", ""], ["CommonText_mMessage_25829", "Invalid", "만료됨", "", ""], ["CommonText_mMessage_25830", "New Recruit", "신규 모집 획득", "", ""], ["CommonText_mMessage_25846", "Officials", "관리자", "", ""], ["CommonText_mMessage_25847", "Guild War Officials Appointment", "길드전 관리자 임명", "", ""], ["CommonText_mMessage_25848", "Rank", "직책", "", ""], ["CommonText_mMessage_25849", "Marshal", "통솔자", "", ""], ["CommonText_mMessage_25850", "Members", "멤버", "", ""], ["CommonText_mMessage_25851", "BP", "전투력", "", ""], ["CommonText_mMessage_25852", "Season's Attacks", "시즌 공격 상황", "", ""], ["CommonText_mMessage_25853", "Actions", "조작", "", ""], ["CommonText_mMessage_25854", "Appoint", "임명", "", ""], ["CommonText_mMessage_25855", "Dismiss", "해임", "", ""], ["CommonText_mMessage_25856", "No Access", "권한 없음", "", ""], ["CommonText_mMessage_25857", "All Marshals gain <span style=\"color: #e37b00;\">{num} extra attack(s) </span> per Guild War round. Only the Guild Leader and Vice Leaders can appoint a Marshal during the preparation phase. If no appointments are made, this position will be automatically assigned based on members' contribution and BP.", "모든 통솔자는 길드전에서 1라운드마다 <span style=\"color: #e37b00;\">추가로 {num}회의 공격 횟수를 획득</span>할 수 있습니다. 통솔자는 길드장과 부길드장만이 준비 기간에 임명할 수 있으며, 임명되지 않을 경우 기여도와 전투력에 따라 자동 배정됩니다.", "", ""], ["CommonText_mMessage_25858", "Appointed: {num1}/{num2}", "임명 완료: {num1}/{num2}", "", ""], ["CommonText_mMessage_25859", "Appointment successful. Player gains {num} extra attack(s) per round.", "임명이 완료되었습니다. 해당 플레이어는 각 라운드에서 공격 횟수가 {num}회 증가합니다.", "", ""], ["CommonText_mMessage_25860", "Marshal slots are full. Dismiss one to continue.", "통솔자 수가 상한에 도달했습니다. 다른 통솔자를 해임한 후 임명해 주세요.", "", ""], ["CommonText_mMessage_25861", "<span style=\"color: #feab53;\">Are you sure you want to dismiss this player from the Marshal position?</span><br>Each Guild can have up to {num1} Marshals, each gaining {num2} extra attack(s) per round.", "<span style=\"color: #feab53;\">해당 플레이어의 통솔자 직책을 해임하시겠습니까?</span><br>각 길드는 최대 {num1}명의 통솔자를 보유할 수 있으며, 통솔자는 각 라운드에서 공격 횟수가 {num2}회 증가합니다.", "", ""], ["CommonText_mMessage_25862", "Marshal dismissed successfully. Please appoint a new one.", "통솔자 해임이 완료되었습니다. 다른 통솔자를 임명해 주세요.", "", ""], ["CommonText_mMessage_25863", "Guild War Attempts", "길드전 횟수", "", ""], ["CommonText_mMessage_25931", "Points of the Round", "이번 포인트", "", ""], ["CommonText_mMessage_26080", "Prioritize Guild War team.", "길드전의 팀 우선 사용", "", ""], ["CommonText_mMessage_26081", "Playtest mode cannot save battle results or auto-fight.", "게스트 플레이 모드에서는 대전 결과 저장 및 자동 전투 불가", "", ""], ["CommonText_mMessage_60708", "Score Details", "포인트 통계", "", ""], ["Difficulty_mDetail_1100001", "Only heroes from <span style=\"color: #e37b00;\">The Nightmare Council, The Star Piercers</span> can challenge this stage.<br>Lord Skills of each Faction can only affect up to <span style=\"color: #fd4540;\">5</span> heroes.", "<span style=\"color: #e37b00;\">악몽 의회, 관성의 화살</span> 진영의 영웅만 사용하여 도전할 수 있는 던전.<br>각 진영의 영주 스킬은 최대 <span style=\"color: #fd4540;\">5</span>명의 영웅에게만 효과가 적용된다.", "", ""], ["Difficulty_mDetail_1100003", "Only heroes from <span style=\"color: #e37b00;\">The Infernal Blast, The North Throne</span> can challenge this stage.<br>Lord Skills of each Faction can only affect up to <span style=\"color: #fd4540;\">5</span> heroes.", "<span style=\"color: #e37b00;\">연옥 폭파, 북쪽 경계 왕좌</span> 진영의 영웅만 사용하여 도전할 수 있는 던전.<br>각 진영의 영주 스킬은 최대 <span style=\"color: #fd4540;\">5</span>명의 영웅에게만 효과가 적용된다.", "", ""], ["Difficulty_mDetail_1100004", "Only heroes from <span style=\"color: #e37b00;\">The Esoteria Order, The Chaos Dominion, and The Supreme Arbiters</span> can challenge this stage.<br>Lord Skills of each Faction can only affect up to <span style=\"color: #fd4540;\">5</span> heroes.", "<span style=\"color: #e37b00;\">비법회, 혼돈 정복자, 최고 중재자</span> 진영의 영웅만 사용하여 도전할 수 있는 던전.<br>각 진영의 영주 스킬은 최대 <span style=\"color: #fd4540;\">5</span>명의 영웅에게만 효과가 적용된다.", "", ""], ["Difficulty_mDetail_1200001", "The following heroes are exempt from map info restrictions.", "다음 영웅은 맵 정보 제한을 받지 않는다.", "", ""], ["Difficulty_mDetail_1200002", "The following heroes are exempt from map info restrictions.", "다음 영웅은 맵 정보 제한을 받지 않는다.", "", ""], ["Difficulty_mDetail_1200003", "The following heroes are exempt from map info restrictions.", "다음 영웅은 맵 정보 제한을 받지 않는다.", "", ""], ["Difficulty_mDetail_1200004", "The following heroes are exempt from map info restrictions.", "다음 영웅은 맵 정보 제한을 받지 않는다.", "", ""], ["Difficulty_mDetail_1300001", "Erlang Shen cannot be deployed in this special stage.", "특수 스테이지이므로 이랑신은 출전할 수 없다.", "", ""], ["Difficulty_mDetail_32010053", "Mage heroes cannot be included in the team.", "편대에 마법사 영웅을 편성할 수 없다.", "", ""], ["Difficulty_mDetail_32010153", "Destroyers gain the Camaraderie skill. When they die, nearby monsters receive an enhancement.", "파멸자가 일심동체 스킬을 획득한다. 사망하면 주위의 몬스터가 강화 효과를 획득한다.", "", ""], ["Difficulty_mDetail_32010163", "When the Priest of Thunder appears, he gains Ghost Form for 30 sec.", "번개의 제사장이 등장할 시, 30초간 지속되는 유령 형태를 획득한다.", "", ""], ["Difficulty_mDetail_32010364", "Boss enemies restore 1% Max HP per sec, while other enemies restore 5% Max HP per sec.", "보스는 초당 최대 HP의 1%를 회복하고, 보스가 아닌 적은 초당 최대 HP의 5%를 회복한다.", "", ""], ["Difficulty_mDetail_32010476", "Langlyn's Max HP increases by 50%, but cannot be healed.", "란린의 최대 HP가 50% 증가하지만, 치유를 받을 수 없다.", "", ""], ["Difficulty_mDetail_32010477", "Langlyn's Max HP increases by 75%, but cannot be healed.", "란린의 최대 HP가 75% 증가하지만, 치유를 받을 수 없다.", "", ""], ["Difficulty_mDetail_32010478", "Langlyn's Max HP increases by 100%, but cannot be healed.", "란린의 최대 HP가 100% 증가하지만, 치유를 받을 수 없다.", "", ""], ["ExpStageUI_mRaidName_8201006", "COTD-1", "COTD-1", "", ""], ["ExpStageUI_mRaidName_8201007", "COTD-2", "COTD-2", "", ""], ["ExpStageUI_mRaidName_8201008", "COTD-3", "COTD-3", "", ""], ["ExpStageUI_mRaidName_8201009", "COTD-4", "COTD-4", "", ""], ["ExpStageUI_mRaidName_8201010", "COTD-5", "COTD-5", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010153", "Destroyers gain the Camaraderie skill. When a Destroyer dies, nearby Destroyers receive an enhancement.", "파멸자가 일심동체 스킬을 획득한다. 다른 파멸자가 사망하면 주위의 파멸자가 강화 효과를 획득한다.", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010163", "When the Priest of Thunder appears, he gains Ghost Form for 30 sec.", "번개의 제사장이 등장할 시, 30초간 지속되는 유령 형태를 획득한다.", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010364", "Boss enemies restore 1% Max HP per sec, while other enemies restore 5% Max HP per sec.", "보스는 초당 최대 HP의 1%를 회복하고, 보스가 아닌 적은 초당 최대 HP의 5%를 회복한다.", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010476", "Langlyn's Max HP increases by 50%, but cannot be healed.", "란린의 최대 HP가 50% 증가하지만, 치유를 받을 수 없다.", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010477", "Langlyn's Max HP increases by 75%, but cannot be healed.", "란린의 최대 HP가 75% 증가하지만, 치유를 받을 수 없다.", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010478", "Langlyn's Max HP increases by 100%, but cannot be healed.", "란린의 최대 HP가 100% 증가하지만, 치유를 받을 수 없다.", "", ""], ["HeroFactionKingSkill_mName_100441_1", "The Cursed Cult", "저주신교", "", ""], ["HeroFactionKingSkill_mName_100441_2", "The Cursed Cult", "저주신교", "", ""], ["HeroFactionKingSkill_mName_100441_3", "The Cursed Cult", "저주신교", "", ""], ["HeroFactionKingSkill_mName_100441_4", "The Cursed Cult", "저주신교", "", ""], ["HeroFactionKingSkill_mName_100441_5", "The Cursed Cult", "저주신교", "", ""], ["Item_mItemDesc_110", "Purchase to obtain a 30-Day Monthly Card of Diamonds.", "구매하여 다이아 월간 카드 30일을 획득할 수 있다.", "", ""], ["Item_mItemDesc_111", "Purchase to obtain a 30-Day Monthly Card of Summoning.", "구매하여 소환 월간 카드 30일을 획득할 수 있다.", "", ""], ["Item_mItemDesc_112", "Purchase to obtain a 30-Day Monthly Card of Stamina.", "구매하여 체력 월간 카드 30일을 획득할 수 있다.", "", ""], ["Item_mItemDesc_31096", "Select 1 event-exclusive hero to join the event. The selected exclusive hero has an increased drop rate & is guaranteed within 200 summons!", "한정 영웅 1명을 선택하여 이벤트에 참여할 수 있으며, 선택한 한정 영웅의 드롭 확률이 상승하고, 뽑기 200회 이내에 확정으로 획득한다!", "", ""], ["Item_mItemDesc_31097", "<span style=\"color: #eadca2;\">Special Summon Offer</span><br><br>Get the necessary materials for Hero Summon", "<span style=\"color: #eadca2;\">영웅 소환 혜택</span><br><br>영웅 소환의 필수 자원을 획득한다.", "", ""], ["Item_mItemDesc_3333", "<span style=\"color: #498a40;\">Exclusive avatar border for the Gold Dragon Pass.</span>", "<span style=\"color: #498a40;\">골드 드래곤 패스 전용 한정 프레임</span>", "", ""], ["Item_mItemDesc_3519", "Unknown Clue of Erlang Shen. When obtained, it will automatically convert into a random one from Erlang Shen's Clues 1-5.", "알 수 없는 이랑신의 스토리 단서, 획득 시 이랑신 스토리 단서 1~5 중 1개로 자동 및 랜덤으로 전환된다.", "", ""], ["Item_mItemDesc_3521", "Erlang Shen's Clue 2.<br><span style=\"color: #498a40;\">Usage: Consume this item via Fate's Chapters to unlock the corresponding clue.</span>", "이랑신의 스토리 단서 2.<br><span style=\"color: #498a40;\">사용 방법: [운명의 챕터] 이벤트. 해당 아이템을 소모해 대응하는 단서 해제</span>", "", ""], ["Item_mItemDesc_3522", "Erlang Shen's Clue 3.<br><span style=\"color: #498a40;\">Usage: Consume this item via Fate's Chapters to unlock the corresponding clue.</span>", "이랑신의 스토리 단서 3.<br><span style=\"color: #498a40;\">사용 방법: [운명의 챕터] 이벤트. 해당 아이템을 소모해 대응하는 단서 해제</span>", "", ""], ["Item_mItemDesc_3523", "Erlang Shen's Clue 4.<br><span style=\"color: #498a40;\">Usage: Consume this item via Fate's Chapters to unlock the corresponding clue.</span>", "이랑신의 스토리 단서 4.<br><span style=\"color: #498a40;\">사용 방법: [운명의 챕터] 이벤트. 해당 아이템을 소모해 대응하는 단서 해제</span>", "", ""], ["Item_mItemDesc_3524", "Erlang Shen's Clue 5.<br><span style=\"color: #498a40;\">Usage: Consume this item via Fate's Chapters to unlock the corresponding clue.</span>", "이랑신의 스토리 단서 5.<br><span style=\"color: #498a40;\">사용 방법: [운명의 챕터] 이벤트. 해당 아이템을 소모해 대응하는 단서 해제</span>", "", ""], ["Item_mItemDesc_35473", "You can obtain the following items:<br>Monthly Card of Diamonds (30-Day)<br>Diamond x500", "다음 아이템을 획득할 수 있다.<br>다이아 월간 카드(30일)<br>다이아 x500", "", ""], ["Item_mItemDesc_35474", "You can obtain the following items:<br>Monthly Card of Summoning (30-Day)<br>Rare Summoning Crystal x500", "다음 아이템을 획득할 수 있다.<br>소환 월간 카드(30일)<br>레어 소환 수정 x500", "", ""], ["Item_mItemDesc_35475", "You can obtain the following items:<br>Monthly Card of Stamina (30-Day)<br>Stamina x600<br>Auto-Fight Chance x30", "다음 아이템을 획득할 수 있다.<br>체력 월간 카드(30일)<br>체력 x600<br>자동 전투 횟수 x30", "", ""], ["Item_mItemDesc_56310", "Grants a random <span style=\"color: #498a40;\">Lvl. 2-4</span> Trial Keystone.", "랜덤으로 <span style=\"color: #498a40;\">Lv.2~Lv.4</span>의 시련의 석판을 획득할 수 있다.", "", ""], ["Item_mItemDesc_56311", "Grants a random <span style=\"color: #498a40;\">Lvl. 2-5</span> Trial Keystone.", "랜덤으로 <span style=\"color: #498a40;\">Lv.2~Lv.5</span>의 시련의 석판을 획득할 수 있다.", "", ""], ["Item_mItemName_110", "Monthly Card of Diamonds (30-Day)", "다이아 월간 카드(30일)", "", ""], ["Item_mItemName_111", "Monthly Card of Summoning (30-Day)", "소환 월간 카드(30일)", "", ""], ["Item_mItemName_112", "Monthly Card of Stamina (30-Day)", "체력 월간 카드(30일)", "", ""], ["Item_mItemName_31096", "Exclusive Lucky Pick", "한정 선택 소환 이벤트", "", ""], ["Item_mItemName_31097", "Turbo Summon Bundle", "소환 가속 패키지", "", ""], ["Item_mItemName_3324", "Avatar Border: Nine-Tailed Nightmare Ranking Champion", "'아홉 꼬리의 재앙' 포인트 랭킹 1위 프레임", "", ""], ["Item_mItemName_3325", "Avatar Border: Nine-Tailed Nightmare Ranking Runner-Up", "'아홉 꼬리의 재앙' 포인트 랭킹 2위 프레임", "", ""], ["Item_mItemName_3326", "Avatar Border: Nine-Tailed Nightmare Ranking Third Place", "'아홉 꼬리의 재앙' 포인트 랭킹 3위 프레임", "", ""], ["Item_mItemName_3333", "Avatar Border: Gold Dragon Pass", "'골드 드래곤 패스' 한정 프레임", "", ""], ["Item_mItemName_35473", "Monthly Card of Diamonds", "다이아 월간 카드", "", ""], ["Item_mItemName_35474", "Monthly Card of Summoning", "소환 월간 카드", "", ""], ["Item_mItemName_35475", "Monthly Card of Stamina", "체력 월간 카드", "", ""], ["Item_mItemName_56310", "Random Trial Keystone (Lvl. 2-4)", "랜덤 시련의 석판(Lv.2~Lv.4)", "", ""], ["Item_mItemName_56311", "Random Trial Keystone (Lvl. 2-5)", "랜덤 시련의 석판(Lv.2~Lv.5)", "", ""], ["Quest_mQuestTitle_380034", "Obtain a total of 100 Dragon's Gold.", "누적 100 드래곤 골드 획득", "", ""], ["Quest_mQuestTitle_380035", "Obtain a total of 200 Dragon's Gold.", "누적 200 드래곤 골드 획득", "", ""], ["Quest_mQuestTitle_380036", "Obtain a total of 300 Dragon's Gold.", "누적 300 드래곤 골드 획득", "", ""], ["Quest_mQuestTitle_380037", "Obtain a total of 500 Dragon's Gold.", "누적 500 드래곤 골드 획득", "", ""], ["Quest_mQuestTitle_380038", "Obtain a total of 800 Dragon's Gold.", "누적 800 드래곤 골드 획득", "", ""], ["Quest_mQuestTitle_380039", "Obtain a total of 1,000 Dragon's Gold.", "누적 1,000 드래곤 골드 획득", "", ""], ["Quest_mQuestTitle_380040", "Obtain a total of 1,500 Dragon's Gold.", "누적 1,500 드래곤 골드 획득", "", ""], ["Quest_mQuestTitle_380041", "Obtain a total of 2,000 Dragon's Gold.", "누적 2,000 드래곤 골드 획득", "", ""], ["Quest_mQuestTitle_380042", "Obtain a total of 3,000 Dragon's Gold.", "누적 3,000 드래곤 골드 획득", "", ""], ["Quest_mQuestTitle_380043", "Obtain a total of 4,000 Dragon's Gold.", "누적 4,000 드래곤 골드 획득", "", ""], ["Quest_mQuestTitle_380044", "Obtain a total of 5,000 Dragon's Gold.", "누적 5,000 드래곤 골드 획득", "", ""], ["RoleHeadFrame_mSourceDesc_84", "Awarded to the Commander who ranks first on the Points Leaderboard in the Echoes of Woe during the Nine-Tailed Nightmare.", "'아홉 꼬리의 재앙' 이벤트의 은허의 원령 여우 던전에서 포인트 총 랭킹 1위를 달성한 지휘관에게 주어진다.", "", ""], ["RoleHeadFrame_mSourceDesc_85", "Awarded to the Commander who ranks second on the Points Leaderboard in the Echoes of Woe during the Nine-Tailed Nightmare.", "'아홉 꼬리의 재앙' 이벤트의 은허의 원령 여우 던전에서 포인트 총 랭킹 2위를 달성한 지휘관에게 주어진다.", "", ""], ["RoleHeadFrame_mSourceDesc_86", "Awarded to the Commander who ranks third on the Points Leaderboard in the Echoes of Woe during the Nine-Tailed Nightmare.", "'아홉 꼬리의 재앙' 이벤트의 은허의 원령 여우 던전에서 포인트 총 랭킹 3위를 달성한 지휘관에게 주어진다.", "", ""], ["RoleHeadFrame_mSourceDesc_89", "Guild War S10 \"Overlord\" exclusive avatar border.", "'길드전 S10 시즌' 챌린저 티어 한정 프레임", "", ""], ["RoleHeadFrame_mSourceDesc_91", "Obtained from Gold Dragon Pass.", "골드 드래곤 패스에서 획득", "", ""], ["RollDiceBuilding_mName_11_1", "Turn of Luck", "운수 호전", "", ""], ["RollDiceBuilding_mName_12_1", "Turn of Luck", "운수 호전", "", ""], ["Skill_mSkillDesc_1908301_1", "Swings claws, dealing DMG to all heroes within 1 tile ahead.", "발톱을 휘둘러, 앞에 있는 1칸 범위 내 모든 영웅 유닛에게 피해를 입힌다.", "", ""], ["Skill_mSkillDesc_1908304_1", "Swings claws, dealing DMG to all heroes within 1 tile ahead.", "발톱을 휘둘러, 앞에 있는 1칸 범위 내 모든 영웅 유닛에게 피해를 입힌다.", "", ""], ["Skill_mSkillDesc_1908315_1", "When the Nine-Tailed Fox takes fatal DMG, she flees the battlefield and activates the tails on the field to attack. When the tails are defeated, the Nine-Tailed Fox returns to the battlefield. After all tails on the field are defeated, the Nine-Tailed Fox transforms and summons a large number of foxes.", "구미호는 치명 피해를 받을 때마다 전장을 이탈하며, 동시에 필드에 있는 꼬리가 활성화되어 공격을 시전한다. 꼬리를 처치하면, 구미호가 다시 등장한다. 필드에 있는 모든 꼬리를 처치하면, 구미호는 변신하며 대량의 여우를 소환한다.", "", ""], ["Skill_mSkillDesc_1908345_1", "Deals M. DMG to the last deployed unit on the battlefield, prioritizing Defenders.", "필드에 가장 마지막에 배치된 유닛에게 마법 피해를 입히며, 수호자 직업을 우선으로 선택한다.", "", ""], ["Skill_mSkillDesc_1908357_1", "Deals M. DMG to the last deployed unit on the battlefield, prioritizing Defenders.", "필드에 가장 마지막에 배치된 유닛에게 마법 피해를 입히며, 수호자 직업을 우선으로 선택한다.", "", ""], ["Skill_mSkillDesc_803803_1", "Immune to all <span style=\"color: #4A9DF2;\">CC Effects</span> (except Slow).", "감속 이외의 모든 <span style=\"color: #4A9DF2;\">제어 효과</span>를 면역한다.", "", ""], ["Skill_mSkillDesc_8202053_1", "Reduces the Redeployment Time of allied heroes by <span style=\"color: #4A9DF2;\">{sk1}%</span>, but increases their Deployment Cost by <span style=\"color: #4A9DF2;\">+{sk2}</span>.", "아군 영웅의 재배치 시간이 <span style=\"color: #4A9DF2;\">{sk1}%</span> 감소하지만, 출전 비용이 <span style=\"color: #4A9DF2;\">{sk2} 증가</span>한다.", "", ""], ["Skill_mSkillDesc_8202084_1", "Increases allied heroes' DMG by <span style=\"color: #4A9DF2;\">{sk1}%</span> each round and reduces Basic ATK interval by <span style=\"color: #4A9DF2;\">{sk1}%</span>. Vulnerability (P. DMG) and Vulnerability (M. DMG) increase by <span style=\"color: #4A9DF2;\">{sk2}%</span> each round.", "아군 영웅이 적에게 입히는 피해가 매 라운드마다 <span style=\"color: #4A9DF2;\">{sk1}%</span> 상승하며, 일반 공격의 간격이 <span style=\"color: #4A9DF2;\">{sk1}%</span> 감소한다. 동시에 물리 취약 및 마법 취약도 매 라운드마다 <span style=\"color: #4A9DF2;\">{sk2}%</span> 상승한다.", "", ""], ["Skill_mSkillDesc_8202103_1", "Allied Hero Deployment Limit +<span style=\"color: #4A9DF2;\">{sk1}</span>", "아군이 배치 가능한 영웅 수량이 <span style=\"color: #4A9DF2;\">{sk1} 증가</span>한다.", "", ""], ["Skill_mSkillName_1033701_1", "Accelerated Incubation", "급속 부화", "", ""], ["Skill_mSkillName_3991865_1", "High Quality", "고급", "", ""], ["Skill_mSkillName_803610_1", "Freeze", "빙결", "", ""], ["Skill_mSkillName_803801_1", "Frostbite Strike", "서리침식의 일격", "", ""], ["Skill_mSkillName_803803_1", "Control Immunity", "제어 면역", "", ""], ["Skill_mSkillName_804001_1", "Frostbite Rupture", "서리침식의 폭발", "", ""], ["Skill_mSkillName_8202053_1", "Time VS Money", "대가의 계약", "", ""], ["Skill_mSkillName_8202084_1", "Heating Up", "격전 지속", "", ""], ["Skill_mSkillName_8202103_1", "Rigged Arena", "강군압경", "", ""], ["Skill_mSkillSimpleDesc_11015501_1", "Increases ATK by <span style=\"color: #4A9DF2;\">{skm1}%</span>, and reduces the number of attacks required to trigger Nature's Fury enhanced attack by <span style=\"color: #4A9DF2;\">{skm2}</span>. When in Berserker Stance, Basic ATK restores <span style=\"color: #4A9DF2;\">{skm3}%</span> Max HP, and triggering Ground Stomp restores <span style=\"color: #4A9DF2;\">{skm4}%</span> Max HP.", "공격력이 <span style=\"color: #4A9DF2;\">{skm1}%</span> 상승한다. 정글의 분노의 강화 공격 발동에 필요한 공격 횟수가 <span style=\"color: #4A9DF2;\">{skm2}</span>회 감소한다. 포효자 형태일 시, 일반 공격으로 자신 최대 HP의 <span style=\"color: #4A9DF2;\">{skm3}%</span>만큼 HP를 회복한다. 광폭 타격 발동 시, 자신 최대 HP의 <span style=\"color: #4A9DF2;\">{skm4}%</span>만큼 HP를 회복한다.", "", ""], ["Skill_mSkillSimpleDesc_11015501_2", "Increases ATK by <span style=\"color: #4A9DF2;\">{skm1}%</span>, and reduces the number of attacks required to trigger Nature's Fury enhanced attack by <span style=\"color: #4A9DF2;\">{skm2}</span>. When in Berserker Stance, Basic ATK restores <span style=\"color: #4A9DF2;\">{skm3}%</span> Max HP, and triggering Ground Stomp restores <span style=\"color: #4A9DF2;\">{skm4}%</span> Max HP.", "공격력이 <span style=\"color: #4A9DF2;\">{skm1}%</span> 상승한다. 정글의 분노의 강화 공격 발동에 필요한 공격 횟수가 <span style=\"color: #4A9DF2;\">{skm2}</span>회 감소한다. 포효자 형태일 시, 일반 공격으로 자신 최대 HP의 <span style=\"color: #4A9DF2;\">{skm3}%</span>만큼 HP를 회복한다. 광폭 타격 발동 시, 자신 최대 HP의 <span style=\"color: #4A9DF2;\">{skm4}%</span>만큼 HP를 회복한다.", "", ""], ["Skill_mSkillSimpleDesc_11015501_3", "Increases ATK by <span style=\"color: #4A9DF2;\">{skm1}%</span>, and reduces the number of attacks required to trigger Nature's Fury enhanced attack by <span style=\"color: #4A9DF2;\">{skm2}</span>. When in Berserker Stance, Basic ATK restores <span style=\"color: #4A9DF2;\">{skm3}%</span> Max HP, and triggering Ground Stomp restores <span style=\"color: #4A9DF2;\">{skm4}%</span> Max HP.", "공격력이 <span style=\"color: #4A9DF2;\">{skm1}%</span> 상승한다. 정글의 분노의 강화 공격 발동에 필요한 공격 횟수가 <span style=\"color: #4A9DF2;\">{skm2}</span>회 감소한다. 포효자 형태일 시, 일반 공격으로 자신 최대 HP의 <span style=\"color: #4A9DF2;\">{skm3}%</span>만큼 HP를 회복한다. 광폭 타격 발동 시, 자신 최대 HP의 <span style=\"color: #4A9DF2;\">{skm4}%</span>만큼 HP를 회복한다.", "", ""], ["Skill_mSkillSimpleDesc_11015501_4", "Increases ATK by <span style=\"color: #4A9DF2;\">{skm1}%</span>, and reduces the number of attacks required to trigger Nature's Fury enhanced attack by <span style=\"color: #4A9DF2;\">{skm2}</span>. When in Berserker Stance, Basic ATK restores <span style=\"color: #4A9DF2;\">{skm3}%</span> Max HP, and triggering Ground Stomp restores <span style=\"color: #4A9DF2;\">{skm4}%</span> Max HP.", "공격력이 <span style=\"color: #4A9DF2;\">{skm1}%</span> 상승한다. 정글의 분노의 강화 공격 발동에 필요한 공격 횟수가 <span style=\"color: #4A9DF2;\">{skm2}</span>회 감소한다. 포효자 형태일 시, 일반 공격으로 자신 최대 HP의 <span style=\"color: #4A9DF2;\">{skm3}%</span>만큼 HP를 회복한다. 광폭 타격 발동 시, 자신 최대 HP의 <span style=\"color: #4A9DF2;\">{skm4}%</span>만큼 HP를 회복한다.", "", ""], ["Skill_mSkillSimpleDesc_11015501_5", "Increases ATK by <span style=\"color: #4A9DF2;\">{skm1}%</span>, and reduces the number of attacks required to trigger Nature's Fury enhanced attack by <span style=\"color: #4A9DF2;\">{skm2}</span>. When in Berserker Stance, Basic ATK restores <span style=\"color: #4A9DF2;\">{skm3}%</span> Max HP, and triggering Ground Stomp restores <span style=\"color: #4A9DF2;\">{skm4}%</span> Max HP.", "공격력이 <span style=\"color: #4A9DF2;\">{skm1}%</span> 상승한다. 정글의 분노의 강화 공격 발동에 필요한 공격 횟수가 <span style=\"color: #4A9DF2;\">{skm2}</span>회 감소한다. 포효자 형태일 시, 일반 공격으로 자신 최대 HP의 <span style=\"color: #4A9DF2;\">{skm3}%</span>만큼 HP를 회복한다. 광폭 타격 발동 시, 자신 최대 HP의 <span style=\"color: #4A9DF2;\">{skm4}%</span>만큼 HP를 회복한다.", "", ""], ["Skill_mSkillSimpleDesc_11015501_6", "Increases ATK by <span style=\"color: #4A9DF2;\">{skm1}%</span>, and reduces the number of attacks required to trigger Nature's Fury enhanced attack by <span style=\"color: #4A9DF2;\">{skm2}</span>. When in Berserker Stance, Basic ATK restores <span style=\"color: #4A9DF2;\">{skm3}%</span> Max HP, and triggering Ground Stomp restores <span style=\"color: #4A9DF2;\">{skm4}%</span> Max HP.", "공격력이 <span style=\"color: #4A9DF2;\">{skm1}%</span> 상승한다. 정글의 분노의 강화 공격 발동에 필요한 공격 횟수가 <span style=\"color: #4A9DF2;\">{skm2}</span>회 감소한다. 포효자 형태일 시, 일반 공격으로 자신 최대 HP의 <span style=\"color: #4A9DF2;\">{skm3}%</span>만큼 HP를 회복한다. 광폭 타격 발동 시, 자신 최대 HP의 <span style=\"color: #4A9DF2;\">{skm4}%</span>만큼 HP를 회복한다.", "", ""], ["Skill_mSkillSimpleDesc_13000441_1", "Increases faction team members' basic attributes by <span style=\"color: #4A9DF2;\">{skm1}%</span>.<br>Increases faction team members' DMG dealt to enemies inflicted with Slow, Stun, Freeze, Immobilized State, and other CC Effects by <span style=\"color: #4A9DF2;\">{skm2}%</span>. <br>Increases faction team members' DMG by <span style=\"color: #4A9DF2;\">{skm3}%</span>. When the Lord is on the battlefield and an allied summon dies, increases all faction team members' DMG by an additional <span style=\"color: #4A9DF2;\">{skm4}%</span> for <span style=\"color: #4A9DF2;\">{skm5}</span> sec, stacking up to <span style=\"color: #4A9DF2;\">{skm6}</span> time(s).", "진영 소대 멤버의 기본 속성이 <span style=\"color: #4A9DF2;\">{skm1}%</span> 상승한다.<br>진영 소대 멤버가 감속, 기절, 빙결, 속박 등 제어 효과를 받은 적에게 입히는 피해가 <span style=\"color: #4A9DF2;\">{skm2}%</span> 증가한다.<br>진영 소대 멤버의 입히는 피해가 <span style=\"color: #4A9DF2;\">{skm3}%</span> 증가한다. 영주가 필드에 있는 상태에서 아군 소환물이 사망할 시, 모든 진영 소대 멤버의 피해가 추가로 <span style=\"color: #4A9DF2;\">{skm4}%</span> 증가하며, <span style=\"color: #4A9DF2;\">{skm5}</span>초간 지속된다. 최대 <span style=\"color: #4A9DF2;\">{skm6}</span>스택 중첩 가능하다.", "", ""], ["Skill_mSkillSimpleDesc_13000441_2", "Increases faction team members' basic attributes by <span style=\"color: #4A9DF2;\">{skm1}%</span>.<br>Increases faction team members' DMG dealt to enemies inflicted with Slow, Stun, Freeze, Immobilized State, and other CC Effects by <span style=\"color: #4A9DF2;\">{skm2}%</span>. <br>Increases faction team members' DMG by <span style=\"color: #4A9DF2;\">{skm3}%</span>. When the Lord is on the battlefield and an allied summon dies, increases all faction team members' DMG by an additional <span style=\"color: #4A9DF2;\">{skm4}%</span> for <span style=\"color: #4A9DF2;\">{skm5}</span> sec, stacking up to <span style=\"color: #4A9DF2;\">{skm6}</span> time(s).", "진영 소대 멤버의 기본 속성이 <span style=\"color: #4A9DF2;\">{skm1}%</span> 상승한다.<br>진영 소대 멤버가 감속, 기절, 빙결, 속박 등 제어 효과를 받은 적에게 입히는 피해가 <span style=\"color: #4A9DF2;\">{skm2}%</span> 증가한다.<br>진영 소대 멤버의 입히는 피해가 <span style=\"color: #4A9DF2;\">{skm3}%</span> 증가한다. 영주가 필드에 있는 상태에서 아군 소환물이 사망할 시, 모든 진영 소대 멤버의 피해가 추가로 <span style=\"color: #4A9DF2;\">{skm4}%</span> 증가하며, <span style=\"color: #4A9DF2;\">{skm5}</span>초간 지속된다. 최대 <span style=\"color: #4A9DF2;\">{skm6}</span>스택 중첩 가능하다.", "", ""], ["Skill_mSkillSimpleDesc_13000441_3", "Increases faction team members' basic attributes by <span style=\"color: #4A9DF2;\">{skm1}%</span>.<br>Increases faction team members' DMG dealt to enemies inflicted with Slow, Stun, Freeze, Immobilized State, and other CC Effects by <span style=\"color: #4A9DF2;\">{skm2}%</span>. <br>Increases faction team members' DMG by <span style=\"color: #4A9DF2;\">{skm3}%</span>. When the Lord is on the battlefield and an allied summon dies, increases all faction team members' DMG by an additional <span style=\"color: #4A9DF2;\">{skm4}%</span> for <span style=\"color: #4A9DF2;\">{skm5}</span> sec, stacking up to <span style=\"color: #4A9DF2;\">{skm6}</span> time(s).", "진영 소대 멤버의 기본 속성이 <span style=\"color: #4A9DF2;\">{skm1}%</span> 상승한다.<br>진영 소대 멤버가 감속, 기절, 빙결, 속박 등 제어 효과를 받은 적에게 입히는 피해가 <span style=\"color: #4A9DF2;\">{skm2}%</span> 증가한다.<br>진영 소대 멤버의 입히는 피해가 <span style=\"color: #4A9DF2;\">{skm3}%</span> 증가한다. 영주가 필드에 있는 상태에서 아군 소환물이 사망할 시, 모든 진영 소대 멤버의 피해가 추가로 <span style=\"color: #4A9DF2;\">{skm4}%</span> 증가하며, <span style=\"color: #4A9DF2;\">{skm5}</span>초간 지속된다. 최대 <span style=\"color: #4A9DF2;\">{skm6}</span>스택 중첩 가능하다.", "", ""], ["Skill_mSkillSimpleDesc_13000441_4", "Increases faction team members' basic attributes by <span style=\"color: #4A9DF2;\">{skm1}%</span>.<br>Increases faction team members' DMG dealt to enemies inflicted with Slow, Stun, Freeze, Immobilized State, and other CC Effects by <span style=\"color: #4A9DF2;\">{skm2}%</span>. <br>Increases faction team members' DMG by <span style=\"color: #4A9DF2;\">{skm3}%</span>. When the Lord is on the battlefield and an allied summon dies, increases all faction team members' DMG by an additional <span style=\"color: #4A9DF2;\">{skm4}%</span> for <span style=\"color: #4A9DF2;\">{skm5}</span> sec, stacking up to <span style=\"color: #4A9DF2;\">{skm6}</span> time(s).", "진영 소대 멤버의 기본 속성이 <span style=\"color: #4A9DF2;\">{skm1}%</span> 상승한다.<br>진영 소대 멤버가 감속, 기절, 빙결, 속박 등 제어 효과를 받은 적에게 입히는 피해가 <span style=\"color: #4A9DF2;\">{skm2}%</span> 증가한다.<br>진영 소대 멤버의 입히는 피해가 <span style=\"color: #4A9DF2;\">{skm3}%</span> 증가한다. 영주가 필드에 있는 상태에서 아군 소환물이 사망할 시, 모든 진영 소대 멤버의 피해가 추가로 <span style=\"color: #4A9DF2;\">{skm4}%</span> 증가하며, <span style=\"color: #4A9DF2;\">{skm5}</span>초간 지속된다. 최대 <span style=\"color: #4A9DF2;\">{skm6}</span>스택 중첩 가능하다.", "", ""], ["Skill_mSkillSimpleDesc_13000441_5", "Increases faction team members' basic attributes by <span style=\"color: #4A9DF2;\">{skm1}%</span>.<br>Increases faction team members' DMG dealt to enemies inflicted with Slow, Stun, Freeze, Immobilized State, and other CC Effects by <span style=\"color: #4A9DF2;\">{skm2}%</span>. <br>Increases faction team members' DMG by <span style=\"color: #4A9DF2;\">{skm3}%</span>. When the Lord is on the battlefield and an allied summon dies, increases all faction team members' DMG by an additional <span style=\"color: #4A9DF2;\">{skm4}%</span> for <span style=\"color: #4A9DF2;\">{skm5}</span> sec, stacking up to <span style=\"color: #4A9DF2;\">{skm6}</span> time(s).", "진영 소대 멤버의 기본 속성이 <span style=\"color: #4A9DF2;\">{skm1}%</span> 상승한다.<br>진영 소대 멤버가 감속, 기절, 빙결, 속박 등 제어 효과를 받은 적에게 입히는 피해가 <span style=\"color: #4A9DF2;\">{skm2}%</span> 증가한다.<br>진영 소대 멤버의 입히는 피해가 <span style=\"color: #4A9DF2;\">{skm3}%</span> 증가한다. 영주가 필드에 있는 상태에서 아군 소환물이 사망할 시, 모든 진영 소대 멤버의 피해가 추가로 <span style=\"color: #4A9DF2;\">{skm4}%</span> 증가하며, <span style=\"color: #4A9DF2;\">{skm5}</span>초간 지속된다. 최대 <span style=\"color: #4A9DF2;\">{skm6}</span>스택 중첩 가능하다.", "", ""], ["Skill_mSkillSimpleDesc_8202053_1", "Reduces the Redeployment Time of allied heroes by <span style=\"color: #4A9DF2;\">{skm1}%</span>, but increases their Deployment Cost by <span style=\"color: #4A9DF2;\">+{skm2}</span>.", "아군 영웅의 재배치 시간이 <span style=\"color: #4A9DF2;\">{skm1}%</span> 감소하지만, 출전 비용이 <span style=\"color: #4A9DF2;\">{skm2} 증가</span>한다.", "", ""], ["Skill_mSkillSimpleDesc_8202084_1", "Increases allied heroes' DMG by <span style=\"color: #4A9DF2;\">{skm1}%</span> each round and reduces Basic ATK Interval by <span style=\"color: #4A9DF2;\">{skm1}%</span>. Vulnerability (P. DMG) and Vulnerability (M. DMG) increase by <span style=\"color: #4A9DF2;\">{skm2}%</span> each round.", "아군 영웅이 적에게 입히는 피해가 매 라운드마다 <span style=\"color: #4A9DF2;\">{skm1}%</span> 상승하며, 일반 공격의 간격이 <span style=\"color: #4A9DF2;\">{skm1}%</span> 감소한다. 동시에 물리 취약 및 마법 취약도 매 라운드마다 <span style=\"color: #4A9DF2;\">{skm2}%</span> 상승한다.", "", ""], ["Skill_mSkillSimpleDesc_8202103_1", "Allied Hero Deployment Limit +<span style=\"color: #4A9DF2;\">{skm1}</span>", "아군이 배치 가능한 영웅 수량이 <span style=\"color: #4A9DF2;\">{skm1} 증가</span>한다.", "", ""], ["Skill_mSkillSimpleDesc_8203031_1", "Hotspot appears on both players' battlefields. Heroes standing on the Hotspot have all attributes increased by 20%.", "양측 플레이어의 전장에 증폭 진지가 나타난다. 이 증폭 진지에 출전된 영웅은 모든 속성이 20% 상승한다.", "", ""], ["Stage_mStageDesc_5003001", "In this epic battle, you will face an unprecedented enemy - Semrah. Hailing from ancient times, Semrah fights in 3 Battle Modes, each posing a tough challenge.", "이 장대한 전투에서는 이제껏 경험해 보지 못한 적인 세멜라를 마주하게 될 것입니다. 고대의 세멜라는 3가지 전투 모드가 존재하며, 모두 극도로 어려운 도전이 될 것입니다.", "", ""], ["Stage_mStageDesc_5003002", "In this epic battle, you will face an unprecedented enemy - Semrah. Hailing from ancient times, Semrah fights in 3 Battle Modes, each posing a tough challenge.", "이 장대한 전투에서는 이제껏 경험해 보지 못한 적인 세멜라를 마주하게 될 것입니다. 고대의 세멜라는 3가지 전투 모드가 존재하며, 모두 극도로 어려운 도전이 될 것입니다.", "", ""], ["Stage_mStageDesc_8101001", "Starting from Round 5, <span style=\"color: #fd4540;\">all monsters gain Invisibility and become untargetable</span> for 7 sec.", "라운드5 시작 시, 7초 동안 <span style=\"color: #fd4540;\">모든 몬스터가 은신 효과를 획득하여, 대상으로 선택되지 않는다</span>.", "", ""], ["Stage_mStageDesc_8101002", "Starting from Round 5, <span style=\"color: #fd4540;\">all monsters gain Invincibility upon taking DMG for the first time, becoming immune to all DMG</span> for 4 sec.", "라운드5 시작 시, 4초 동안 <span style=\"color: #fd4540;\">모든 몬스터가 처음으로 피해를 받은 후 무적 효과를 획득하여, 모든 피해를 면역한다</span>.", "", ""], ["Stage_mStageDesc_8101003", "Starting from Round 5, <span style=\"color: #fd4540;\">all heroes continuously take True DMG equal to 4% of their Max HP per sec</span>.", "라운드5 시작 시, <span style=\"color: #fd4540;\">모든 영웅이 초당 최대 HP의 4%에 해당하는 고정 피해를 지속적으로 받는다</span>.", "", ""], ["Stage_mStageDesc_8201011", "Team up with your friends to defeat the enemy Boss and fend off the tides of enemies.", "친구들과 함께 적군 보스를 처치하고, 파도처럼 밀려오는 적들을 막아보세요.", "", ""], ["Stage_mStageDesc_8201012", "Team up with your friends to defeat the enemy Boss and fend off the tides of enemies.", "친구들과 함께 적군 보스를 처치하고, 파도처럼 밀려오는 적들을 막아보세요.", "", ""], ["Stage_mStageDesc_8201013", "Team up with your friends to defeat the enemy Boss and fend off the tides of enemies.", "친구들과 함께 적군 보스를 처치하고, 파도처럼 밀려오는 적들을 막아보세요.", "", ""], ["Stage_mStageDesc_8201014", "Team up with your friends to defeat the enemy Boss and fend off the tides of enemies.", "친구들과 함께 적군 보스를 처치하고, 파도처럼 밀려오는 적들을 막아보세요.", "", ""], ["Stage_mStageDesc_8201015", "Team up with your friends to defeat the enemy Boss and fend off the tides of enemies.", "친구들과 함께 적군 보스를 처치하고, 파도처럼 밀려오는 적들을 막아보세요.", "", ""], ["Stage_mStageFailDesc_5003001", "Pay extra attention to Semrah's Battle Mode and exploit its weakness.", "세멜라의 전투 모드에 주의해 보세요. 각 모드는 돌파할 수 있는 약점이 존재합니다.", "", ""], ["Stage_mStageFailDesc_5003002", "Pay extra attention to Semrah's Battle Mode and exploit its weakness.", "세멜라의 전투 모드에 주의해 보세요. 각 모드는 돌파할 수 있는 약점이 존재합니다.", "", ""], ["Stage_mStageIdDesc_5003001", "Apocalypse I - Playtest", "종말 I-게스트 플레이", "", ""], ["Stage_mStageIdDesc_5003002", "Apocalypse II - Playtest", "종말 II-게스트 플레이", "", ""], ["Stage_mStageIdDesc_8201011", "Stage 1", "스테이지 1", "", ""], ["Stage_mStageIdDesc_8201012", "Stage 2", "스테이지 2", "", ""], ["Stage_mStageIdDesc_8201013", "Stage 3", "스테이지 3", "", ""], ["Stage_mStageIdDesc_8201014", "Stage 4", "스테이지 4", "", ""], ["Stage_mStageIdDesc_8201015", "Stage 5", "스테이지 5", "", ""], ["Stage_mStageIdDesc_991001", "Test 1-1", "Test1-1", "", ""], ["Stage_mStageIdDesc_991002", "Test 1-2", "Test1-2", "", ""], ["Stage_mStageIdDesc_991003", "Test 1-3", "Test1-3", "", ""], ["Stage_mStageName_5003001", "Semrah", "세멜라", "", ""], ["Stage_mStageName_5003002", "Semrah", "세멜라", "", ""], ["Stage_mStageName_8201011", "Co-op Mode", "협력 모드", "", ""], ["Stage_mStageName_8201012", "Co-op Mode", "협력 모드", "", ""], ["Stage_mStageName_8201013", "Co-op Mode", "협력 모드", "", ""], ["Stage_mStageName_8201014", "Co-op Mode", "협력 모드", "", ""], ["Stage_mStageName_8201015", "Co-op Mode", "협력 모드", "", ""], ["UILanguage_mKeyValue_Form_BackpackIntegration_SubTitle", "Sort", "정렬", "", ""], ["UILanguage_mKeyValue_Panel_BackpackEquipPanel_EquipedText", "Equipped", "장착 중", "", ""], ["UILanguage_mKeyValue_Panel_MaterialPanel_GetWayTitle_Text", "Access", "Access", "", ""], ["UILanguage_mKeyValue_Panel_MaterialPanel_Text_Use", "Use", "사용", "", ""], ["UnionRaise_mRaiseText_15", "Donate <color=#28d37c>{num}</color> Mythic Extract(s).", "신화 정수 <color=#28d37c>{num}</color>개 수집", "", ""], ["UnionRaise_mRaiseText_16", "Donate <color=#28d37c>{num}</color> 5-star Psychic Power(s).", "5성 심령체 <color=#28d37c>{num}</color>개 수집", "", ""], ["UnionRaise_mRaiseTitle_15", "Promotion Insignia III", "진급 재료 III", "", ""], ["UnionRaise_mRaiseTitle_16", "Hero Star Up", "캐릭터 승급", "", ""], ["Unit_mDescribe_37105", "Scalekin mages, adept in the art of poisonous magic, possess the ability to <color=#ff4500>inflict poison on enemies</color>.", "맹독 마법을 다루는 스케일킨 마법사. <color=#ff4500>공격으로 적을 중독시킬 수 있다</color>.", "", ""], ["Unit_mDescribe_37106", "Elite Skeleton Archers that can deal massive DMG from afar.", "정예 스켈레톤 궁수. 비교적 높은 원거리 피해를 입힌다.", "", ""], ["Unit_mDescribe_37107", "Small spiders, very aggressive but weak individually.", "소형 거미. 공격 욕구는 강하지만 개체 실력이 약하다.", "", ""], ["Unit_mDescribe_37108", "Toxic Suicides will explode when approaching enemies, <color=#ff4500>dealing moderate AoE DMG and poisoning them</color>.", "맹독 폭발충은 적에게 다가가 자폭하여 <color=#ff4500>소량의 범위 피해를 입히고 적을 중독시킨다</color>.", "", ""], ["Unit_mDescribe_37110", "Clad in giant shields and possessing unyielding skeletal frames, they are renowned for their exceptional DEF.", "거대한 방패를 들고 있는 스켈레톤 병사. 방어 능력이 매우 강하다.", "", ""], ["Unit_mDescribe_37112", "Produces a Queen Spider when left out of combat for a while. Eliminate it before it hatches.", "일정 시간 후 스파이더 퀸이 부화하므로, 부화하기 전에 처치해야 한다.", "", ""], ["Unit_mFeature_10408", "Ludwig has been reborn from the abyss. With a horrifying power granted by his master - the Eldritch God. Ludwig has now lost his humanity.", "루드비히는 심연에서 새로운 삶은 맞이했고, 그의 주인은 무서운 사탄의 힘을 부여했다. 지금의 루드비히는 인간성을 완전히 상실한 괴물이다.", "", ""], ["Unit_mFeature_10409", "Ludwig has been reborn from the abyss. With a horrifying power granted by his master - the Eldritch God. Ludwig has now lost his humanity.", "루드비히는 심연에서 새로운 삶은 맞이했고, 그의 주인은 무서운 사탄의 힘을 부여했다. 지금의 루드비히는 인간성을 완전히 상실한 괴물이다.", "", ""], ["Unit_mFeature_10410", "Ludwig has been reborn from the abyss. With a horrifying power granted by his master - the Eldritch God. Ludwig has now lost his humanity.", "루드비히는 심연에서 새로운 삶은 맞이했고, 그의 주인은 무서운 사탄의 힘을 부여했다. 지금의 루드비히는 인간성을 완전히 상실한 괴물이다.", "", ""], ["Unit_mFeature_37105", "Scalekin mages, adept in the art of poisonous magic, possess the ability to inflict continuous Poison DMG on enemies.", "맹독 마법을 다루는 스케일킨 마법사. 적에게 지속적인 독성 피해를 입힌다.", "", ""], ["Unit_mFeature_37106", "Elite Skeleton Archers that can deal massive DMG from afar.", "정예 스켈레톤 궁수. 비교적 높은 원거리 피해를 입힌다.", "", ""], ["Unit_mFeature_37107", "Small spiders, very aggressive but weak individually.", "소형 거미. 공격 욕구는 강하지만 개체 실력이 약하다.", "", ""], ["Unit_mFeature_37108", "The inferior zraks, whose bodies are filled with corrosive liquids, will launch suicide attacks on enemies.", "벌레족의 하급 구성원. 체내에 부식성이 강한 액체가 가득하며, 적에게 자폭 공격을 시전한다.", "", ""], ["Unit_mFeature_37110", "Equipped with a giant shield, these stiff skeletons are able to hold off heavy attacks.", "거대한 방패를 들고 있는 스켈레톤 병사. 거대한 방패로 방어하며, 강력한 공격을 막아낼 수 있다.", "", ""], ["Unit_mFeature_37112", "Produces a Queen Spider when left out of combat for a while. Eliminate it before it hatches.", "일정 시간 후 스파이더 퀸이 부화하므로, 부화하기 전에 처치해야 한다.", "", ""], ["Unit_mName_37105", "Poison Mage", "맹독 마법사", "", ""], ["Unit_mName_37106", "Elite Skeleton Archer", "정예 스켈레톤 궁수", "", ""], ["Unit_mName_37107", "Small Arachnid", "아라크니드", "", ""], ["Unit_mName_37108", "Suicide", "폭발충", "", ""], ["Unit_mName_37110", "Skeletal Giant-Shielder", "스켈레톤 실드 병사", "", ""], ["Unit_mName_37112", "Huge Spider Egg", "거대한 벌레알", "", ""], ["Unit_mFeature_16474", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "암석 조종 능력을 타고난 생물. 자신의 영지를 침략하는 적에게 무차별 공격을 시전한다.", "", ""], ["Unit_mFeature_16475", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "암석 조종 능력을 타고난 생물. 자신의 영지를 침략하는 적에게 무차별 공격을 시전한다.", "", ""], ["Unit_mFeature_16481", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "암석 조종 능력을 타고난 생물. 자신의 영지를 침략하는 적에게 무차별 공격을 시전한다.", "", ""], ["Unit_mFeature_16487", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "암석 조종 능력을 타고난 생물. 자신의 영지를 침략하는 적에게 무차별 공격을 시전한다.", "", ""], ["Unit_mFeature_16496", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "암석 조종 능력을 타고난 생물. 자신의 영지를 침략하는 적에게 무차별 공격을 시전한다.", "", ""], ["Unit_mFeature_16497", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "암석 조종 능력을 타고난 생물. 자신의 영지를 침략하는 적에게 무차별 공격을 시전한다.", "", ""], ["Unit_mFeature_18133", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "암석 조종 능력을 타고난 생물. 자신의 영지를 침략하는 적에게 무차별 공격을 시전한다.", "", ""], ["Unit_mFeature_18137", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "암석 조종 능력을 타고난 생물. 자신의 영지를 침략하는 적에게 무차별 공격을 시전한다.", "", ""], ["Unit_mFeature_11127", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "암석 조종 능력을 타고난 생물. 자신의 영지를 침략하는 적에게 무차별 공격을 시전한다.", "", ""], ["Stage_mStageDesc_9042001", "The Nine-Tailed Fox, resurrected by the grievance from the Shang Dynasty, wreaks havoc upon the mortal realm with her illusions. Four supreme arrays must be laid to obliterate its true spirit.<br><br>Fire Realm: Molten lava surges as crimson chains, coiling round her nine tails to scorch demonic bones. The fox’s wails crackle like searing thunder.", "구미호가 은상의 원한으로 환생하여, 현혹술로 인간 세상을 어지럽혔다. 사대 절진을 펼쳐 그 영물을 소멸시켜야 한다.<br><br>불지옥 영역: 땅에서 솟은 용암이 붉은 사슬로 변해, 휘감아오는 아홉 꼬리가 요골을 불태우니, 여우 요괴의 애곡이 천둥과 같았다.", "", ""], ["Item_mItemName_214901", "Shawl of the Lifegiver", "불굴의 용기", "", ""], ["Skill_mSkillSimpleDesc_232170_1", "When the Talent is triggered, increases the hero's DMG by <span style=\"color: #4A9DF2;\">{skm1}%</span>, with an additional <span style=\"color: #4A9DF2;\">{skm2}%</span> against Elite and Boss units for <span style=\"color: #4A9DF2;\">{skm3}</span> sec.", "재능 발동 시, 자신의 피해가 <span style=\"color: #4A9DF2;\">{skm1}%</span> 증가하고, 정예와 보스 유닛에 대한 피해가 추가로 <span style=\"color: #4A9DF2;\">{skm2}%</span> 증가하며, <span style=\"color: #4A9DF2;\">{skm3}</span>초간 지속된다.", "", ""], ["CommonText_mMessage_25947", "Corresponding Arena Challenge Attack Mode", "아레나 해당 도전 공격 모드", "", ""], ["CommonText_mMessage_25948", "Corresponding Arena Challenge Defense Mode", "아레나 해당 도전 방어 모드", "", ""], ["Skill_mSkillSimpleDesc_220903_5", "Applies <span style=\"color: #28d37c;\">[322095]</span> to <span style=\"color: #4A9DF2;\">1</span> ally with the lowest HP percentage in range for <span style=\"color: #4A9DF2;\">{skm1}</span> sec.", "범위 내 HP 비율이 가장 낮은 아군 <span style=\"color: #4A9DF2;\">1</span>명에게 <span style=\"color: #28d37c;\">[322095]</span>을(를) 부여하며, <span style=\"color: #4A9DF2;\">{skm1}</span>초간 지속된다.", "", ""], ["Skill_mSkillSimpleDesc_220903_4", "Applies <span style=\"color: #28d37c;\">[322094]</span> to <span style=\"color: #4A9DF2;\">1</span> ally with the lowest HP percentage in range for <span style=\"color: #4A9DF2;\">{skm1}</span> sec.", "범위 내 HP 비율이 가장 낮은 아군 <span style=\"color: #4A9DF2;\">1</span>명에게 <span style=\"color: #28d37c;\">[322094]</span>을(를) 부여하며, <span style=\"color: #4A9DF2;\">{skm1}</span>초간 지속된다.", "", ""], ["Skill_mSkillSimpleDesc_220903_3", "Applies <span style=\"color: #28d37c;\">[322093]</span> to <span style=\"color: #4A9DF2;\">1</span> ally with the lowest HP percentage in range for <span style=\"color: #4A9DF2;\">{skm1}</span> sec.", "범위 내 HP 비율이 가장 낮은 아군 <span style=\"color: #4A9DF2;\">1</span>명에게 <span style=\"color: #28d37c;\">[322093]</span>을(를) 부여하며, <span style=\"color: #4A9DF2;\">{skm1}</span>초간 지속된다.", "", ""], ["Skill_mSkillSimpleDesc_220903_2", "Applies <span style=\"color: #28d37c;\">[322092]</span> to <span style=\"color: #4A9DF2;\">1</span> ally with the lowest HP percentage in range for <span style=\"color: #4A9DF2;\">{skm1}</span> sec.", "범위 내 HP 비율이 가장 낮은 아군 <span style=\"color: #4A9DF2;\">1</span>명에게 <span style=\"color: #28d37c;\">[322092]</span>을(를) 부여하며, <span style=\"color: #4A9DF2;\">{skm1}</span>초간 지속된다.", "", ""], ["LANG_STRID_notice_NineTailedNightmare", "Nine-Tailed Nightmare Event Intro", "아홉 꼬리의 재앙 이벤트 소개", "", ""], ["LANG_STRID_push_long9_title_1", "Grimmscale Invasion Launches", "사르얀의 전투 도전 오픈", "", ""], ["LANG_STRID_push_long9_title_2", "Commanders can challenge Sauryan, Wing of Chaos infinitely every day. Rewards are based on the highest total damage dealt in a single challenge attempt.", "지휘관들은 【혼돈의 힘·사르얀】을 무제한으로 도전할 수 있으며, 매일 단일 최고 피해에 따라 각종 귀중한 보상을 획득할 수 있습니다.", "", ""], ["LANG_STRID_push_xyx_title_1", "Zombie Invasion Starts!", "좀비 포위 완료! 이벤트 오픈", "", ""], ["LANG_STRID_push_xyx_title_2", "Build your hero's skills, equip powerful Relics, and battle through waves of monsters to survive!", "영웅 스킬을 구축하고, 적합한 유물을 선택하여 습격하는 몬스터를 격퇴하고 끝까지 생존하세요!", "", ""], ["LANG_STRID_notice_jwhpv", "Event Trailer: Nine-Tailed Nightmare", "아홉 꼬리의 재앙 이벤트 트레일러", "", ""], ["LANG_STRID_push_jwhyy1", "Nine-Tailed Nightmare Is Here!", "아홉 꼬리의 재앙 이벤트 출현!", "", ""], ["LANG_STRID_push_jwhyy2", "The new Legendary heroes Ne Zha and Erlang Shen arrive! Join the events to claim event-exclusive rewards, including Exclusive Artifacts, Summoning Crystals, Avatar, Emote, and more! Plus, Erlang Shen's time-limited skin is now available!", "신규 레전더리 영웅 「나타」「이랑신」 등장! 시리즈 이벤트에 참여하여 전용 아티팩트, 각종 소환 수정, 아바타, 이모티콘 등 이벤트 한정 보상을 수령하세요. 이랑신 스킨도 한정 출시!", "", ""], ["LANG_STRID_notice_NineTailed2", "Nine-Tailed Nightmare Starts!", "아홉 꼬리의 재앙 이벤트 오픈", "", ""], ["LANG_STRID_notice_NineTailed3", "Join the event to obtain event-exclusive rewards, including Exclusive Artifacts, Avatar, Avatar Border, Summoning Crystals, and more!", "이벤트에 참여하여 전용 아티팩트, 아바타, 프레임 등 이벤트 한정 보상과 각종 소환 수정 등의 보상을 획득하세요!", "", ""], ["LANG_STRID_push_shardsummon_nezha", "Collect shards to assemble Ne Zha's Exclusive Artifact: Fire-Tipped Spear!", "조각을 모아 나타 전용 아티팩트 「화첨창」을 합성하세요!", "", ""], ["LANG_STRID_push_shardsummon_sqhcending", "Artifact Shard Assembly Countdown", "아티팩트 조각 합성 카운트다운", "", ""], ["LANG_STRID_push_shardsummon_nezhaend2", "Last chance to collect shards and assemble Ne Zha's Exclusive Artifact: Fire-Tipped Spear! Don't miss out!", "조각을 모아 나타 전용 아티팩트 「화첨창」을 합성하세요! 마지막 기회를 놓치지 마세요!", "", ""], ["LANG_STRID_notice_CreativeShort", "Creative Short", "창의 단편극", "", ""], ["LANG_STRID_compete_brief", "After the event starts, Commanders earn League points by participating in the Arena, Guild - Drake's Chasm and spending Stamina and can claim Personal Score Rewards. Commanders within the same League compete against each other for ranking rewards. After the event ends, Commanders who have earned points can claim the Basic League Rewards. Members of the League with a higher total score will receive additional Champion League Reward.", "이벤트 시작 후 지휘관님은 아레나 참여, 길드-드래곤 유적, 체력 소모 등을 통해 연맹 포인트를 획득하여 개인 포인트 보상을 수령할 수 있습니다. 동시에 연맹 내 지휘관님들은 서로 경쟁하여 랭킹 보상을 획득하게 됩니다. 이벤트 종료 후 포인트를 획득한 지휘관님은 기본 연맹 보상을 수령할 수 있으며, 총 포인트가 더 높은 연맹 멤버는 연맹 승리 보상을 추가로 받을 수 있습니다.", "", ""], ["LANG_STRID_Anniversary_Discount_Event_Des_01", "Discount Tokens obtained from event quests can be used to randomly discount an item on the event page once. Each item can be discounted up to 3 times.", "이벤트 퀘스트에서 획득한 할인 코인을 사용하면 이벤트 페이지 내 상품에 무작위로 1회 할인이 적용되며, 각 상품은 최대 3회까지 할인받을 수 있습니다.", "", ""], ["LANG_STRID_FishingRanking", "<color=#e1e1e1>After the event ends, the top 3 Commanders on the leaderboard will each receive a physical merchandise reward. Contact info will be requested via in-game mail for delivery.</color>", "<color=#e1e1e1>이벤트 종료 후 랭킹 TOP 3 지휘관님께는 실물 굿즈 보상을 각각 지급하며, 추후 게임 내 우편을 통해 주소 기입 관련 연락을 드릴 예정입니다.</color>", "", ""], ["LANG_STRID_notice_nzgl", "Hero Gameplay: Ne Zha", "영웅 콘텐츠: 나타", "", ""], ["LANG_STRID_notice_yjgl", "Hero Gameplay: Erlang Shen", "영웅 콘텐츠: 이랑신", "", ""], ["LANG_STRID_GDP_title_26", "Celestial Season", "환천 시즌", "", ""], ["LANG_STRID_activity_popup_GDP_htj", "Gold Dragon Pass - Celestial Season", "골드 드래곤 패스-환천 시즌", "", ""], ["LANG_STRID_CompeteEvent_Rule11", "<color=#e1e1e1>Consume general items to gain points.</color>", "<color=#e1e1e1>통용 아이템을 소모하여 포인트 획득</color>", "", ""], ["LANG_STRID_CompeteEvent_Rule12", "<color=#e1e1e1>Consume Mythril and Meteorite to gain points.</color>", "<color=#e1e1e1>미스릴, 운석을 소모하여 포인트 획득</color>", "", ""], ["LANG_STRID_Moon_Dec_01", "Shadows of Tomorrow", "몽롱한 달의 쌍화", "", ""], ["LANG_STRID_Anniversary_Discount_Event_Detail", "<span style=\"color: #cec2b1;\">Discount Event</span><br>Each use of a Discount Token will apply a <span style=\"color: #28d37c;\">random discount</span> to a random item in the event. Participate in event quests to obtain Discount Tokens. All unused Discount Tokens will be removed after the event ends.<br>Players may choose to purchase event items at their original prices without using any Discount Tokens.<br><br>Each time a Discount Token is used, one item will be randomly selected from the three available in the event interface for a discount. After each discount, the price of the currently selected item will be further reduced. <span style=\"color: #28d37c;\">Each item reaches its maximum discount after being discounted 3 times</span>.<br>Only items that have not reached the maximum discount and have not been purchased can continue to participate in the discount event.", "<span style=\"color: #cec2b1;\">할인 이벤트</span><br>할인 코인을 사용할 때마다 이벤트 내 상품에 <span style=\"color: #28d37c;\">무작위 할인</span>이 적용됩니다. 이벤트 퀘스트에 참여하면 이벤트 할인 코인을 획득할 수 있으며, 각 기간의 이벤트 할인 코인은 이벤트 종료 후 삭제됩니다.<br>플레이어는 할인 코인을 사용하지 않고 원가로 이벤트 상품을 구매할 수 있습니다.<br><br>할인 코인을 사용할 때마다 이벤트 화면의 3개 상품 중 1개가 무작위로 선택되어 할인됩니다. 할인을 적용할 때마다 현재 선택된 상품의 가격이 더 낮아지며, <span style=\"color: #28d37c;\">각 상품은 3회 할인 후 최대 할인에 도달합니다</span>.<br>최대 할인에 도달하지 않았고 구매되지 않은 상품만 계속 할인에 참여할 수 있습니다.", "", ""]];
+            let showingRaw = false;
+            let tableData = formattedData;
+            let dataTable;
+        
+            function getStateKey(index) {
+                return "state_StringZ Visualizer - Korean_row_" + index; 
+            }
+            
+            function getNotesKey(index) {
+                return "notes_StringZ Visualizer - Korean_row_" + index;
+            }
+        
+            function generateRowWithState(row, idx) {
+                const savedState = localStorage.getItem(getStateKey(idx)) || "";
+                const savedNotes = localStorage.getItem(getNotesKey(idx)) || "";
+                
+                const selectHTML = '<select class="state-select ' + savedState.toLowerCase() + '">' +
+                    '<option value="" ' + (savedState === "" ? "selected" : "") + '></option>' +
+                    '<option value="Pass" ' + (savedState === "Pass" ? "selected" : "") + '>Pass</option>' +
+                    '<option value="Fail" ' + (savedState === "Fail" ? "selected" : "") + '>Fail</option>' +
+                    '</select>';
+                
+                const notesHTML = '<input type="text" class="notes-input" value="' + 
+                    savedNotes.replace(/"/g, '&quot;') + 
+                    '" placeholder="Personal notes..." maxlength="200">';
+                
+                const newRow = row.slice();
+                const stateIndex = headers.indexOf("State") + 1;
+                const notesIndex = headers.indexOf("Notes") + 1;
+                newRow[stateIndex] = selectHTML;
+                newRow[notesIndex] = notesHTML;
+                return newRow;
+            }
+        
+            function renderData(data) {
+                tableData = data;
+                const transformed = data.map((row, idx) => {
+                  const rowWithNumber = [idx + 1, ...row];
+                  return generateRowWithState(rowWithNumber, idx);
+                });
+        
+                if (!dataTable) {
+                    const columnsWithNumber = [{ title: '#' }, ...headers.map(h => ({ title: h }))];
+                    dataTable = $('#myTable').DataTable({
+                        data: transformed,
+                        columns: columnsWithNumber,
+                        scrollX: true,
+                        paging: true,
+                        searching: true,
+                        ordering: true,
+                        deferRender: true,
+                        lengthMenu: [[-1, 10, 25, 50], ["All", 10, 25, 50]],
+                        order: [],
+                        columnDefs: [
+                            {
+                                targets: headers.indexOf("State"),
+                                orderable: true
+                            }
+                        ]
+                    });
+        
+                    $('#myTable tbody').on('change', 'select.state-select', function () {
+                        const rowIdx = dataTable.row($(this).closest('tr')).index();
+                        const value = $(this).val();
+                        localStorage.setItem(getStateKey(rowIdx), value);
+                        this.className = "state-select " + value.toLowerCase();
+                    });
+                    
+                    $('#myTable tbody').on('input', 'input.notes-input', function () {
+                        const rowIdx = dataTable.row($(this).closest('tr')).index();
+                        const value = $(this).val();
+                        localStorage.setItem(getNotesKey(rowIdx), value);
+                    });
+
+                    $('#myTable tbody').on('keydown', 'input.notes-input', function(e) {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        $(this).blur(); // Remove focus from notes
+                      }
+                    });
+                } else {
+                    const currentPage = dataTable.page();
+                    const currentLength = dataTable.page.len();
+                    dataTable.clear().rows.add(transformed).draw(false);
+                    dataTable.page.len(currentLength).draw();
+                    dataTable.page(currentPage).draw(false);
+                }
+            }
+        
+            function toggleData() {
+                showingRaw = !showingRaw;
+                renderData(showingRaw ? rawData : formattedData);
+                
+                // Update button text
+                const btn = document.querySelector('.toggle-btn');
+                btn.textContent = showingRaw ? 'Show Formatted' : 'Show Raw';
+            }
+        
+            function clearAllStates() {
+                const total = tableData.length;
+                let clearedCount = 0;
+                
+                for (let i = 0; i < total; i++) {
+                    const stateKey = getStateKey(i);
+                    const notesKey = getNotesKey(i);
+                    
+                    if (localStorage.getItem(stateKey)) {
+                        localStorage.removeItem(stateKey);
+                        clearedCount++;
+                    }
+                    if (localStorage.getItem(notesKey)) {
+                        localStorage.removeItem(notesKey);
+                    }
+                }
+                
+                renderData(tableData);
+                
+                // Better user feedback
+                if (clearedCount > 0) {
+                    alert(`✅ Cleared ${clearedCount} review states and all notes!`);
+                } else {
+                    alert('ℹ️ No review states to clear.');
+                }
+            }
+        
+            function getProgress() {
+                const total = tableData.length;
+                let reviewed = 0;
+                let passed = 0;
+                let failed = 0;
+                
+                for (let i = 0; i < total; i++) {
+                    const state = localStorage.getItem(getStateKey(i));
+                    if (state) {
+                        reviewed++;
+                        if (state === 'Pass') passed++;
+                        if (state === 'Fail') failed++;
+                    }
+                }
+                
+                return { total, reviewed, passed, failed };
+            }
+            
+            function updateProgressDisplay() {
+                const progress = getProgress();
+                const percentage = Math.round((progress.reviewed / progress.total) * 100);
+                
+                // Update the info banner with progress
+                const banner = document.querySelector('.info-banner p');
+                if (banner) {
+                    const originalText = banner.textContent.split('•')[0] + '•';
+                    banner.innerHTML = `${originalText} 📊 <strong>${progress.reviewed}/${progress.total}</strong> reviewed (<strong>${percentage}%</strong>) • ✅ <strong>${progress.passed}</strong> passed • ❌ <strong>${progress.failed}</strong> failed`;
+                }
+            }
+        
+            function toggleDarkMode() {
+                const body = document.body;
+                const btn = document.querySelector('.dark-mode-btn');
+                const isDark = body.getAttribute('data-theme') === 'dark';
+                
+                if (isDark) {
+                    body.removeAttribute('data-theme');
+                    btn.textContent = '🌙 Dark';
+                    localStorage.setItem('visualizer-theme', 'light');
+                } else {
+                    body.setAttribute('data-theme', 'dark');
+                    btn.textContent = '☀️ Light'; 
+                    localStorage.setItem('visualizer-theme', 'dark');
+                }
+            }
+            
+            function initializeTheme() {
+                const savedTheme = localStorage.getItem('visualizer-theme');
+                const btn = document.querySelector('.dark-mode-btn');
+                
+                if (savedTheme === 'dark') {
+                    document.body.setAttribute('data-theme', 'dark');
+                    btn.textContent = '☀️ Light';
+                } else {
+                    btn.textContent = '🌙 Dark';
+                }
+            }
+
+            // New copyToClipboard function to copy ONLY the rawText
+            // Can be updated to copy depending on the Formatting/Raw toggle
+            function copyToClipboard(text, element) {
+                const rowIndex = dataTable.row(element).index();
+                const cellIndex = $(element).index();
+
+                let rawText = text;
+                if (!showingRaw && rawData[rowIndex]) {
+                    rawText = rawData[rowIndex][cellIndex - 1];
+                }
+    
+                // Decode HTML entities to get original text
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = rawText;
+                const decodedText = tempDiv.textContent || tempDiv.innerText || rawText;
+
+                navigator.clipboard.writeText(decodedText).then(() => {
+                    // Show feedback
+                    const feedback = document.createElement('div');
+                    feedback.className = 'copy-feedback show';
+                    feedback.textContent = 'Copied!';
+                    element.style.position = 'relative';
+                    element.appendChild(feedback);
+
+                    setTimeout(() => {
+                        feedback.classList.remove('show');
+                        setTimeout(() => {
+                            if (feedback.parentNode) {
+                                feedback.parentNode.removeChild(feedback);
+                            }
+                            $(element).removeClass('copyable-cell');
+                        }, 300);
+                    }, 1000);
+                });
+            }        
+
+            $(document).ready(function () {
+              initializeTheme();
+              renderData(formattedData);
+              $('#clearState').click(clearAllStates);
+  
+              // Update progress on page load
+              updateProgressDisplay();
+  
+              // Update progress when states change
+              $('#myTable tbody').on('change', 'select.state-select', function () {
+                  setTimeout(updateProgressDisplay, 100);
+              });
+
+              $('#myTable tbody').on('mouseenter', 'td:nth-child(2), td:nth-child(3), td:nth-child(4)', function() {
+                $(this).addClass('copyable-cell');
+              }).on('mouseleave', 'td:nth-child(2), td:nth-child(3), td:nth-child(4)', function() {
+                if (!$(this).find('.copy-feedback').length) {
+                  $(this).removeClass('copyable-cell');
+                }
+              }).on('click', 'td:nth-child(2), td:nth-child(3), td:nth-child(4)', function() {
+                const text = $(this).text().trim();
+                if (text) {
+                  copyToClipboard(text, this);
+                }
+              });
+
+              // Initialize keyboard navigation and show initial hint
+              initKeyboardNavigation();
+              showInitialHint();
+            });
+
+            // Keyboard shortcuts
+            let currentRowIndex = 0;
+            let isKeyboardMode = false;
+
+            function initKeyboardNavigation() {
+              $(document).keydown(function(e) {
+                // Important, don't interfere when typing in inputs
+                if (e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT') return;
+
+                // Even more important! DO NOT INTERFERE WITH BROWSER SHORTCUTS
+                if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+                // Don't interfere with Fn keys either
+                if (e.key.startsWith('F') && e.key.length > 1) return;
+
+                const table = $('#myTable').DataTable();
+                const totalRows = table.rows().count();
+
+                switch(e.key.toLowerCase()) {
+                  case 'p':
+                    e.preventDefault();
+                    markCurrentRow('Pass');
+                    break;
+                  case 'f':
+                    e.preventDefault();
+                    markCurrentRow('Fail');
+                    break;
+                  case 'c':
+                    e.preventDefault();
+                    clearCurrentRow();
+                    break;
+                  case 'arrowdown':
+                  case 'j':
+                    e.preventDefault();
+                    navigateRow(1);
+                    break;
+                  case 'arrowup':
+                  case 'k':
+                    e.preventDefault();
+                    navigateRow(-1);
+                    break;
+                  case 'enter':
+                    e.preventDefault();
+                    focusNotes();
+                    break;
+                  case 'escape':
+                    e.preventDefault();
+                    exitKeyboardMode();
+                    break;
+                  case ' ':
+                    e.preventDefault();
+                    enterKeyboardMode();
+                    break;
+                }
+              });
+            }
+
+            function markCurrentRow(state) {
+              if (!isKeyboardMode) return;
+
+              const currentRow = getCurrentRow();
+              if (currentRow.length) {
+                const select = currentRow.find('.state-select');
+                select.val(state).trigger('change');
+                navigateRow(1);
+              }
+            }
+
+            function clearCurrentRow() {
+              if (!isKeyboardMode) return;
+
+              const currentRow = getCurrentRow();
+              if (currentRow.length) {
+                currentRow.find('.state-select').val('').trigger('change');
+                // currentRow.find('.notes-input').val('').trigger('input');
+              }
+            }
+
+            function navigateRow(direction) {
+              if (!isKeyboardMode) return;
+
+              const table = $('#myTable').DataTable();
+              const totalRows = table.rows().count();
+
+              currentRowIndex += direction;
+              if (currentRowIndex < 0) currentRowIndex = 0;
+              if (currentRowIndex >= totalRows) currentRowIndex = totalRows - 1;
+
+              highlightCurrentRow();
+              scrollToCurrentRow();
+            }
+
+            function getCurrentRow() {
+              const table = $('#myTable').DataTable();
+              return $(table.row(currentRowIndex).node());
+            }
+
+            function highlightCurrentRow() {
+              $('#myTable tbody tr').removeClass('keyboard-focus');
+
+              const currentRow = getCurrentRow();
+              currentRow.addClass('keyboard-focus');
+            }
+
+            function scrollToCurrentRow() {
+              const currentRow = getCurrentRow();
+              if (currentRow.length) {
+                currentRow[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }
+            }
+
+            function focusNotes() {
+              if (!isKeyboardMode) return;
+
+              const currentRow = getCurrentRow();
+              const notesInput = currentRow.find('.notes-input');
+              if (notesInput.length) {
+                notesInput.focus();
+              }
+            }
+
+            function enterKeyboardMode() {
+              isKeyboardMode = true;
+              <!-- currentRowIndex = 0; -->
+              highlightCurrentRow();
+              showKeyboardHint();
+            }
+
+            function exitKeyboardMode() {
+              isKeyboardMode = false;
+              $('#myTable tbody tr').removeClass('keyboard-focus')
+              hideKeyboardHint();
+            }
+
+            function showInitialHint() {
+                $('.keyboard-hint').remove();
+    
+                $('body').append(`
+                    <div class="keyboard-hint" style="
+                        position: fixed; 
+                        top: 15px; 
+                        right: 10px; 
+                        background: var(--bg-banner); 
+                        color: var(--text-primary);
+                        padding: 8px 12px; 
+                        border-radius: 4px; 
+                        font-size: 13px;
+                        font-weight: 500;
+                        z-index: 9999;
+                        border: 1px solid var(--border-color);
+                        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                    ">
+                        Press <kbd>Space</kbd> to start keyboard navigation
+                    </div>
+                `);
+
+                // Auto-hide if not in keyboard mode
+                setTimeout(() => {
+                  if (!isKeyboardMode) {
+                    $('.keyboard-hint').fadeOut(1000, function() {
+                      $(this).remove();
+                    });
+                  }
+                }, 4000);
+            }
+
+            function showKeyboardHint() {
+              $('.keyboard-hint').remove();
+  
+              $('body').append(`
+                  <div class="keyboard-hint" style="
+                      position: fixed; 
+                      top: 15px; 
+                      right: 10px; 
+                      background: var(--bg-banner); 
+                      color: var(--text-primary);
+                      padding: 8px 12px; 
+                      border-radius: 4px; 
+                      font-size: 13px;
+                      font-weight: 500;
+                      z-index: 9999;
+                      border: 1px solid var(--border-color);
+                      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                  ">
+                      Press <kbd>Esc</kbd> to exit keyboard mode
+                  </div>
+              `);
+
+              $('body').append(`
+              <div class="shortcut-summary" style="
+                  position: fixed;
+                  top: 60px;
+                  right: 10px;
+                  background: #007bff;
+                  color: white;
+                  padding: 10px 12px;
+                  border-radius: 6px;
+                  font-size: 11px;
+                  z-index: 9998;
+                  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+                  font-family: monospace;
+              ">
+                  <kbd style="background: rgba(255,255,255,0.2);">P</kbd>ass 
+                  <kbd style="background: rgba(255,255,255,0.2);">F</kbd>ail 
+                  <kbd style="background: rgba(255,255,255,0.2);">C</kbd>lear 
+                  <kbd style="background: rgba(255,255,255,0.2);">↑↓</kbd>Nav 
+                  <kbd style="background: rgba(255,255,255,0.2);">⏎</kbd>Notes
+              </div>
+            `);
+
+              setTimeout(() => {
+                $('.shortcut-summary').fadeOut(800, function() {
+                  $(this).remove();
+                });
+              }, 5000);
+            }            
+
+            function hideKeyboardHint() {
+              $('#keyboard-hint').remove();
+              $('.shortcut-summary').remove();
+              showInitialHint();
+            }
+    </script>
+  </body>
+</html>

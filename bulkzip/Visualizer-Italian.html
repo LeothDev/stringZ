@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>StringZ Visualizer - Italian</title>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <style>
+      :root {
+        /* Light mode colors */
+        --bg-primary: #f8f9fa;
+        --bg-secondary: white;
+        --bg-banner: #f8f9fa;
+        --text-primary: #333;
+        --text-secondary: #6c757d;
+        --text-muted: #495057;
+        --border-color: #dee2e6;
+        --table-header-bg: #f8f9fa;
+        --table-border: #dee2e6;
+        --button-bg: #6c757d;
+        --button-hover: #5a6268;
+        --input-bg: white;
+      }
+      
+      [data-theme="dark"] {
+        /* Dark mode colors */
+        --bg-primary: #1a1a1a;
+        --bg-secondary: #2d2d2d;
+        --bg-banner: #343a40;
+        --text-primary: #f8f9fa;
+        --text-secondary: #adb5bd;
+        --text-muted: #ced4da;
+        --border-color: #495057;
+        --table-header-bg: #343a40;
+        --table-border: #495057;
+        --button-bg: #495057;
+        --button-hover: #5a6268;
+        --input-bg: #343a40;
+      }
+      
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: var(--bg-primary);
+        margin: 0;
+        padding: 0;
+        color: var(--text-primary);
+        transition: background-color 0.3s ease, color 0.3s ease;
+      }
+      
+      .toggle-btn {
+        position: fixed;
+        top: 15px;
+        left: 15px;
+        z-index: 9999;
+        padding: 8px 16px;
+        background-color: var(--button-bg);
+        color: white;
+        border: 1px solid var(--button-bg);
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        font-size: 14px;
+        transition: background-color 0.2s ease;
+      }
+      
+      .toggle-btn:hover {
+        background-color: var(--button-hover);
+        border-color: var(--button-hover);
+      }
+      
+      .dark-mode-btn {
+        position: fixed;
+        top: 15px;
+        left: 150px;
+        z-index: 9999;
+        padding: 8px 16px;
+        background-color: var(--button-bg);
+        color: white;
+        border: 1px solid var(--button-bg);
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        font-size: 14px;
+        transition: background-color 0.2s ease;
+      }
+      
+      .dark-mode-btn:hover {
+        background-color: var(--button-hover);
+        border-color: var(--button-hover);
+      }
+      
+      #clearState {
+        float: left;
+        margin-right: 15px;
+        margin-bottom: 15px;
+        padding: 8px 16px;
+        background-color: #dc3545;
+        color: white;
+        border: 1px solid #dc3545;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        font-size: 14px;
+        transition: background-color 0.2s ease;
+      }
+      
+      #clearState:hover {
+        background-color: #c82333;
+        border-color: #bd2130;
+      }
+      
+      .container {
+        padding: 70px 30px 30px 30px;
+        background: var(--bg-secondary);
+        margin: 0;
+        min-height: 100vh;
+        transition: background-color 0.3s ease;
+      }
+      
+      .info-banner {
+        background-color: var(--bg-banner);
+        border: 1px solid var(--border-color);
+        color: var(--text-muted);
+        padding: 20px;
+        margin-bottom: 25px;
+        border-radius: 4px;
+        text-align: center;
+        transition: background-color 0.3s ease, border-color 0.3s ease;
+      }
+      
+      .info-banner h2 {
+        margin: 0 0 10px 0;
+        font-size: 24px;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+      
+      .info-banner p {
+        margin: 0;
+        font-size: 14px;
+        color: var(--text-secondary);
+      }
+      
+      #myTable {
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        overflow: hidden;
+        transition: border-color 0.3s ease;
+      }
+      
+      #myTable td {
+        user-select: text !important;
+        padding: 12px 8px;
+        vertical-align: top;
+        border-bottom: 1px solid var(--table-border);
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+        transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+      }
+      
+      #myTable th {
+        background-color: var(--table-header-bg);
+        border-bottom: 2px solid var(--border-color);
+        color: var(--text-muted);
+        font-weight: 600;
+        padding: 15px 8px;
+        text-align: center;
+        transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+      }
+      
+      /* Enhanced styling for different columns */
+      #myTable td:first-child {
+        text-align: center;
+        font-family: 'Courier New', monospace;
+        font-size: 12px;
+        color: var(--text-secondary);
+        /*<!-- max-width: 120px; -->*/
+        width: 50px;
+      }
+      
+      #myTable td:nth-child(2) {
+        font-family: 'Courier New', monospace;
+        font-size: 12px;
+        color: var(--text-secondary);
+        text-align: left;
+        /*line-height: 1.4;*/
+        max-width: 120px;
+      }
+
+      #myTable td:nth-child(3), #myTable td:nth-child(4) {
+        line-height: 1.4;
+        max-width: 300px;
+        word-wrap: break-word;
+        text-align: left;
+      }
+      
+      #myTable td:nth-child(5) {
+        text-align: center;
+        font-weight: 600;
+        color: var(--text-muted);
+        font-size: 14px;
+        width: 80px;
+      }
+      
+      #myTable td:nth-child(6) {
+        min-width: 120px;
+        max-width: 150px;
+        text-align: center;
+      }
+
+      #myTable td:nth-child(7) {
+        min-width: 150px;
+        max-width: 200px;
+      }
+      
+      select.state-select {
+        width: 100%;
+        font-weight: 500;
+        padding: 6px 8px;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        font-size: 14px;
+        background-color: var(--input-bg);
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+      }
+      
+      input.notes-input {
+        width: 100%;
+        padding: 6px 8px;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        font-size: 12px;
+        background-color: var(--input-bg);
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+      }
+      
+      input.notes-input:focus {
+        outline: none;
+        border-color: #80bdff;
+        box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+      }
+      
+      input.notes-input::placeholder {
+        color: var(--text-secondary);
+        font-style: italic;
+      }
+      
+      select.state-select:focus {
+        outline: none;
+        border-color: #80bdff;
+        box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+      }
+      
+      select.state-select.pass {
+        color: #28a745;
+        border-color: #28a745;
+      }
+      
+      select.state-select.fail {
+        color: #dc3545;
+        border-color: #dc3545;
+      }
+      
+      /* DataTables styling */
+      .dataTables_wrapper {
+        color: var(--text-primary);
+      }
+      
+      .dataTables_wrapper .dataTables_length,
+      .dataTables_wrapper .dataTables_filter,
+      .dataTables_wrapper .dataTables_info,
+      .dataTables_wrapper .dataTables_paginate {
+        margin: 15px 0;
+      }
+      
+      .dataTables_wrapper .dataTables_filter input {
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        padding: 6px 12px;
+        margin-left: 8px;
+        background-color: var(--input-bg);
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+      }
+      
+      .dataTables_wrapper .dataTables_length select {
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        padding: 4px 8px;
+        margin: 0 8px;
+        background-color: var(--input-bg);
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+      }
+      
+      .dataTables_wrapper .dataTables_paginate .paginate_button {
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        padding: 6px 12px;
+        margin: 0 2px;
+        background-color: var(--input-bg);
+        color: var(--text-primary) !important;
+        transition: all 0.3s ease;
+      }
+      
+      .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+        background-color: var(--bg-banner);
+        border-color: var(--text-secondary);
+      }
+      
+      .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+        background-color: #007bff;
+        border-color: #007bff;
+        color: white !important;
+      }
+
+      /* Copy feature styling */
+    .copyable-cell {
+        cursor: pointer;
+        position: relative;
+        transition: background-color 0.2s ease;
+    }
+
+    .copyable-cell:hover {
+        background-color: rgba(0, 123, 255, 0.1) !important;
+    }
+
+    .copy-feedback {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #28a745;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        z-index: 1000;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .copy-feedback.show {
+        opacity: 1;
+    }
+
+    .keyboard-focus {
+      background-color: rgba(0, 123, 255, 0.08) !important;
+      border: 2px solid #007bff !important;
+      box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2) !important;
+    }
+
+    .keyboard-focus td {
+      background-color: rgba(0, 123, 255, 0.05) !important;
+    }
+
+    kbd {
+      background-color: var(--button-bg);
+      color: white;
+      padding: 2px 4px;
+      border-radius: 3px;
+      font-size: 11px;
+      font-family: monospace;
+    }
+    </style>
+  </head>
+  <body>
+    <button class="toggle-btn" onclick="toggleData()">Show Raw</button>
+    <button class="dark-mode-btn" onclick="toggleDarkMode()">🌙 Dark</button>
+    <div class="container">
+      <div class="info-banner">
+        <h2>StringZ Visualizer - Italian</h2>
+        <p>📊
+          <strong>270</strong>
+          strings • 🌍
+          <strong>EN</strong>
+          →
+          <strong>Italian</strong>
+          • 📝
+          <strong>3,547</strong>
+          words • 🛠️ Generated by StringZ</p>
+      </div>
+      <button id="clearState">Clear All States</button>
+      <table id="myTable" class="display" style="width:100%"></table>
+    </div>
+    <script>
+      const headers = ["strId", "EN", "Italian", "State", "Notes"];
+            const rawData = [["BUFFAttribute_mName_8202044", "DMG Increase", "Aumento DMG", "", ""], ["BUFFAttribute_mName_8202045", "DMG Reduction", "Riduzione DMG", "", ""], ["BUFFAttribute_mTips_322928", "Fire-Tipped Spear ignores {30,num}% of the enemy&#x27;s DEF. Universe Ring bounces {31,num} extra time(s) and can hit the same target multiple times. Yin-Yang Blade executes common monsters with HP below {32,num}%.", "La Lancia dalla punta infuocata ignora un {30,num}% della DEF del nemico. L&#x27;Anello dell&#x27;universo rimbalza {31,num} volta/e in più e può colpire lo stesso bersaglio più volte. La Lama dello Yin-Yang esegue i mostri comuni con HP inferiori a un {32,num}%.", "", ""], ["ChampionshipPlan_mChampionshipDesc_833", "Participate in Artifact Material Raid to win trophies and redeem rewards.", "Partecipa al raid Materiale per manufatti per ottenere trofei e riscattare ricompense.", "", ""], ["ChampionshipPlan_mChampionshipDesc_834", "Level up/star up/promote heroes or upgrade heroes&#x27; skills to win trophies and redeem rewards.", "Aumenta livello/Star Up/promuovi gli eroi o migliorane le skill per ottenere trofei e riscattare ricompense.", "", ""], ["ChampionshipPlan_mChampionshipDesc_835", "Participate in Gear Raid I to win trophies and redeem rewards.", "Partecipa al raid Equip I per vincere trofei e riscattare ricompense.", "", ""], ["ChampionshipPlan_mChampionshipDesc_836", "Participate in Gear Raid II to win trophies and redeem rewards.", "Partecipa al raid Equip II per ottenere trofei e riscattare ricompense.", "", ""], ["ChampionshipPlan_mChampionshipDesc_837", "Summon heroes to win trophies and redeem rewards.", "Evoca eroi per ottenere trofei e riscattare ricompense.", "", ""], ["ChampionshipPlan_mChampionshipDesc_838", "Participate in Artifact Material Raid to win trophies and redeem rewards.", "Partecipa al raid Materiale per manufatti per ottenere trofei e riscattare ricompense.", "", ""], ["ChampionshipPlan_mChampionshipDesc_839", "Participate in Gear Raid III to win trophies and redeem rewards.", "Partecipa al raid Equip III per ottenere trofei e riscattare ricompense.", "", ""], ["ChampionshipPlan_mChampionshipDesc_840", "Level up/star up/promote heroes or upgrade heroes&#x27; skills to win trophies and redeem rewards.", "Aumenta livello/Star Up/promuovi gli eroi o migliorane le skill per ottenere trofei e riscattare ricompense.", "", ""], ["ChampionshipPlan_mChampionshipDesc_841", "Participate in Gear Raid I to win trophies and redeem rewards.", "Partecipa al raid Equip I per vincere trofei e riscattare ricompense.", "", ""], ["ChampionshipPlan_mChampionshipDesc_842", "Participate in Gear Raid II to win trophies and redeem rewards.", "Partecipa al raid Equip II per ottenere trofei e riscattare ricompense.", "", ""], ["ChampionshipPlan_mChampionshipGlobalName_837", "Arrival of Heroes Ultimate Leaderboard", "Classifica finale Arrivo degli eroi", "", ""], ["ChampionshipPlan_mChampionshipName_833", "Mystery of Artifacts", "Mistero dei manufatti", "", ""], ["ChampionshipPlan_mChampionshipName_834", "Hero Training", "Addestramento eroe", "", ""], ["ChampionshipPlan_mChampionshipName_835", "The Lost Legacy", "Eredità perduta", "", ""], ["ChampionshipPlan_mChampionshipName_836", "Vault in the Sands", "Cripta nelle sabbie", "", ""], ["ChampionshipPlan_mChampionshipName_837", "Arrival of Heroes", "Arrivo degli eroi", "", ""], ["ChampionshipPlan_mChampionshipName_838", "Mystery of Artifacts", "Mistero dei manufatti", "", ""], ["ChampionshipPlan_mChampionshipName_839", "Forgotten Palace", "Palazzo dimenticato", "", ""], ["ChampionshipPlan_mChampionshipName_840", "Hero Training", "Addestramento eroe", "", ""], ["ChampionshipPlan_mChampionshipName_841", "The Lost Legacy", "Eredità perduta", "", ""], ["ChampionshipPlan_mChampionshipName_842", "Vault in the Sands", "Cripta nelle sabbie", "", ""], ["Chapter_mChapterName_4301", "Titanic Ruins - Playtest", "Rovine titaniche - Test di gioco", "", ""], ["CommonText_mMessage_25116", "Awaken the mystical power within.", "Risveglia il potere mistico interiore.", "", ""], ["CommonText_mMessage_25125", "Take destiny into your own hands.", "Prendi il destino nelle tue mani.", "", ""], ["CommonText_mMessage_25132", "Reveal cards to earn Dragon&#x27;s Gold by matching the designated patterns.", "Rivela le carte seguendo gli schemi designati per ottenere Oro del drago.", "", ""], ["CommonText_mMessage_25133", "Reveal cards and match 3 identical patterns to earn a &lt;color=&quot;#fdbe36&quot;&gt;{num}&lt;/color&gt;x reward!", "Rivela le carte e abbina 3 pattern identici per ottenere &lt;color=&quot;#fdbe36&quot;&gt;{num}&lt;/color&gt; ricompensa/e!", "", ""], ["CommonText_mMessage_25631", "Number:", "Numero:", "", ""], ["CommonText_mMessage_25635", "The [?] corresponds to 3 numbers that will be filled into empty slots in sequence—the resulting number will determine the final amount of Dragon&#x27;s Gold you receive!", "Il [?] corrisponde a 3 numeri che verranno inseriti negli slot vuoti in sequenza: il numero risultante determinerà la quantità finale di Oro del drago che riceverai!", "", ""], ["CommonText_mMessage_25773", "Nine-Tailed Nightmare", "Incubo a nove code", "", ""], ["CommonText_mMessage_25828", "Locked", "Bloccato/a", "", ""], ["CommonText_mMessage_25829", "Invalid", "Non valido", "", ""], ["CommonText_mMessage_25830", "New Recruit", "Nuova recluta", "", ""], ["CommonText_mMessage_25846", "Officials", "Funzionari", "", ""], ["CommonText_mMessage_25847", "Guild War Officials Appointment", "Nomina dei funzionari della Guerra tra gilde", "", ""], ["CommonText_mMessage_25848", "Rank", "Rango", "", ""], ["CommonText_mMessage_25849", "Marshal", "Maresciallo", "", ""], ["CommonText_mMessage_25850", "Members", "Membri", "", ""], ["CommonText_mMessage_25851", "BP", "PB", "", ""], ["CommonText_mMessage_25852", "Season&#x27;s Attacks", "Attacchi stagionali", "", ""], ["CommonText_mMessage_25853", "Actions", "Azioni", "", ""], ["CommonText_mMessage_25854", "Appoint", "Nomina", "", ""], ["CommonText_mMessage_25855", "Dismiss", "Congeda", "", ""], ["CommonText_mMessage_25856", "No Access", "Accesso negato", "", ""], ["CommonText_mMessage_25857", "All Marshals gain &lt;color=&quot;#e37b00&quot;&gt;{num} extra attack(s) &lt;/color&gt; per Guild War round. Only the Guild Leader and Vice Leaders can appoint a Marshal during the preparation phase. If no appointments are made, this position will be automatically assigned based on members&#x27; contribution and BP.", "Tutti i Marescialli ottengono &lt;color=&quot;#e37b00&quot;&gt;{num} attacco/i extra&lt;/color&gt; per turno della Guerra tra gilde. Solo il leader della gilda e i vice leader possono nominare un Maresciallo durante la fase di preparazione. Se non vengono effettuate nomine, questa posizione verrà assegnata automaticamente in base al contributo e alla PB dei membri.", "", ""], ["CommonText_mMessage_25858", "Appointed: {num1}/{num2}", "Nominati: {num1}/{num2}", "", ""], ["CommonText_mMessage_25859", "Appointment successful. Player gains {num} extra attack(s) per round.", "Nomina effettuata. Il giocatore ottiene {num} attacco/i extra per turno.", "", ""], ["CommonText_mMessage_25860", "Marshal slots are full. Dismiss one to continue.", "Gli slot Maresciallo sono pieni. Congeda un Maresciallo per continuare.", "", ""], ["CommonText_mMessage_25861", "&lt;color=&quot;#feab53&quot;&gt;Are you sure you want to dismiss this player from the Marshal position?&lt;/color&gt;\\nEach Guild can have up to {num1} Marshals, each gaining {num2} extra attack(s) per round.", "&lt;color=&quot;#feab53&quot;&gt;Sei sicuro di voler congedare questo giocatore dalla posizione di Maresciallo?&lt;/color&gt;\\nOgni gilda può avere fino a {num1} Marescialli, ognuno dei quali guadagna {num2} ATK extra per turno.", "", ""], ["CommonText_mMessage_25862", "Marshal dismissed successfully. Please appoint a new one.", "Maresciallo congedato. Nominane uno nuovo.", "", ""], ["CommonText_mMessage_25863", "Guild War Attempts", "Tentativi Guerra tra gilde", "", ""], ["CommonText_mMessage_25931", "Points of the Round", "Punti del turno", "", ""], ["CommonText_mMessage_26080", "Prioritize Guild War team.", "Dai la priorità al team della Guerra tra gilde.", "", ""], ["CommonText_mMessage_26081", "Playtest mode cannot save battle results or auto-fight.", "La modalità Test di gioco non salva i risultati della battaglia e non consente l&#x27;Auto Combat.", "", ""], ["CommonText_mMessage_60708", "Score Details", "Dettagli punteggio", "", ""], ["Difficulty_mDetail_1100001", "Only heroes from &lt;color=&quot;#e37b00&quot;&gt;The Nightmare Council, The Star Piercers&lt;/color&gt; can challenge this stage.\\nLord Skills of each Faction can only affect up to &lt;color=&quot;#fd4540&quot;&gt;5&lt;/color&gt; heroes.", "Solo gli eroi del &lt;color=&quot;#e37b00&quot;&gt;Consiglio dell&#x27;Incubo e dei Perforatori di Stelle&lt;/color&gt; possono affrontare questa fase.\\nLe skill del Lord di ogni fazione possono influenzare solo fino a &lt;color=&quot;#fd4540&quot;&gt;5&lt;/color&gt; eroi.", "", ""], ["Difficulty_mDetail_1100003", "Only heroes from &lt;color=&quot;#e37b00&quot;&gt;The Infernal Blast, The North Throne&lt;/color&gt; can challenge this stage.\\nLord Skills of each Faction can only affect up to &lt;color=&quot;#fd4540&quot;&gt;5&lt;/color&gt; heroes.", "Solo gli eroi dell&#x27;&lt;color=&quot;#e37b00&quot;&gt;Esplosione Infernale e del Trono del Nord&lt;/color&gt; possono affrontare questa fase.\\nLe skill del Lord di ogni fazione possono influenzare solo fino a &lt;color=&quot;#fd4540&quot;&gt;5&lt;/color&gt; eroi.", "", ""], ["Difficulty_mDetail_1100004", "Only heroes from &lt;color=&quot;#e37b00&quot;&gt;The Esoteria Order, The Chaos Dominion, and The Supreme Arbiters&lt;/color&gt; can challenge this stage.\\nLord Skills of each Faction can only affect up to &lt;color=&quot;#fd4540&quot;&gt;5&lt;/color&gt; heroes.", "Solo gli eroi dell&#x27;&lt;color=&quot;#e37b00&quot;&gt;Ordine dell&#x27;Esoteria, del Dominio del Caos e dei Giudici Supremi&lt;/color&gt; possono affrontare questa fase.\\nLe skill del Lord di ogni fazione possono influenzare solo fino a &lt;color=&quot;#fd4540&quot;&gt;5&lt;/color&gt; eroi.", "", ""], ["Difficulty_mDetail_1200001", "The following heroes are exempt from map info restrictions.", "I seguenti eroi sono esenti dalle restrizioni delle informazioni della mappa.", "", ""], ["Difficulty_mDetail_1200002", "The following heroes are exempt from map info restrictions.", "I seguenti eroi sono esenti dalle restrizioni delle informazioni della mappa.", "", ""], ["Difficulty_mDetail_1200003", "The following heroes are exempt from map info restrictions.", "I seguenti eroi sono esenti dalle restrizioni delle informazioni della mappa.", "", ""], ["Difficulty_mDetail_1200004", "The following heroes are exempt from map info restrictions.", "I seguenti eroi sono esenti dalle restrizioni delle informazioni della mappa.", "", ""], ["Difficulty_mDetail_1300001", "Erlang Shen cannot be deployed in this special stage.", "Erlang Shen non può essere schierato in questa fase speciale.", "", ""], ["Difficulty_mDetail_32010053", "Mage heroes cannot be included in the team.", "Impossibile includere eroi maghi nel team.", "", ""], ["Difficulty_mDetail_32010153", "Destroyers gain the Camaraderie skill. When they die, nearby monsters receive an enhancement.", "I Distruttori ottengono la skill Cameratismo. Quando muoiono, i mostri nelle vicinanze ricevono un potenziamento.", "", ""], ["Difficulty_mDetail_32010163", "When the Priest of Thunder appears, he gains Ghost Form for 30 sec.", "Quando il Sacerdote del tuono appare, ottiene Forma fantasma per 30 sec.", "", ""], ["Difficulty_mDetail_32010364", "Boss enemies restore 1% Max HP per sec, while other enemies restore 5% Max HP per sec.", "I nemici boss recuperano 1% degli HP max al sec., mentre gli altri nemici recuperano 5% degli HP max al sec.", "", ""], ["Difficulty_mDetail_32010476", "Langlyn&#x27;s Max HP increases by 50%, but cannot be healed.", "Gli HP max di Langlyn aumentano del 50%, ma non può essere curato.", "", ""], ["Difficulty_mDetail_32010477", "Langlyn&#x27;s Max HP increases by 75%, but cannot be healed.", "Gli HP max di Langlyn aumentano del 75%, ma non può essere curato.", "", ""], ["Difficulty_mDetail_32010478", "Langlyn&#x27;s Max HP increases by 100%, but cannot be healed.", "Gli HP max di Langlyn aumentano del 100%, ma non può essere curato.", "", ""], ["ExpStageUI_mRaidName_8201006", "COTD-1", "COTD-1", "", ""], ["ExpStageUI_mRaidName_8201007", "COTD-2", "COTD-2", "", ""], ["ExpStageUI_mRaidName_8201008", "COTD-3", "COTD-3", "", ""], ["ExpStageUI_mRaidName_8201009", "COTD-4", "COTD-4", "", ""], ["ExpStageUI_mRaidName_8201010", "COTD-5", "COTD-5", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010153", "Destroyers gain the Camaraderie skill. When a Destroyer dies, nearby Destroyers receive an enhancement.", "I Distruttori ottengono la skill Cameratismo. Quando un Distruttore muore, i Distruttori nelle vicinanze ricevono un potenziamento.", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010163", "When the Priest of Thunder appears, he gains Ghost Form for 30 sec.", "Quando il Sacerdote del tuono appare, ottiene Forma fantasma per 30 sec.", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010364", "Boss enemies restore 1% Max HP per sec, while other enemies restore 5% Max HP per sec.", "I nemici boss recuperano 1% degli HP max al sec., mentre gli altri nemici recuperano 5% degli HP max al sec.", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010476", "Langlyn&#x27;s Max HP increases by 50%, but cannot be healed.", "Gli HP max di Langlyn aumentano del 50%, ma non può essere curato.", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010477", "Langlyn&#x27;s Max HP increases by 75%, but cannot be healed.", "Gli HP max di Langlyn aumentano del 75%, ma non può essere curato.", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010478", "Langlyn&#x27;s Max HP increases by 100%, but cannot be healed.", "Gli HP max di Langlyn aumentano del 100%, ma non può essere curato.", "", ""], ["HeroFactionKingSkill_mName_100441_1", "The Cursed Cult", "Il Culto Maledetto", "", ""], ["HeroFactionKingSkill_mName_100441_2", "The Cursed Cult", "Il Culto Maledetto", "", ""], ["HeroFactionKingSkill_mName_100441_3", "The Cursed Cult", "Il Culto Maledetto", "", ""], ["HeroFactionKingSkill_mName_100441_4", "The Cursed Cult", "Il Culto Maledetto", "", ""], ["HeroFactionKingSkill_mName_100441_5", "The Cursed Cult", "Il Culto Maledetto", "", ""], ["Item_mItemDesc_110", "Purchase to obtain a 30-Day Monthly Card of Diamonds.", "Acquista per ottenere una Carta mensile di diamanti da 30 giorni.", "", ""], ["Item_mItemDesc_111", "Purchase to obtain a 30-Day Monthly Card of Summoning.", "Acquista per ottenere una Carta mensile di evocazione da 30 giorni.", "", ""], ["Item_mItemDesc_112", "Purchase to obtain a 30-Day Monthly Card of Stamina.", "Acquista per ottenere una Carta mensile di Vigore da 30 giorni.", "", ""], ["Item_mItemDesc_31096", "Select 1 event-exclusive hero to join the event. The selected exclusive hero has an increased drop rate &amp; is guaranteed within 200 summons!", "Seleziona 1 eroe esclusivo dell&#x27;evento per partecipare all&#x27;evento. L&#x27;eroe esclusivo selezionato ha un tasso di drop aumentato ed è garantito entro 200 evocazioni!", "", ""], ["Item_mItemDesc_31097", "&lt;color=&quot;#eadca2&quot;&gt;Special Summon Offer&lt;/color&gt;\\n\\nGet the necessary materials for Hero Summon", "&lt;color=&quot;#eadca2&quot;&gt;Offerta speciale evocazione&lt;/color&gt;\\n\\nOttieni i materiali necessari per l&#x27;evocazione di eroi", "", ""], ["Item_mItemDesc_3333", "&lt;color=&quot;#498a40&quot;&gt;Exclusive avatar border for the Gold Dragon Pass.&lt;/color&gt;", "&lt;color=&quot;#498a40&quot;&gt;Cornice avatar esclusiva del Pass del Drago d&#x27;oro.&lt;/color&gt;", "", ""], ["Item_mItemDesc_3519", "Unknown Clue of Erlang Shen. When obtained, it will automatically convert into a random one from Erlang Shen&#x27;s Clues 1-5.", "Indizio sconosciuto di Erlang Shen. Quando ottenuto, si convertirà automaticamente in uno casuale tra gli Indizi di Erlang Shen 1-5.", "", ""], ["Item_mItemDesc_3521", "Erlang Shen&#x27;s Clue 2.\\n&lt;color=&quot;#498a40&quot;&gt;Usage: Consume this item via Fate&#x27;s Chapters to unlock the corresponding clue.&lt;/color&gt;", "Indizio 2 di Erlang Shen.\\n&lt;color=&quot;#498a40&quot;&gt;Utilizzo: consuma questo item tramite Capitoli del destino per sbloccare l&#x27;indizio corrispondente.&lt;/color&gt;", "", ""], ["Item_mItemDesc_3522", "Erlang Shen&#x27;s Clue 3.\\n&lt;color=&quot;#498a40&quot;&gt;Usage: Consume this item via Fate&#x27;s Chapters to unlock the corresponding clue.&lt;/color&gt;", "Indizio 3 di Erlang Shen.\\n&lt;color=&quot;#498a40&quot;&gt;Utilizzo: consuma questo item tramite Capitoli del destino per sbloccare l&#x27;indizio corrispondente.&lt;/color&gt;", "", ""], ["Item_mItemDesc_3523", "Erlang Shen&#x27;s Clue 4.\\n&lt;color=&quot;#498a40&quot;&gt;Usage: Consume this item via Fate&#x27;s Chapters to unlock the corresponding clue.&lt;/color&gt;", "Indizio 4 di Erlang Shen.\\n&lt;color=&quot;#498a40&quot;&gt;Utilizzo: consuma questo item tramite Capitoli del destino per sbloccare l&#x27;indizio corrispondente.&lt;/color&gt;", "", ""], ["Item_mItemDesc_3524", "Erlang Shen&#x27;s Clue 5.\\n&lt;color=&quot;#498a40&quot;&gt;Usage: Consume this item via Fate&#x27;s Chapters to unlock the corresponding clue.&lt;/color&gt;", "Indizio 5 di Erlang Shen.\\n&lt;color=&quot;#498a40&quot;&gt;Utilizzo: consuma questo item tramite Capitoli del destino per sbloccare l&#x27;indizio corrispondente.&lt;/color&gt;", "", ""], ["Item_mItemDesc_35473", "You can obtain the following items:\\nMonthly Card of Diamonds (30-Day)\\nDiamond x500", "Puoi ottenere i seguenti item:\\nCarta Mensile di diamanti (30 giorni)\\nDiamanti x500", "", ""], ["Item_mItemDesc_35474", "You can obtain the following items:\\nMonthly Card of Summoning (30-Day)\\nRare Summoning Crystal x500", "Puoi ottenere i seguenti item:\\nCarta Mensile di evocazione (30 giorni)\\nCristallo di evocazione raro x500", "", ""], ["Item_mItemDesc_35475", "You can obtain the following items:\\nMonthly Card of Stamina (30-Day)\\nStamina x600\\nAuto-Fight Chance x30", "Puoi ottenere i seguenti item:\\nCarta Mensile d Vigore (30 giorni)\\nVigore x600\\nChance di Auto Combat x30", "", ""], ["Item_mItemDesc_56310", "Grants a random &lt;color=&quot;#498a40&quot;&gt;Lvl. 2-4&lt;/color&gt; Trial Keystone.", "Concede una Chiave della prova casuale di &lt;color=&quot;#498a40&quot;&gt;liv. 2-4&lt;/color&gt;.", "", ""], ["Item_mItemDesc_56311", "Grants a random &lt;color=&quot;#498a40&quot;&gt;Lvl. 2-5&lt;/color&gt; Trial Keystone.", "Concede una Chiave della prova casuale di &lt;color=&quot;#498a40&quot;&gt;liv. 2-5&lt;/color&gt;.", "", ""], ["Item_mItemName_110", "Monthly Card of Diamonds (30-Day)", "Carta mensile di diamanti (30 giorni)", "", ""], ["Item_mItemName_111", "Monthly Card of Summoning (30-Day)", "Carta mensile di evocazione (30 giorni)", "", ""], ["Item_mItemName_112", "Monthly Card of Stamina (30-Day)", "Carta mensile di Vigore (30 giorni)", "", ""], ["Item_mItemName_31096", "Exclusive Lucky Pick", "Scelta Fortunata esclusiva", "", ""], ["Item_mItemName_31097", "Turbo Summon Bundle", "Pacchetto di evocazioni turbo", "", ""], ["Item_mItemName_3324", "Avatar Border: Nine-Tailed Nightmare Ranking Champion", "Cornice avatar: Campione nella classifica dell&#x27;Incubo a nove code", "", ""], ["Item_mItemName_3325", "Avatar Border: Nine-Tailed Nightmare Ranking Runner-Up", "Cornice avatar: Secondo nella classifica dell&#x27;Incubo a nove code", "", ""], ["Item_mItemName_3326", "Avatar Border: Nine-Tailed Nightmare Ranking Third Place", "Cornice avatar: Terzo nella classifica dell&#x27;Incubo a nove code", "", ""], ["Item_mItemName_3333", "Avatar Border: Gold Dragon Pass", "Cornice avatar: Pass del Drago d&#x27;oro", "", ""], ["Item_mItemName_35473", "Monthly Card of Diamonds", "Carta mensile di diamanti", "", ""], ["Item_mItemName_35474", "Monthly Card of Summoning", "Carta mensile di evocazione", "", ""], ["Item_mItemName_35475", "Monthly Card of Stamina", "Carta mensile di Vigore", "", ""], ["Item_mItemName_56310", "Random Trial Keystone (Lvl. 2-4)", "Chiave della prova casuale (liv. 2-4)", "", ""], ["Item_mItemName_56311", "Random Trial Keystone (Lvl. 2-5)", "Chiave della prova casuale (liv. 2-5)", "", ""], ["Quest_mQuestTitle_380034", "Obtain a total of 100 Dragon&#x27;s Gold.", "Ottieni un totale di 100 Oro del drago.", "", ""], ["Quest_mQuestTitle_380035", "Obtain a total of 200 Dragon&#x27;s Gold.", "Ottieni un totale di 200 Oro del drago.", "", ""], ["Quest_mQuestTitle_380036", "Obtain a total of 300 Dragon&#x27;s Gold.", "Ottieni un totale di 300 Oro del drago.", "", ""], ["Quest_mQuestTitle_380037", "Obtain a total of 500 Dragon&#x27;s Gold.", "Ottieni un totale di 500 Oro del drago.", "", ""], ["Quest_mQuestTitle_380038", "Obtain a total of 800 Dragon&#x27;s Gold.", "Ottieni un totale di 800 Oro del drago.", "", ""], ["Quest_mQuestTitle_380039", "Obtain a total of 1,000 Dragon&#x27;s Gold.", "Ottieni un totale di 1.000 Oro del drago.", "", ""], ["Quest_mQuestTitle_380040", "Obtain a total of 1,500 Dragon&#x27;s Gold.", "Ottieni un totale di 1.500 Oro del drago.", "", ""], ["Quest_mQuestTitle_380041", "Obtain a total of 2,000 Dragon&#x27;s Gold.", "Ottieni un totale di 2.000 Oro del drago.", "", ""], ["Quest_mQuestTitle_380042", "Obtain a total of 3,000 Dragon&#x27;s Gold.", "Ottieni un totale di 3.000 Oro del drago.", "", ""], ["Quest_mQuestTitle_380043", "Obtain a total of 4,000 Dragon&#x27;s Gold.", "Ottieni un totale di 4.000 Oro del drago.", "", ""], ["Quest_mQuestTitle_380044", "Obtain a total of 5,000 Dragon&#x27;s Gold.", "Ottieni un totale di 5.000 Oro del drago.", "", ""], ["RoleHeadFrame_mSourceDesc_84", "Awarded to the Commander who ranks first on the Points Leaderboard in the Echoes of Woe during the Nine-Tailed Nightmare.", "Assegnato al Comandante che si classifica primo nella classifica dei punti negli Echi del dolore durante l&#x27;Incubo a nove code.", "", ""], ["RoleHeadFrame_mSourceDesc_85", "Awarded to the Commander who ranks second on the Points Leaderboard in the Echoes of Woe during the Nine-Tailed Nightmare.", "Assegnato al Comandante che si classifica secondo nella classifica dei punti negli Echi del dolore durante l&#x27;Incubo a nove code.", "", ""], ["RoleHeadFrame_mSourceDesc_86", "Awarded to the Commander who ranks third on the Points Leaderboard in the Echoes of Woe during the Nine-Tailed Nightmare.", "Assegnato al Comandante che si classifica terzo nella classifica dei Punti negli Echi del dolore durante l&#x27;Incubo a nove code.", "", ""], ["RoleHeadFrame_mSourceDesc_89", "Guild War S10 &quot;Overlord&quot; exclusive avatar border.", "Cornice avatar esclusiva &quot;Grande Lord&quot; della S10 della Guerra tra gilde.", "", ""], ["RoleHeadFrame_mSourceDesc_91", "Obtained from Gold Dragon Pass.", "Si ottiene dal Pass del Drago d&#x27;oro.", "", ""], ["RollDiceBuilding_mName_11_1", "Turn of Luck", "Svolta della fortuna", "", ""], ["RollDiceBuilding_mName_12_1", "Turn of Luck", "Svolta della fortuna", "", ""], ["Skill_mSkillDesc_1908301_1", "Swings claws, dealing DMG to all heroes within 1 tile ahead.", "Vibra gli artigli, infliggendo DMG a tutti gli eroi entro 1 casella davanti.", "", ""], ["Skill_mSkillDesc_1908304_1", "Swings claws, dealing DMG to all heroes within 1 tile ahead.", "Vibra gli artigli, infliggendo DMG a tutti gli eroi entro 1 casella davanti.", "", ""], ["Skill_mSkillDesc_1908315_1", "When the Nine-Tailed Fox takes fatal DMG, she flees the battlefield and activates the tails on the field to attack. When the tails are defeated, the Nine-Tailed Fox returns to the battlefield. After all tails on the field are defeated, the Nine-Tailed Fox transforms and summons a large number of foxes.", "Quando la Volpe a nove code subisce DMG fatali, fugge dal campo di battaglia e attiva le code sul campo per attaccare. Quando le code vengono sconfitte, la Volpe a nove code ritorna sul campo di battaglia. Dopo che tutte le code sul campo sono state sconfitte, la Volpe a nove code si trasforma ed evoca un gran numero di volpi.", "", ""], ["Skill_mSkillDesc_1908345_1", "Deals M. DMG to the last deployed unit on the battlefield, prioritizing Defenders.", "Infligge DMG M. all&#x27;ultima unità schierata sul campo di battaglia, dando priorità ai difensori.", "", ""], ["Skill_mSkillDesc_1908357_1", "Deals M. DMG to the last deployed unit on the battlefield, prioritizing Defenders.", "Infligge DMG M. all&#x27;ultima unità schierata sul campo di battaglia, dando priorità ai difensori.", "", ""], ["Skill_mSkillDesc_803803_1", "Immune to all &lt;color=&quot;#4A9DF2&quot;&gt;CC Effects&lt;/color&gt; (except Slow).", "Immune a tutti gli &lt;color=&quot;#4A9DF2&quot;&gt;effetti di controllo folla&lt;/color&gt; (eccetto Rallentamento).", "", ""], ["Skill_mSkillDesc_8202053_1", "Reduces the Redeployment Time of allied heroes by &lt;color=&quot;#4A9DF2&quot;&gt;{sk1}%&lt;/color&gt;, but increases their Deployment Cost by &lt;color=&quot;#4A9DF2&quot;&gt;+{sk2}&lt;/color&gt;.", "Riduce il tempo di rischieramento degli eroi alleati di un &lt;color=&quot;#4A9DF2&quot;&gt;{sk1}%&lt;/color&gt;, ma aumenta il loro Costo di schieramento di &lt;color=&quot;#4A9DF2&quot;&gt;+{sk2}&lt;/color&gt;.", "", ""], ["Skill_mSkillDesc_8202084_1", "Increases allied heroes&#x27; DMG by &lt;color=&quot;#4A9DF2&quot;&gt;{sk1}%&lt;/color&gt; each round and reduces Basic ATK interval by &lt;color=&quot;#4A9DF2&quot;&gt;{sk1}%&lt;/color&gt;. Vulnerability (P. DMG) and Vulnerability (M. DMG) increase by &lt;color=&quot;#4A9DF2&quot;&gt;{sk2}%&lt;/color&gt; each round.", "Aumenta i DMG degli eroi alleati di un &lt;color=&quot;#4A9DF2&quot;&gt;{sk1}%&lt;/color&gt; ogni turno e riduce l&#x27;intervallo dell&#x27;ATK base di un &lt;color=&quot;#4A9DF2&quot;&gt;{sk1}%&lt;/color&gt;. La Vulnerabilità (DMG F.) e la Vulnerabilità (DMG M.) aumentano di un &lt;color=&quot;#4A9DF2&quot;&gt;{sk2}%&lt;/color&gt; ogni turno.", "", ""], ["Skill_mSkillDesc_8202103_1", "Allied Hero Deployment Limit +&lt;color=&quot;#4A9DF2&quot;&gt;{sk1}&lt;/color&gt;", "Limite di schieramento eroi alleati +&lt;color=&quot;#4A9DF2&quot;&gt;{sk1}&lt;/color&gt;", "", ""], ["Skill_mSkillName_1033701_1", "Accelerated Incubation", "Incubazione accelerata", "", ""], ["Skill_mSkillName_3991865_1", "High Quality", "Alta qualità", "", ""], ["Skill_mSkillName_803610_1", "Freeze", "Congela", "", ""], ["Skill_mSkillName_803801_1", "Frostbite Strike", "Colpo dell&#x27;assideramento", "", ""], ["Skill_mSkillName_803803_1", "Control Immunity", "Immunità dal controllo", "", ""], ["Skill_mSkillName_804001_1", "Frostbite Rupture", "Frattura dell&#x27;assideramento", "", ""], ["Skill_mSkillName_8202053_1", "Time VS Money", "Tempo VS denaro", "", ""], ["Skill_mSkillName_8202084_1", "Heating Up", "Riscaldamento", "", ""], ["Skill_mSkillName_8202103_1", "Rigged Arena", "Arena truccata", "", ""], ["Skill_mSkillSimpleDesc_11015501_1", "Increases ATK by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;, and reduces the number of attacks required to trigger Nature&#x27;s Fury enhanced attack by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;. When in Berserker Stance, Basic ATK restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt; Max HP, and triggering Ground Stomp restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; Max HP.", "Aumenta l&#x27;ATK di un &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt; e riduce il numero di attacchi necessari per attivare l&#x27;attacco potenziato Furia della natura di &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;. Quando si è nella Posizione del berserker, l&#x27;ATK base ripristina un &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt; degli HP max, e l&#x27;attivazione del Colpo a terra ripristina un &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; degli HP max.", "", ""], ["Skill_mSkillSimpleDesc_11015501_2", "Increases ATK by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;, and reduces the number of attacks required to trigger Nature&#x27;s Fury enhanced attack by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;. When in Berserker Stance, Basic ATK restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt; Max HP, and triggering Ground Stomp restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; Max HP.", "Aumenta l&#x27;ATK di un &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt; e riduce il numero di attacchi necessari per attivare l&#x27;attacco potenziato Furia della natura di &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;. Quando si è nella Posizione del berserker, l&#x27;ATK base ripristina un &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt; degli HP max, e l&#x27;attivazione del Colpo a terra ripristina un &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; degli HP max.", "", ""], ["Skill_mSkillSimpleDesc_11015501_3", "Increases ATK by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;, and reduces the number of attacks required to trigger Nature&#x27;s Fury enhanced attack by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;. When in Berserker Stance, Basic ATK restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt; Max HP, and triggering Ground Stomp restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; Max HP.", "Aumenta l&#x27;ATK di un &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt; e riduce il numero di attacchi necessari per attivare l&#x27;attacco potenziato Furia della natura di &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;. Quando si è nella Posizione del berserker, l&#x27;ATK base ripristina un &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt; degli HP max, e l&#x27;attivazione del Colpo a terra ripristina un &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; degli HP max.", "", ""], ["Skill_mSkillSimpleDesc_11015501_4", "Increases ATK by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;, and reduces the number of attacks required to trigger Nature&#x27;s Fury enhanced attack by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;. When in Berserker Stance, Basic ATK restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt; Max HP, and triggering Ground Stomp restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; Max HP.", "Aumenta l&#x27;ATK di un &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt; e riduce il numero di attacchi necessari per attivare l&#x27;attacco potenziato Furia della natura di &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;. Quando si è nella Posizione del berserker, l&#x27;ATK base ripristina un &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt; degli HP max, e l&#x27;attivazione del Colpo a terra ripristina un &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; degli HP max.", "", ""], ["Skill_mSkillSimpleDesc_11015501_5", "Increases ATK by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;, and reduces the number of attacks required to trigger Nature&#x27;s Fury enhanced attack by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;. When in Berserker Stance, Basic ATK restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt; Max HP, and triggering Ground Stomp restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; Max HP.", "Aumenta l&#x27;ATK di un &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt; e riduce il numero di attacchi necessari per attivare l&#x27;attacco potenziato Furia della natura di &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;. Quando si è nella Posizione del berserker, l&#x27;ATK base ripristina un &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt; degli HP max, e l&#x27;attivazione del Colpo a terra ripristina un &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; degli HP max.", "", ""], ["Skill_mSkillSimpleDesc_11015501_6", "Increases ATK by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;, and reduces the number of attacks required to trigger Nature&#x27;s Fury enhanced attack by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;. When in Berserker Stance, Basic ATK restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt; Max HP, and triggering Ground Stomp restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; Max HP.", "Aumenta l&#x27;ATK di un &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt; e riduce il numero di attacchi necessari per attivare l&#x27;attacco potenziato Furia della natura di &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;. Quando si è nella Posizione del berserker, l&#x27;ATK base ripristina un &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt; degli HP max, e l&#x27;attivazione del Colpo a terra ripristina un &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; degli HP max.", "", ""], ["Skill_mSkillSimpleDesc_13000441_1", "Increases faction team members&#x27; basic attributes by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;.\\nIncreases faction team members&#x27; DMG dealt to enemies inflicted with Slow, Stun, Freeze, Immobilized State, and other CC Effects by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt;. \\nIncreases faction team members&#x27; DMG by &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;. When the Lord is on the battlefield and an allied summon dies, increases all faction team members&#x27; DMG by an additional &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; for &lt;color=&quot;#4A9DF2&quot;&gt;{skm5}&lt;/color&gt; sec, stacking up to &lt;color=&quot;#4A9DF2&quot;&gt;{skm6}&lt;/color&gt; time(s).", "Aumenta gli attributi di base dei membri del team della fazione di un &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;.\\nI membri del team della fazione infliggono un &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt; di DMG in più ai nemici rallentati, storditi, congelati, immobilizzati o con altri effetti di controllo folla. \\nAumenta il DMG dei membri del team della fazione di un &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;. Quando il Lord è sul campo di battaglia e un&#x27;evocazione alleata muore, aumenta il DMG di tutti i membri del team della fazione di un ulteriore &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; per &lt;color=&quot;#4A9DF2&quot;&gt;{skm5}&lt;/color&gt; sec. Cumulabile fino a &lt;color=&quot;#4A9DF2&quot;&gt;{skm6}&lt;/color&gt; volta/e.", "", ""], ["Skill_mSkillSimpleDesc_13000441_2", "Increases faction team members&#x27; basic attributes by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;.\\nIncreases faction team members&#x27; DMG dealt to enemies inflicted with Slow, Stun, Freeze, Immobilized State, and other CC Effects by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt;. \\nIncreases faction team members&#x27; DMG by &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;. When the Lord is on the battlefield and an allied summon dies, increases all faction team members&#x27; DMG by an additional &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; for &lt;color=&quot;#4A9DF2&quot;&gt;{skm5}&lt;/color&gt; sec, stacking up to &lt;color=&quot;#4A9DF2&quot;&gt;{skm6}&lt;/color&gt; time(s).", "Aumenta gli attributi di base dei membri del team della fazione di un &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;.\\nI membri del team della fazione infliggono un &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt; di DMG in più ai nemici rallentati, storditi, congelati, immobilizzati o con altri effetti di controllo folla. \\nAumenta il DMG dei membri del team della fazione di un &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;. Quando il Lord è sul campo di battaglia e un&#x27;evocazione alleata muore, aumenta il DMG di tutti i membri del team della fazione di un ulteriore &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; per &lt;color=&quot;#4A9DF2&quot;&gt;{skm5}&lt;/color&gt; sec. Cumulabile fino a &lt;color=&quot;#4A9DF2&quot;&gt;{skm6}&lt;/color&gt; volta/e.", "", ""], ["Skill_mSkillSimpleDesc_13000441_3", "Increases faction team members&#x27; basic attributes by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;.\\nIncreases faction team members&#x27; DMG dealt to enemies inflicted with Slow, Stun, Freeze, Immobilized State, and other CC Effects by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt;. \\nIncreases faction team members&#x27; DMG by &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;. When the Lord is on the battlefield and an allied summon dies, increases all faction team members&#x27; DMG by an additional &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; for &lt;color=&quot;#4A9DF2&quot;&gt;{skm5}&lt;/color&gt; sec, stacking up to &lt;color=&quot;#4A9DF2&quot;&gt;{skm6}&lt;/color&gt; time(s).", "Aumenta gli attributi di base dei membri del team della fazione di un &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;.\\nI membri del team della fazione infliggono un &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt; di DMG in più ai nemici rallentati, storditi, congelati, immobilizzati o con altri effetti di controllo folla. \\nAumenta il DMG dei membri del team della fazione di un &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;. Quando il Lord è sul campo di battaglia e un&#x27;evocazione alleata muore, aumenta il DMG di tutti i membri del team della fazione di un ulteriore &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; per &lt;color=&quot;#4A9DF2&quot;&gt;{skm5}&lt;/color&gt; sec. Cumulabile fino a &lt;color=&quot;#4A9DF2&quot;&gt;{skm6}&lt;/color&gt; volta/e.", "", ""], ["Skill_mSkillSimpleDesc_13000441_4", "Increases faction team members&#x27; basic attributes by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;.\\nIncreases faction team members&#x27; DMG dealt to enemies inflicted with Slow, Stun, Freeze, Immobilized State, and other CC Effects by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt;. \\nIncreases faction team members&#x27; DMG by &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;. When the Lord is on the battlefield and an allied summon dies, increases all faction team members&#x27; DMG by an additional &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; for &lt;color=&quot;#4A9DF2&quot;&gt;{skm5}&lt;/color&gt; sec, stacking up to &lt;color=&quot;#4A9DF2&quot;&gt;{skm6}&lt;/color&gt; time(s).", "Aumenta gli attributi di base dei membri del team della fazione di un &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;.\\nI membri del team della fazione infliggono un &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt; di DMG in più ai nemici rallentati, storditi, congelati, immobilizzati o con altri effetti di controllo folla. \\nAumenta il DMG dei membri del team della fazione di un &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;. Quando il Lord è sul campo di battaglia e un&#x27;evocazione alleata muore, aumenta il DMG di tutti i membri del team della fazione di un ulteriore &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; per &lt;color=&quot;#4A9DF2&quot;&gt;{skm5}&lt;/color&gt; sec. Cumulabile fino a &lt;color=&quot;#4A9DF2&quot;&gt;{skm6}&lt;/color&gt; volta/e.", "", ""], ["Skill_mSkillSimpleDesc_13000441_5", "Increases faction team members&#x27; basic attributes by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;.\\nIncreases faction team members&#x27; DMG dealt to enemies inflicted with Slow, Stun, Freeze, Immobilized State, and other CC Effects by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt;. \\nIncreases faction team members&#x27; DMG by &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;. When the Lord is on the battlefield and an allied summon dies, increases all faction team members&#x27; DMG by an additional &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; for &lt;color=&quot;#4A9DF2&quot;&gt;{skm5}&lt;/color&gt; sec, stacking up to &lt;color=&quot;#4A9DF2&quot;&gt;{skm6}&lt;/color&gt; time(s).", "Aumenta gli attributi di base dei membri del team della fazione di un &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;.\\nI membri del team della fazione infliggono un &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt; di DMG in più ai nemici rallentati, storditi, congelati, immobilizzati o con altri effetti di controllo folla. \\nAumenta il DMG dei membri del team della fazione di un &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;. Quando il Lord è sul campo di battaglia e un&#x27;evocazione alleata muore, aumenta il DMG di tutti i membri del team della fazione di un ulteriore &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; per &lt;color=&quot;#4A9DF2&quot;&gt;{skm5}&lt;/color&gt; sec. Cumulabile fino a &lt;color=&quot;#4A9DF2&quot;&gt;{skm6}&lt;/color&gt; volta/e.", "", ""], ["Skill_mSkillSimpleDesc_8202053_1", "Reduces the Redeployment Time of allied heroes by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;, but increases their Deployment Cost by &lt;color=&quot;#4A9DF2&quot;&gt;+{skm2}&lt;/color&gt;.", "Riduce il tempo di rischieramento degli eroi alleati di un &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;, ma aumenta il loro Costo di schieramento di &lt;color=&quot;#4A9DF2&quot;&gt;+{skm2}&lt;/color&gt;.", "", ""], ["Skill_mSkillSimpleDesc_8202084_1", "Increases allied heroes&#x27; DMG by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt; each round and reduces Basic ATK Interval by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;. Vulnerability (P. DMG) and Vulnerability (M. DMG) increase by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt; each round.", "Aumenta i DMG degli eroi alleati di un &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt; ogni turno e riduce l&#x27;intervallo dell&#x27;ATK base di un &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;. La Vulnerabilità (DMG F.) e la Vulnerabilità (DMG M.) aumentano di un &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt; ogni turno.", "", ""], ["Skill_mSkillSimpleDesc_8202103_1", "Allied Hero Deployment Limit +&lt;color=&quot;#4A9DF2&quot;&gt;{skm1}&lt;/color&gt;", "Limite di schieramento eroi alleati +&lt;color=&quot;#4A9DF2&quot;&gt;{skm1}&lt;/color&gt;", "", ""], ["Skill_mSkillSimpleDesc_8203031_1", "Hotspot appears on both players&#x27; battlefields. Heroes standing on the Hotspot have all attributes increased by 20%.", "L&#x27;Hotspot appare sui campi di battaglia di entrambi i giocatori. Gli eroi che si trovano sull&#x27;Hotspot hanno tutti gli attributi aumentati del 20%.", "", ""], ["Stage_mStageDesc_5003001", "In this epic battle, you will face an unprecedented enemy - Semrah. Hailing from ancient times, Semrah fights in 3 Battle Modes, each posing a tough challenge.", "In questa battaglia epica dovrai affrontare un nemico ancestrale senza precedenti: Semrah. Dovrai affrontarlo in 3 modalità di battaglia, ognuna delle quali rappresenta una sfida molto difficile.", "", ""], ["Stage_mStageDesc_5003002", "In this epic battle, you will face an unprecedented enemy - Semrah. Hailing from ancient times, Semrah fights in 3 Battle Modes, each posing a tough challenge.", "In questa battaglia epica dovrai affrontare un nemico ancestrale senza precedenti: Semrah. Dovrai affrontarlo in 3 modalità di battaglia, ognuna delle quali rappresenta una sfida molto difficile.", "", ""], ["Stage_mStageDesc_8101001", "Starting from Round 5, &lt;color=&quot;#fd4540&quot;&gt;all monsters gain Invisibility and become untargetable&lt;/color&gt; for 7 sec.", "A partire dal 5º turno, &lt;color=&quot;#fd4540&quot;&gt;tutti i mostri ottengono Invisibilità e non possono essere presi di mira&lt;/color&gt; per 7 sec.", "", ""], ["Stage_mStageDesc_8101002", "Starting from Round 5, &lt;color=&quot;#fd4540&quot;&gt;all monsters gain Invincibility upon taking DMG for the first time, becoming immune to all DMG&lt;/color&gt; for 4 sec.", "A partire dal 5º turno, &lt;color=&quot;#fd4540&quot;&gt;tutti i mostri ottengono Invincibilità quando subiscono DMG per la prima volta, diventando immuni a tutti i DMG&lt;/color&gt; per 4 sec.", "", ""], ["Stage_mStageDesc_8101003", "Starting from Round 5, &lt;color=&quot;#fd4540&quot;&gt;all heroes continuously take True DMG equal to 4% of their Max HP per sec&lt;/color&gt;.", "A partire dal 5º turno, &lt;color=&quot;#fd4540&quot;&gt;tutti gli eroi subiscono ininterrottamente DMG effettivi pari al 4% dei loro HP max al sec&lt;/color&gt;.", "", ""], ["Stage_mStageDesc_8201011", "Team up with your friends to defeat the enemy Boss and fend off the tides of enemies.", "Unisciti ai tuoi amici per sconfiggere il boss e respingere le ondate di nemici.", "", ""], ["Stage_mStageDesc_8201012", "Team up with your friends to defeat the enemy Boss and fend off the tides of enemies.", "Unisciti ai tuoi amici per sconfiggere il boss e respingere le ondate di nemici.", "", ""], ["Stage_mStageDesc_8201013", "Team up with your friends to defeat the enemy Boss and fend off the tides of enemies.", "Unisciti ai tuoi amici per sconfiggere il boss e respingere le ondate di nemici.", "", ""], ["Stage_mStageDesc_8201014", "Team up with your friends to defeat the enemy Boss and fend off the tides of enemies.", "Unisciti ai tuoi amici per sconfiggere il boss e respingere le ondate di nemici.", "", ""], ["Stage_mStageDesc_8201015", "Team up with your friends to defeat the enemy Boss and fend off the tides of enemies.", "Unisciti ai tuoi amici per sconfiggere il boss e respingere le ondate di nemici.", "", ""], ["Stage_mStageFailDesc_5003001", "Pay extra attention to Semrah&#x27;s Battle Mode and exploit its weakness.", "Presta particolare attenzione alla modalità di battaglia di Semrah e sfrutta la sua debolezza.", "", ""], ["Stage_mStageFailDesc_5003002", "Pay extra attention to Semrah&#x27;s Battle Mode and exploit its weakness.", "Presta particolare attenzione alla modalità di battaglia di Semrah e sfrutta la sua debolezza.", "", ""], ["Stage_mStageIdDesc_5003001", "Apocalypse I - Playtest", "Apocalisse I - Test di gioco", "", ""], ["Stage_mStageIdDesc_5003002", "Apocalypse II - Playtest", "Apocalisse II - Test di gioco", "", ""], ["Stage_mStageIdDesc_8201011", "Stage 1", "Fase 1", "", ""], ["Stage_mStageIdDesc_8201012", "Stage 2", "Fase 2", "", ""], ["Stage_mStageIdDesc_8201013", "Stage 3", "Fase 3", "", ""], ["Stage_mStageIdDesc_8201014", "Stage 4", "Fase 4", "", ""], ["Stage_mStageIdDesc_8201015", "Stage 5", "Fase 5", "", ""], ["Stage_mStageIdDesc_991001", "Test 1-1", "Test 1-1", "", ""], ["Stage_mStageIdDesc_991002", "Test 1-2", "Test 1-2", "", ""], ["Stage_mStageIdDesc_991003", "Test 1-3", "Test 1-3", "", ""], ["Stage_mStageName_5003001", "Semrah", "Semrah", "", ""], ["Stage_mStageName_5003002", "Semrah", "Semrah", "", ""], ["Stage_mStageName_8201011", "Co-op Mode", "Modalità cooperativa", "", ""], ["Stage_mStageName_8201012", "Co-op Mode", "Modalità cooperativa", "", ""], ["Stage_mStageName_8201013", "Co-op Mode", "Modalità cooperativa", "", ""], ["Stage_mStageName_8201014", "Co-op Mode", "Modalità cooperativa", "", ""], ["Stage_mStageName_8201015", "Co-op Mode", "Modalità cooperativa", "", ""], ["UILanguage_mKeyValue_Form_BackpackIntegration_SubTitle", "Sort", "Ordina", "", ""], ["UILanguage_mKeyValue_Panel_BackpackEquipPanel_EquipedText", "Equipped", "In uso", "", ""], ["UILanguage_mKeyValue_Panel_MaterialPanel_GetWayTitle_Text", "Access", "Accesso", "", ""], ["UILanguage_mKeyValue_Panel_MaterialPanel_Text_Use", "Use", "Usa", "", ""], ["UnionRaise_mRaiseText_15", "Donate &lt;color=#28d37c&gt;{num}&lt;/color&gt; Mythic Extract(s).", "Dona &lt;color=#28d37c&gt;{num}&lt;/color&gt; Estratto/i mitico/i.", "", ""], ["UnionRaise_mRaiseText_16", "Donate &lt;color=#28d37c&gt;{num}&lt;/color&gt; 5-star Psychic Power(s).", "Dona &lt;color=#28d37c&gt;{num}&lt;/color&gt; Potere/i psichico/i a 5 stelle.", "", ""], ["UnionRaise_mRaiseTitle_15", "Promotion Insignia III", "Stemma di promozione III", "", ""], ["UnionRaise_mRaiseTitle_16", "Hero Star Up", "Star Up eroe", "", ""], ["Unit_mDescribe_37105", "Scalekin mages, adept in the art of poisonous magic, possess the ability to &lt;color=#ff4500&gt;inflict poison on enemies&lt;/color&gt;.", "I Maghi scagliadura, esperti nell&#x27;arte della magia velenosa, possiedono la capacità di &lt;color=#ff4500&gt; infliggere veleno ai nemici&lt;/color&gt;.", "", ""], ["Unit_mDescribe_37106", "Elite Skeleton Archers that can deal massive DMG from afar.", "Élite di Scheletri arcieri possono infliggere molti DMG a distanza.", "", ""], ["Unit_mDescribe_37107", "Small spiders, very aggressive but weak individually.", "Piccoli ragni, molto aggressivi, ma deboli individualmente.", "", ""], ["Unit_mDescribe_37108", "Toxic Suicides will explode when approaching enemies, &lt;color=#ff4500&gt;dealing moderate AoE DMG and poisoning them&lt;/color&gt;.", "I Suicidi tossici esplodono quando si avvicinano ai nemici, &lt;color=#ff4500&gt;infliggendo moderati DMG AoE e avvelenandoli&lt;/color&gt;.", "", ""], ["Unit_mDescribe_37110", "Clad in giant shields and possessing unyielding skeletal frames, they are renowned for their exceptional DEF.", "Rivestiti di scudi giganti e dotati di strutture scheletriche inflessibili, sono rinomati per la loro eccezionale DEF.", "", ""], ["Unit_mDescribe_37112", "Produces a Queen Spider when left out of combat for a while. Eliminate it before it hatches.", "Produce una Regina ragno, se non partecipa al combattimento per un po&#x27;. Eliminalo prima che si schiuda.", "", ""], ["Unit_mFeature_10408", "Ludwig has been reborn from the abyss. With a horrifying power granted by his master - the Eldritch God. Ludwig has now lost his humanity.", "Ludwig è rinato dall&#x27;Abisso. Con un orribile potere concesso dal suo padrone, il Dio Eldritch. Ludwig ha perso la sua umanità.", "", ""], ["Unit_mFeature_10409", "Ludwig has been reborn from the abyss. With a horrifying power granted by his master - the Eldritch God. Ludwig has now lost his humanity.", "Ludwig è rinato dall&#x27;Abisso. Con un orribile potere concesso dal suo padrone, il Dio Eldritch. Ludwig ha perso la sua umanità.", "", ""], ["Unit_mFeature_10410", "Ludwig has been reborn from the abyss. With a horrifying power granted by his master - the Eldritch God. Ludwig has now lost his humanity.", "Ludwig è rinato dall&#x27;Abisso. Con un orribile potere concesso dal suo padrone, il Dio Eldritch. Ludwig ha perso la sua umanità.", "", ""], ["Unit_mFeature_37105", "Scalekin mages, adept in the art of poisonous magic, possess the ability to inflict continuous Poison DMG on enemies.", "Maghi scagliadura che usano la magia del veleno, in grado di infliggere danni da avvelenamento continui ai nemici.", "", ""], ["Unit_mFeature_37106", "Elite Skeleton Archers that can deal massive DMG from afar.", "Élite di Scheletri arcieri possono infliggere molti DMG a distanza.", "", ""], ["Unit_mFeature_37107", "Small spiders, very aggressive but weak individually.", "Piccoli ragni, molto aggressivi, ma deboli individualmente.", "", ""], ["Unit_mFeature_37108", "The inferior zraks, whose bodies are filled with corrosive liquids, will launch suicide attacks on enemies.", "Gli Zrak inferiori, i cui corpi sono pieni di liquidi corrosivi, sferrano attacchi suicidi contro i nemici.", "", ""], ["Unit_mFeature_37110", "Equipped with a giant shield, these stiff skeletons are able to hold off heavy attacks.", "Dotati di uno scudo gigante, questi scheletri rigidi sono in grado di respingere gli attacchi pesanti.", "", ""], ["Unit_mFeature_37112", "Produces a Queen Spider when left out of combat for a while. Eliminate it before it hatches.", "Produce una Regina ragno, se non partecipa al combattimento per un po&#x27;. Eliminalo prima che si schiuda.", "", ""], ["Unit_mName_37105", "Poison Mage", "Mago del veleno", "", ""], ["Unit_mName_37106", "Elite Skeleton Archer", "Scheletro arciere d&#x27;élite", "", ""], ["Unit_mName_37107", "Small Arachnid", "Aracnide piccolo", "", ""], ["Unit_mName_37108", "Suicide", "Suicida", "", ""], ["Unit_mName_37110", "Skeletal Giant-Shielder", "Scheletro gigante-scudiero", "", ""], ["Unit_mName_37112", "Huge Spider Egg", "Uovo di ragno enorme", "", ""], ["Unit_mFeature_16474", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "Le creature nate per manipolare le pietre attaccano senza sosta chiunque si intrometta nel loro territorio.", "", ""], ["Unit_mFeature_16475", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "Le creature nate per manipolare le pietre attaccano senza sosta chiunque si intrometta nel loro territorio.", "", ""], ["Unit_mFeature_16481", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "Le creature nate per manipolare le pietre attaccano senza sosta chiunque si intrometta nel loro territorio.", "", ""], ["Unit_mFeature_16487", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "Le creature nate per manipolare le pietre attaccano senza sosta chiunque si intrometta nel loro territorio.", "", ""], ["Unit_mFeature_16496", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "Le creature nate per manipolare le pietre attaccano senza sosta chiunque si intrometta nel loro territorio.", "", ""], ["Unit_mFeature_16497", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "Le creature nate per manipolare le pietre attaccano senza sosta chiunque si intrometta nel loro territorio.", "", ""], ["Unit_mFeature_18133", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "Le creature nate per manipolare le pietre attaccano senza sosta chiunque si intrometta nel loro territorio.", "", ""], ["Unit_mFeature_18137", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "Le creature nate per manipolare le pietre attaccano senza sosta chiunque si intrometta nel loro territorio.", "", ""], ["Unit_mFeature_11127", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "Le creature nate per manipolare le pietre attaccano senza sosta chiunque si intrometta nel loro territorio.", "", ""], ["Stage_mStageDesc_9042001", "The Nine-Tailed Fox, resurrected by the grievance from the Shang Dynasty, wreaks havoc upon the mortal realm with her illusions. Four supreme arrays must be laid to obliterate its true spirit.\\n\\nFire Realm: Molten lava surges as crimson chains, coiling round her nine tails to scorch demonic bones. The fox’s wails crackle like searing thunder.", "La Volpe a nove code, resuscitata dal rancore della dinastia Shang, semina il caos nel regno mortale con le sue illusioni. Quattro schieramenti supremi devono essere disposti per annientare il suo vero spirito.\\n\\nRegno del fuoco: la lava fusa si impenna come catene cremisi, avvolgendosi attorno alle sue nove code per bruciare le ossa demoniache. I lamenti della volpe crepitano come tuono rovente.", "", ""], ["Item_mItemName_214901", "Shawl of the Lifegiver", "Scialle del Donavita", "", ""], ["Skill_mSkillSimpleDesc_232170_1", "When the Talent is triggered, increases the hero&#x27;s DMG by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;, with an additional &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt; against Elite and Boss units for &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}&lt;/color&gt; sec.", "Quando il talento viene attivato, aumenta il DMG dell&#x27;eroe di un &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;, con un ulteriore &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt; contro unità élite e boss per &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}&lt;/color&gt; sec.", "", ""], ["CommonText_mMessage_25947", "Corresponding Arena Challenge Attack Mode", "Modalità Attacco Sfida Arena corrispondente", "", ""], ["CommonText_mMessage_25948", "Corresponding Arena Challenge Defense Mode", "Modalità DEF Sfida Arena corrispondente", "", ""], ["Skill_mSkillSimpleDesc_220903_5", "Applies &lt;color=&quot;#28d37c&quot;&gt;[322095]&lt;/color&gt; to &lt;color=&quot;#4A9DF2&quot;&gt;1&lt;/color&gt; ally with the lowest HP percentage in range for &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}&lt;/color&gt; sec.", "Applica &lt;color=&quot;#28d37c&quot;&gt;[322095]&lt;/color&gt; a &lt;color=&quot;#4A9DF2&quot;&gt;1&lt;/color&gt; alleato con la percentuale di HP più bassa nel raggio d&#x27;azione per &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}&lt;/color&gt; sec.", "", ""], ["Skill_mSkillSimpleDesc_220903_4", "Applies &lt;color=&quot;#28d37c&quot;&gt;[322094]&lt;/color&gt; to &lt;color=&quot;#4A9DF2&quot;&gt;1&lt;/color&gt; ally with the lowest HP percentage in range for &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}&lt;/color&gt; sec.", "Applica &lt;color=&quot;#28d37c&quot;&gt;[322094]&lt;/color&gt; a &lt;color=&quot;#4A9DF2&quot;&gt;1&lt;/color&gt; alleato con la percentuale di HP più bassa nel raggio d&#x27;azione per &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}&lt;/color&gt; sec.", "", ""], ["Skill_mSkillSimpleDesc_220903_3", "Applies &lt;color=&quot;#28d37c&quot;&gt;[322093]&lt;/color&gt; to &lt;color=&quot;#4A9DF2&quot;&gt;1&lt;/color&gt; ally with the lowest HP percentage in range for &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}&lt;/color&gt; sec.", "Applica &lt;color=&quot;#28d37c&quot;&gt;[322093]&lt;/color&gt; a &lt;color=&quot;#4A9DF2&quot;&gt;1&lt;/color&gt; alleato con la percentuale di HP più bassa nel raggio d&#x27;azione per &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}&lt;/color&gt; sec.", "", ""], ["Skill_mSkillSimpleDesc_220903_2", "Applies &lt;color=&quot;#28d37c&quot;&gt;[322092]&lt;/color&gt; to &lt;color=&quot;#4A9DF2&quot;&gt;1&lt;/color&gt; ally with the lowest HP percentage in range for &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}&lt;/color&gt; sec.", "Applica &lt;color=&quot;#28d37c&quot;&gt;[322092]&lt;/color&gt; a &lt;color=&quot;#4A9DF2&quot;&gt;1&lt;/color&gt; alleato con la percentuale di HP più bassa nel raggio d&#x27;azione per &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}&lt;/color&gt; sec.", "", ""], ["LANG_STRID_notice_NineTailedNightmare", "Nine-Tailed Nightmare Event Intro", "Introduzione all&#x27;evento Incubo a nove code", "", ""], ["LANG_STRID_push_long9_title_1", "Grimmscale Invasion Launches", "Invasione degli Scagliafosca in arrivo", "", ""], ["LANG_STRID_push_long9_title_2", "Commanders can challenge Sauryan, Wing of Chaos infinitely every day. Rewards are based on the highest total damage dealt in a single challenge attempt.", "I Comandanti possono sfidare Sauryan, l&#x27;Ala del caos infinite volte ogni giorno. Le ricompense si basano sul danno totale più alto inflitto in un singolo tentativo di sfida.", "", ""], ["LANG_STRID_push_xyx_title_1", "Zombie Invasion Starts!", "Inizia l&#x27;Invasione degli zombie!", "", ""], ["LANG_STRID_push_xyx_title_2", "Build your hero&#x27;s skills, equip powerful Relics, and battle through waves of monsters to survive!", "Potenzia le skill del tuo eroe, equipaggia potenti Reliquie e combatti attraverso ondate di mostri per sopravvivere!", "", ""], ["LANG_STRID_notice_jwhpv", "Event Trailer: Nine-Tailed Nightmare", "Trailer dell&#x27;evento: Incubo a nove code", "", ""], ["LANG_STRID_push_jwhyy1", "Nine-Tailed Nightmare Is Here!", "L&#x27;Incubo a nove code è qui!", "", ""], ["LANG_STRID_push_jwhyy2", "The new Legendary heroes Ne Zha and Erlang Shen arrive! Join the events to claim event-exclusive rewards, including Exclusive Artifacts, Summoning Crystals, Avatar, Emote, and more! Plus, Erlang Shen&#x27;s time-limited skin is now available!", "I nuovi eroi Leggendari Ne Zha ed Erlang Shen sono arrivati! Partecipa agli eventi per richiedere ricompense esclusive dell&#x27;evento, tra cui manufatti esclusivi, Cristalli di evocazione, avatar, emote e altro! Inoltre, è disponibile la skin a tempo limitato di Erlang Shen!", "", ""], ["LANG_STRID_notice_NineTailed2", "Nine-Tailed Nightmare Starts!", "Inizia l&#x27;Incubo a nove code!", "", ""], ["LANG_STRID_notice_NineTailed3", "Join the event to obtain event-exclusive rewards, including Exclusive Artifacts, Avatar, Avatar Border, Summoning Crystals, and more!", "Partecipa all&#x27;evento per ottenere ricompense esclusive dell&#x27;evento, tra cui manufatti esclusivi, avatar, cornice avatar, Cristalli di evocazione e altro!", "", ""], ["LANG_STRID_push_shardsummon_nezha", "Collect shards to assemble Ne Zha&#x27;s Exclusive Artifact: Fire-Tipped Spear!", "Raccogli frammenti per assemblare il manufatto esclusivo di Ne Zha: Lancia dalla punta infuocata!", "", ""], ["LANG_STRID_push_shardsummon_sqhcending", "Artifact Shard Assembly Countdown", "Conto alla rovescia per l&#x27;Assemblaggio dei Frammenti di manufatto", "", ""], ["LANG_STRID_push_shardsummon_nezhaend2", "Last chance to collect shards and assemble Ne Zha&#x27;s Exclusive Artifact: Fire-Tipped Spear! Don&#x27;t miss out!", "Ultima chance di raccogliere frammenti e assemblare il manufatto esclusivo di Ne Zha: Lancia dalla punta infuocata! Non perdere quest&#x27;opportunità!", "", ""], ["LANG_STRID_notice_CreativeShort", "Creative Short", "Corto creativo", "", ""], ["LANG_STRID_compete_brief", "After the event starts, Commanders earn League points by participating in the Arena, Guild - Drake&#x27;s Chasm and spending Stamina and can claim Personal Score Rewards. Commanders within the same League compete against each other for ranking rewards. After the event ends, Commanders who have earned points can claim the Basic League Rewards. Members of the League with a higher total score will receive additional Champion League Reward.", "Dopo l&#x27;inizio dell&#x27;evento, i Comandanti guadagnano punti Lega partecipando all&#x27;Arena, Gilda - Baratro del drago e consumando Vigore, e possono richiedere le Ricompense Punteggio Personale. I Comandanti nella stessa Lega competono tra loro per le ricompense di rango. Al termine dell&#x27;evento, i Comandanti che hanno guadagnato punti possono richiedere le Ricompense della Lega di base. I membri della Lega con un punteggio totale più alto riceveranno un&#x27;ulteriore Ricompensa della Lega dei cmpioni.", "", ""], ["LANG_STRID_Anniversary_Discount_Event_Des_01", "Discount Tokens obtained from event quests can be used to randomly discount an item on the event page once. Each item can be discounted up to 3 times.", "I Gettoni sconto ottenuti dalle quest dell&#x27;evento possono essere usati per scontare casualmente un item nella pagina dell&#x27;evento. Ogni item può essere scontato fino a 3 volte.", "", ""], ["LANG_STRID_FishingRanking", "&lt;color=#e1e1e1&gt;After the event ends, the top 3 Commanders on the leaderboard will each receive a physical merchandise reward. Contact info will be requested via in-game mail for delivery.&lt;/color&gt;", "&lt;color=#e1e1e1&gt;Al termine dell&#x27;evento, i primi 3 Comandanti in classifica riceveranno ciascuno un premio fisico. Le informazioni di contatto saranno richieste tramite e-mail di gioco per la consegna.&lt;/color&gt;", "", ""], ["LANG_STRID_notice_nzgl", "Hero Gameplay: Ne Zha", "Gameplay eroe: Ne Zha", "", ""], ["LANG_STRID_notice_yjgl", "Hero Gameplay: Erlang Shen", "Gameplay eroe: Erlang Shen", "", ""], ["LANG_STRID_GDP_title_26", "Celestial Season", "Stagione celestiale", "", ""], ["LANG_STRID_activity_popup_GDP_htj", "Gold Dragon Pass - Celestial Season", "Pass del Drago d&#x27;oro - Stagione celestiale", "", ""], ["LANG_STRID_CompeteEvent_Rule11", "&lt;color=#e1e1e1&gt;Consume general items to gain points.&lt;/color&gt;", "&lt;color=#e1e1e1&gt;Consuma gli item generali per ottenere punti.&lt;/color&gt;", "", ""], ["LANG_STRID_CompeteEvent_Rule12", "&lt;color=#e1e1e1&gt;Consume Mythril and Meteorite to gain points.&lt;/color&gt;", "&lt;color=#e1e1e1&gt;Consuma Mythril e Meteoriti per ottenere punti.&lt;/color&gt;", "", ""], ["LANG_STRID_Moon_Dec_01", "Shadows of Tomorrow", "Ombre del domani", "", ""], ["LANG_STRID_Anniversary_Discount_Event_Detail", "&lt;color=&quot;#cec2b1&quot;&gt;Discount Event&lt;/color&gt;\\nEach use of a Discount Token will apply a &lt;color=&quot;#28d37c&quot;&gt;random discount&lt;/color&gt; to a random item in the event. Participate in event quests to obtain Discount Tokens. All unused Discount Tokens will be removed after the event ends.\\nPlayers may choose to purchase event items at their original prices without using any Discount Tokens.\\n\\nEach time a Discount Token is used, one item will be randomly selected from the three available in the event interface for a discount. After each discount, the price of the currently selected item will be further reduced. &lt;color=&quot;#28d37c&quot;&gt;Each item reaches its maximum discount after being discounted 3 times&lt;/color&gt;.\\nOnly items that have not reached the maximum discount and have not been purchased can continue to participate in the discount event.", "&lt;color=&quot;#cec2b1&quot;&gt;Evento sconti&lt;/color&gt;\\nOgni utilizzo di un Gettone sconto applicherà uno &lt;color=&quot;#28d37c&quot;&gt;sconto casuale&lt;/color&gt; a un item casuale presente nell&#x27;evento. Partecipa alle quest dell&#x27;evento per ottenere i Gettoni sconto. Tutti i Gettoni sconto non utilizzati saranno rimossi al termine dell&#x27;evento.\\nI giocatori hanno la possibilità di acquistare gli item dell&#x27;evento ai loro prezzi originali senza utilizzare alcun Gettone sconto.\\n\\nOgni volta che viene utilizzato un Gettone sconto, un item verrà selezionato casualmente tra i tre disponibili nell&#x27;interfaccia dell&#x27;evento per uno sconto. Dopo ogni sconto, il prezzo dell&#x27;item attualmente selezionato sarà ulteriormente ridotto. &lt;color=&quot;#28d37c&quot;&gt;Ogni item raggiunge il suo sconto massimo dopo aver ricevuto 3 sconti&lt;/color&gt;.\\nSolo gli item che non hanno raggiunto lo sconto massimo e non sono stati acquistati possono continuare a partecipare all&#x27;evento degli sconti.", "", ""]];
+            const formattedData = [["BUFFAttribute_mName_8202044", "DMG Increase", "Aumento DMG", "", ""], ["BUFFAttribute_mName_8202045", "DMG Reduction", "Riduzione DMG", "", ""], ["BUFFAttribute_mTips_322928", "Fire-Tipped Spear ignores {30,num}% of the enemy's DEF. Universe Ring bounces {31,num} extra time(s) and can hit the same target multiple times. Yin-Yang Blade executes common monsters with HP below {32,num}%.", "La Lancia dalla punta infuocata ignora un {30,num}% della DEF del nemico. L'Anello dell'universo rimbalza {31,num} volta/e in più e può colpire lo stesso bersaglio più volte. La Lama dello Yin-Yang esegue i mostri comuni con HP inferiori a un {32,num}%.", "", ""], ["ChampionshipPlan_mChampionshipDesc_833", "Participate in Artifact Material Raid to win trophies and redeem rewards.", "Partecipa al raid Materiale per manufatti per ottenere trofei e riscattare ricompense.", "", ""], ["ChampionshipPlan_mChampionshipDesc_834", "Level up/star up/promote heroes or upgrade heroes' skills to win trophies and redeem rewards.", "Aumenta livello/Star Up/promuovi gli eroi o migliorane le skill per ottenere trofei e riscattare ricompense.", "", ""], ["ChampionshipPlan_mChampionshipDesc_835", "Participate in Gear Raid I to win trophies and redeem rewards.", "Partecipa al raid Equip I per vincere trofei e riscattare ricompense.", "", ""], ["ChampionshipPlan_mChampionshipDesc_836", "Participate in Gear Raid II to win trophies and redeem rewards.", "Partecipa al raid Equip II per ottenere trofei e riscattare ricompense.", "", ""], ["ChampionshipPlan_mChampionshipDesc_837", "Summon heroes to win trophies and redeem rewards.", "Evoca eroi per ottenere trofei e riscattare ricompense.", "", ""], ["ChampionshipPlan_mChampionshipDesc_838", "Participate in Artifact Material Raid to win trophies and redeem rewards.", "Partecipa al raid Materiale per manufatti per ottenere trofei e riscattare ricompense.", "", ""], ["ChampionshipPlan_mChampionshipDesc_839", "Participate in Gear Raid III to win trophies and redeem rewards.", "Partecipa al raid Equip III per ottenere trofei e riscattare ricompense.", "", ""], ["ChampionshipPlan_mChampionshipDesc_840", "Level up/star up/promote heroes or upgrade heroes' skills to win trophies and redeem rewards.", "Aumenta livello/Star Up/promuovi gli eroi o migliorane le skill per ottenere trofei e riscattare ricompense.", "", ""], ["ChampionshipPlan_mChampionshipDesc_841", "Participate in Gear Raid I to win trophies and redeem rewards.", "Partecipa al raid Equip I per vincere trofei e riscattare ricompense.", "", ""], ["ChampionshipPlan_mChampionshipDesc_842", "Participate in Gear Raid II to win trophies and redeem rewards.", "Partecipa al raid Equip II per ottenere trofei e riscattare ricompense.", "", ""], ["ChampionshipPlan_mChampionshipGlobalName_837", "Arrival of Heroes Ultimate Leaderboard", "Classifica finale Arrivo degli eroi", "", ""], ["ChampionshipPlan_mChampionshipName_833", "Mystery of Artifacts", "Mistero dei manufatti", "", ""], ["ChampionshipPlan_mChampionshipName_834", "Hero Training", "Addestramento eroe", "", ""], ["ChampionshipPlan_mChampionshipName_835", "The Lost Legacy", "Eredità perduta", "", ""], ["ChampionshipPlan_mChampionshipName_836", "Vault in the Sands", "Cripta nelle sabbie", "", ""], ["ChampionshipPlan_mChampionshipName_837", "Arrival of Heroes", "Arrivo degli eroi", "", ""], ["ChampionshipPlan_mChampionshipName_838", "Mystery of Artifacts", "Mistero dei manufatti", "", ""], ["ChampionshipPlan_mChampionshipName_839", "Forgotten Palace", "Palazzo dimenticato", "", ""], ["ChampionshipPlan_mChampionshipName_840", "Hero Training", "Addestramento eroe", "", ""], ["ChampionshipPlan_mChampionshipName_841", "The Lost Legacy", "Eredità perduta", "", ""], ["ChampionshipPlan_mChampionshipName_842", "Vault in the Sands", "Cripta nelle sabbie", "", ""], ["Chapter_mChapterName_4301", "Titanic Ruins - Playtest", "Rovine titaniche - Test di gioco", "", ""], ["CommonText_mMessage_25116", "Awaken the mystical power within.", "Risveglia il potere mistico interiore.", "", ""], ["CommonText_mMessage_25125", "Take destiny into your own hands.", "Prendi il destino nelle tue mani.", "", ""], ["CommonText_mMessage_25132", "Reveal cards to earn Dragon's Gold by matching the designated patterns.", "Rivela le carte seguendo gli schemi designati per ottenere Oro del drago.", "", ""], ["CommonText_mMessage_25133", "Reveal cards and match 3 identical patterns to earn a <span style=\"color: #fdbe36;\">{num}</span>x reward!", "Rivela le carte e abbina 3 pattern identici per ottenere <span style=\"color: #fdbe36;\">{num}</span> ricompensa/e!", "", ""], ["CommonText_mMessage_25631", "Number:", "Numero:", "", ""], ["CommonText_mMessage_25635", "The [?] corresponds to 3 numbers that will be filled into empty slots in sequence—the resulting number will determine the final amount of Dragon's Gold you receive!", "Il [?] corrisponde a 3 numeri che verranno inseriti negli slot vuoti in sequenza: il numero risultante determinerà la quantità finale di Oro del drago che riceverai!", "", ""], ["CommonText_mMessage_25773", "Nine-Tailed Nightmare", "Incubo a nove code", "", ""], ["CommonText_mMessage_25828", "Locked", "Bloccato/a", "", ""], ["CommonText_mMessage_25829", "Invalid", "Non valido", "", ""], ["CommonText_mMessage_25830", "New Recruit", "Nuova recluta", "", ""], ["CommonText_mMessage_25846", "Officials", "Funzionari", "", ""], ["CommonText_mMessage_25847", "Guild War Officials Appointment", "Nomina dei funzionari della Guerra tra gilde", "", ""], ["CommonText_mMessage_25848", "Rank", "Rango", "", ""], ["CommonText_mMessage_25849", "Marshal", "Maresciallo", "", ""], ["CommonText_mMessage_25850", "Members", "Membri", "", ""], ["CommonText_mMessage_25851", "BP", "PB", "", ""], ["CommonText_mMessage_25852", "Season's Attacks", "Attacchi stagionali", "", ""], ["CommonText_mMessage_25853", "Actions", "Azioni", "", ""], ["CommonText_mMessage_25854", "Appoint", "Nomina", "", ""], ["CommonText_mMessage_25855", "Dismiss", "Congeda", "", ""], ["CommonText_mMessage_25856", "No Access", "Accesso negato", "", ""], ["CommonText_mMessage_25857", "All Marshals gain <span style=\"color: #e37b00;\">{num} extra attack(s) </span> per Guild War round. Only the Guild Leader and Vice Leaders can appoint a Marshal during the preparation phase. If no appointments are made, this position will be automatically assigned based on members' contribution and BP.", "Tutti i Marescialli ottengono <span style=\"color: #e37b00;\">{num} attacco/i extra</span> per turno della Guerra tra gilde. Solo il leader della gilda e i vice leader possono nominare un Maresciallo durante la fase di preparazione. Se non vengono effettuate nomine, questa posizione verrà assegnata automaticamente in base al contributo e alla PB dei membri.", "", ""], ["CommonText_mMessage_25858", "Appointed: {num1}/{num2}", "Nominati: {num1}/{num2}", "", ""], ["CommonText_mMessage_25859", "Appointment successful. Player gains {num} extra attack(s) per round.", "Nomina effettuata. Il giocatore ottiene {num} attacco/i extra per turno.", "", ""], ["CommonText_mMessage_25860", "Marshal slots are full. Dismiss one to continue.", "Gli slot Maresciallo sono pieni. Congeda un Maresciallo per continuare.", "", ""], ["CommonText_mMessage_25861", "<span style=\"color: #feab53;\">Are you sure you want to dismiss this player from the Marshal position?</span><br>Each Guild can have up to {num1} Marshals, each gaining {num2} extra attack(s) per round.", "<span style=\"color: #feab53;\">Sei sicuro di voler congedare questo giocatore dalla posizione di Maresciallo?</span><br>Ogni gilda può avere fino a {num1} Marescialli, ognuno dei quali guadagna {num2} ATK extra per turno.", "", ""], ["CommonText_mMessage_25862", "Marshal dismissed successfully. Please appoint a new one.", "Maresciallo congedato. Nominane uno nuovo.", "", ""], ["CommonText_mMessage_25863", "Guild War Attempts", "Tentativi Guerra tra gilde", "", ""], ["CommonText_mMessage_25931", "Points of the Round", "Punti del turno", "", ""], ["CommonText_mMessage_26080", "Prioritize Guild War team.", "Dai la priorità al team della Guerra tra gilde.", "", ""], ["CommonText_mMessage_26081", "Playtest mode cannot save battle results or auto-fight.", "La modalità Test di gioco non salva i risultati della battaglia e non consente l'Auto Combat.", "", ""], ["CommonText_mMessage_60708", "Score Details", "Dettagli punteggio", "", ""], ["Difficulty_mDetail_1100001", "Only heroes from <span style=\"color: #e37b00;\">The Nightmare Council, The Star Piercers</span> can challenge this stage.<br>Lord Skills of each Faction can only affect up to <span style=\"color: #fd4540;\">5</span> heroes.", "Solo gli eroi del <span style=\"color: #e37b00;\">Consiglio dell'Incubo e dei Perforatori di Stelle</span> possono affrontare questa fase.<br>Le skill del Lord di ogni fazione possono influenzare solo fino a <span style=\"color: #fd4540;\">5</span> eroi.", "", ""], ["Difficulty_mDetail_1100003", "Only heroes from <span style=\"color: #e37b00;\">The Infernal Blast, The North Throne</span> can challenge this stage.<br>Lord Skills of each Faction can only affect up to <span style=\"color: #fd4540;\">5</span> heroes.", "Solo gli eroi dell'<span style=\"color: #e37b00;\">Esplosione Infernale e del Trono del Nord</span> possono affrontare questa fase.<br>Le skill del Lord di ogni fazione possono influenzare solo fino a <span style=\"color: #fd4540;\">5</span> eroi.", "", ""], ["Difficulty_mDetail_1100004", "Only heroes from <span style=\"color: #e37b00;\">The Esoteria Order, The Chaos Dominion, and The Supreme Arbiters</span> can challenge this stage.<br>Lord Skills of each Faction can only affect up to <span style=\"color: #fd4540;\">5</span> heroes.", "Solo gli eroi dell'<span style=\"color: #e37b00;\">Ordine dell'Esoteria, del Dominio del Caos e dei Giudici Supremi</span> possono affrontare questa fase.<br>Le skill del Lord di ogni fazione possono influenzare solo fino a <span style=\"color: #fd4540;\">5</span> eroi.", "", ""], ["Difficulty_mDetail_1200001", "The following heroes are exempt from map info restrictions.", "I seguenti eroi sono esenti dalle restrizioni delle informazioni della mappa.", "", ""], ["Difficulty_mDetail_1200002", "The following heroes are exempt from map info restrictions.", "I seguenti eroi sono esenti dalle restrizioni delle informazioni della mappa.", "", ""], ["Difficulty_mDetail_1200003", "The following heroes are exempt from map info restrictions.", "I seguenti eroi sono esenti dalle restrizioni delle informazioni della mappa.", "", ""], ["Difficulty_mDetail_1200004", "The following heroes are exempt from map info restrictions.", "I seguenti eroi sono esenti dalle restrizioni delle informazioni della mappa.", "", ""], ["Difficulty_mDetail_1300001", "Erlang Shen cannot be deployed in this special stage.", "Erlang Shen non può essere schierato in questa fase speciale.", "", ""], ["Difficulty_mDetail_32010053", "Mage heroes cannot be included in the team.", "Impossibile includere eroi maghi nel team.", "", ""], ["Difficulty_mDetail_32010153", "Destroyers gain the Camaraderie skill. When they die, nearby monsters receive an enhancement.", "I Distruttori ottengono la skill Cameratismo. Quando muoiono, i mostri nelle vicinanze ricevono un potenziamento.", "", ""], ["Difficulty_mDetail_32010163", "When the Priest of Thunder appears, he gains Ghost Form for 30 sec.", "Quando il Sacerdote del tuono appare, ottiene Forma fantasma per 30 sec.", "", ""], ["Difficulty_mDetail_32010364", "Boss enemies restore 1% Max HP per sec, while other enemies restore 5% Max HP per sec.", "I nemici boss recuperano 1% degli HP max al sec., mentre gli altri nemici recuperano 5% degli HP max al sec.", "", ""], ["Difficulty_mDetail_32010476", "Langlyn's Max HP increases by 50%, but cannot be healed.", "Gli HP max di Langlyn aumentano del 50%, ma non può essere curato.", "", ""], ["Difficulty_mDetail_32010477", "Langlyn's Max HP increases by 75%, but cannot be healed.", "Gli HP max di Langlyn aumentano del 75%, ma non può essere curato.", "", ""], ["Difficulty_mDetail_32010478", "Langlyn's Max HP increases by 100%, but cannot be healed.", "Gli HP max di Langlyn aumentano del 100%, ma non può essere curato.", "", ""], ["ExpStageUI_mRaidName_8201006", "COTD-1", "COTD-1", "", ""], ["ExpStageUI_mRaidName_8201007", "COTD-2", "COTD-2", "", ""], ["ExpStageUI_mRaidName_8201008", "COTD-3", "COTD-3", "", ""], ["ExpStageUI_mRaidName_8201009", "COTD-4", "COTD-4", "", ""], ["ExpStageUI_mRaidName_8201010", "COTD-5", "COTD-5", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010153", "Destroyers gain the Camaraderie skill. When a Destroyer dies, nearby Destroyers receive an enhancement.", "I Distruttori ottengono la skill Cameratismo. Quando un Distruttore muore, i Distruttori nelle vicinanze ricevono un potenziamento.", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010163", "When the Priest of Thunder appears, he gains Ghost Form for 30 sec.", "Quando il Sacerdote del tuono appare, ottiene Forma fantasma per 30 sec.", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010364", "Boss enemies restore 1% Max HP per sec, while other enemies restore 5% Max HP per sec.", "I nemici boss recuperano 1% degli HP max al sec., mentre gli altri nemici recuperano 5% degli HP max al sec.", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010476", "Langlyn's Max HP increases by 50%, but cannot be healed.", "Gli HP max di Langlyn aumentano del 50%, ma non può essere curato.", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010477", "Langlyn's Max HP increases by 75%, but cannot be healed.", "Gli HP max di Langlyn aumentano del 75%, ma non può essere curato.", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010478", "Langlyn's Max HP increases by 100%, but cannot be healed.", "Gli HP max di Langlyn aumentano del 100%, ma non può essere curato.", "", ""], ["HeroFactionKingSkill_mName_100441_1", "The Cursed Cult", "Il Culto Maledetto", "", ""], ["HeroFactionKingSkill_mName_100441_2", "The Cursed Cult", "Il Culto Maledetto", "", ""], ["HeroFactionKingSkill_mName_100441_3", "The Cursed Cult", "Il Culto Maledetto", "", ""], ["HeroFactionKingSkill_mName_100441_4", "The Cursed Cult", "Il Culto Maledetto", "", ""], ["HeroFactionKingSkill_mName_100441_5", "The Cursed Cult", "Il Culto Maledetto", "", ""], ["Item_mItemDesc_110", "Purchase to obtain a 30-Day Monthly Card of Diamonds.", "Acquista per ottenere una Carta mensile di diamanti da 30 giorni.", "", ""], ["Item_mItemDesc_111", "Purchase to obtain a 30-Day Monthly Card of Summoning.", "Acquista per ottenere una Carta mensile di evocazione da 30 giorni.", "", ""], ["Item_mItemDesc_112", "Purchase to obtain a 30-Day Monthly Card of Stamina.", "Acquista per ottenere una Carta mensile di Vigore da 30 giorni.", "", ""], ["Item_mItemDesc_31096", "Select 1 event-exclusive hero to join the event. The selected exclusive hero has an increased drop rate & is guaranteed within 200 summons!", "Seleziona 1 eroe esclusivo dell'evento per partecipare all'evento. L'eroe esclusivo selezionato ha un tasso di drop aumentato ed è garantito entro 200 evocazioni!", "", ""], ["Item_mItemDesc_31097", "<span style=\"color: #eadca2;\">Special Summon Offer</span><br><br>Get the necessary materials for Hero Summon", "<span style=\"color: #eadca2;\">Offerta speciale evocazione</span><br><br>Ottieni i materiali necessari per l'evocazione di eroi", "", ""], ["Item_mItemDesc_3333", "<span style=\"color: #498a40;\">Exclusive avatar border for the Gold Dragon Pass.</span>", "<span style=\"color: #498a40;\">Cornice avatar esclusiva del Pass del Drago d'oro.</span>", "", ""], ["Item_mItemDesc_3519", "Unknown Clue of Erlang Shen. When obtained, it will automatically convert into a random one from Erlang Shen's Clues 1-5.", "Indizio sconosciuto di Erlang Shen. Quando ottenuto, si convertirà automaticamente in uno casuale tra gli Indizi di Erlang Shen 1-5.", "", ""], ["Item_mItemDesc_3521", "Erlang Shen's Clue 2.<br><span style=\"color: #498a40;\">Usage: Consume this item via Fate's Chapters to unlock the corresponding clue.</span>", "Indizio 2 di Erlang Shen.<br><span style=\"color: #498a40;\">Utilizzo: consuma questo item tramite Capitoli del destino per sbloccare l'indizio corrispondente.</span>", "", ""], ["Item_mItemDesc_3522", "Erlang Shen's Clue 3.<br><span style=\"color: #498a40;\">Usage: Consume this item via Fate's Chapters to unlock the corresponding clue.</span>", "Indizio 3 di Erlang Shen.<br><span style=\"color: #498a40;\">Utilizzo: consuma questo item tramite Capitoli del destino per sbloccare l'indizio corrispondente.</span>", "", ""], ["Item_mItemDesc_3523", "Erlang Shen's Clue 4.<br><span style=\"color: #498a40;\">Usage: Consume this item via Fate's Chapters to unlock the corresponding clue.</span>", "Indizio 4 di Erlang Shen.<br><span style=\"color: #498a40;\">Utilizzo: consuma questo item tramite Capitoli del destino per sbloccare l'indizio corrispondente.</span>", "", ""], ["Item_mItemDesc_3524", "Erlang Shen's Clue 5.<br><span style=\"color: #498a40;\">Usage: Consume this item via Fate's Chapters to unlock the corresponding clue.</span>", "Indizio 5 di Erlang Shen.<br><span style=\"color: #498a40;\">Utilizzo: consuma questo item tramite Capitoli del destino per sbloccare l'indizio corrispondente.</span>", "", ""], ["Item_mItemDesc_35473", "You can obtain the following items:<br>Monthly Card of Diamonds (30-Day)<br>Diamond x500", "Puoi ottenere i seguenti item:<br>Carta Mensile di diamanti (30 giorni)<br>Diamanti x500", "", ""], ["Item_mItemDesc_35474", "You can obtain the following items:<br>Monthly Card of Summoning (30-Day)<br>Rare Summoning Crystal x500", "Puoi ottenere i seguenti item:<br>Carta Mensile di evocazione (30 giorni)<br>Cristallo di evocazione raro x500", "", ""], ["Item_mItemDesc_35475", "You can obtain the following items:<br>Monthly Card of Stamina (30-Day)<br>Stamina x600<br>Auto-Fight Chance x30", "Puoi ottenere i seguenti item:<br>Carta Mensile d Vigore (30 giorni)<br>Vigore x600<br>Chance di Auto Combat x30", "", ""], ["Item_mItemDesc_56310", "Grants a random <span style=\"color: #498a40;\">Lvl. 2-4</span> Trial Keystone.", "Concede una Chiave della prova casuale di <span style=\"color: #498a40;\">liv. 2-4</span>.", "", ""], ["Item_mItemDesc_56311", "Grants a random <span style=\"color: #498a40;\">Lvl. 2-5</span> Trial Keystone.", "Concede una Chiave della prova casuale di <span style=\"color: #498a40;\">liv. 2-5</span>.", "", ""], ["Item_mItemName_110", "Monthly Card of Diamonds (30-Day)", "Carta mensile di diamanti (30 giorni)", "", ""], ["Item_mItemName_111", "Monthly Card of Summoning (30-Day)", "Carta mensile di evocazione (30 giorni)", "", ""], ["Item_mItemName_112", "Monthly Card of Stamina (30-Day)", "Carta mensile di Vigore (30 giorni)", "", ""], ["Item_mItemName_31096", "Exclusive Lucky Pick", "Scelta Fortunata esclusiva", "", ""], ["Item_mItemName_31097", "Turbo Summon Bundle", "Pacchetto di evocazioni turbo", "", ""], ["Item_mItemName_3324", "Avatar Border: Nine-Tailed Nightmare Ranking Champion", "Cornice avatar: Campione nella classifica dell'Incubo a nove code", "", ""], ["Item_mItemName_3325", "Avatar Border: Nine-Tailed Nightmare Ranking Runner-Up", "Cornice avatar: Secondo nella classifica dell'Incubo a nove code", "", ""], ["Item_mItemName_3326", "Avatar Border: Nine-Tailed Nightmare Ranking Third Place", "Cornice avatar: Terzo nella classifica dell'Incubo a nove code", "", ""], ["Item_mItemName_3333", "Avatar Border: Gold Dragon Pass", "Cornice avatar: Pass del Drago d'oro", "", ""], ["Item_mItemName_35473", "Monthly Card of Diamonds", "Carta mensile di diamanti", "", ""], ["Item_mItemName_35474", "Monthly Card of Summoning", "Carta mensile di evocazione", "", ""], ["Item_mItemName_35475", "Monthly Card of Stamina", "Carta mensile di Vigore", "", ""], ["Item_mItemName_56310", "Random Trial Keystone (Lvl. 2-4)", "Chiave della prova casuale (liv. 2-4)", "", ""], ["Item_mItemName_56311", "Random Trial Keystone (Lvl. 2-5)", "Chiave della prova casuale (liv. 2-5)", "", ""], ["Quest_mQuestTitle_380034", "Obtain a total of 100 Dragon's Gold.", "Ottieni un totale di 100 Oro del drago.", "", ""], ["Quest_mQuestTitle_380035", "Obtain a total of 200 Dragon's Gold.", "Ottieni un totale di 200 Oro del drago.", "", ""], ["Quest_mQuestTitle_380036", "Obtain a total of 300 Dragon's Gold.", "Ottieni un totale di 300 Oro del drago.", "", ""], ["Quest_mQuestTitle_380037", "Obtain a total of 500 Dragon's Gold.", "Ottieni un totale di 500 Oro del drago.", "", ""], ["Quest_mQuestTitle_380038", "Obtain a total of 800 Dragon's Gold.", "Ottieni un totale di 800 Oro del drago.", "", ""], ["Quest_mQuestTitle_380039", "Obtain a total of 1,000 Dragon's Gold.", "Ottieni un totale di 1.000 Oro del drago.", "", ""], ["Quest_mQuestTitle_380040", "Obtain a total of 1,500 Dragon's Gold.", "Ottieni un totale di 1.500 Oro del drago.", "", ""], ["Quest_mQuestTitle_380041", "Obtain a total of 2,000 Dragon's Gold.", "Ottieni un totale di 2.000 Oro del drago.", "", ""], ["Quest_mQuestTitle_380042", "Obtain a total of 3,000 Dragon's Gold.", "Ottieni un totale di 3.000 Oro del drago.", "", ""], ["Quest_mQuestTitle_380043", "Obtain a total of 4,000 Dragon's Gold.", "Ottieni un totale di 4.000 Oro del drago.", "", ""], ["Quest_mQuestTitle_380044", "Obtain a total of 5,000 Dragon's Gold.", "Ottieni un totale di 5.000 Oro del drago.", "", ""], ["RoleHeadFrame_mSourceDesc_84", "Awarded to the Commander who ranks first on the Points Leaderboard in the Echoes of Woe during the Nine-Tailed Nightmare.", "Assegnato al Comandante che si classifica primo nella classifica dei punti negli Echi del dolore durante l'Incubo a nove code.", "", ""], ["RoleHeadFrame_mSourceDesc_85", "Awarded to the Commander who ranks second on the Points Leaderboard in the Echoes of Woe during the Nine-Tailed Nightmare.", "Assegnato al Comandante che si classifica secondo nella classifica dei punti negli Echi del dolore durante l'Incubo a nove code.", "", ""], ["RoleHeadFrame_mSourceDesc_86", "Awarded to the Commander who ranks third on the Points Leaderboard in the Echoes of Woe during the Nine-Tailed Nightmare.", "Assegnato al Comandante che si classifica terzo nella classifica dei Punti negli Echi del dolore durante l'Incubo a nove code.", "", ""], ["RoleHeadFrame_mSourceDesc_89", "Guild War S10 \"Overlord\" exclusive avatar border.", "Cornice avatar esclusiva \"Grande Lord\" della S10 della Guerra tra gilde.", "", ""], ["RoleHeadFrame_mSourceDesc_91", "Obtained from Gold Dragon Pass.", "Si ottiene dal Pass del Drago d'oro.", "", ""], ["RollDiceBuilding_mName_11_1", "Turn of Luck", "Svolta della fortuna", "", ""], ["RollDiceBuilding_mName_12_1", "Turn of Luck", "Svolta della fortuna", "", ""], ["Skill_mSkillDesc_1908301_1", "Swings claws, dealing DMG to all heroes within 1 tile ahead.", "Vibra gli artigli, infliggendo DMG a tutti gli eroi entro 1 casella davanti.", "", ""], ["Skill_mSkillDesc_1908304_1", "Swings claws, dealing DMG to all heroes within 1 tile ahead.", "Vibra gli artigli, infliggendo DMG a tutti gli eroi entro 1 casella davanti.", "", ""], ["Skill_mSkillDesc_1908315_1", "When the Nine-Tailed Fox takes fatal DMG, she flees the battlefield and activates the tails on the field to attack. When the tails are defeated, the Nine-Tailed Fox returns to the battlefield. After all tails on the field are defeated, the Nine-Tailed Fox transforms and summons a large number of foxes.", "Quando la Volpe a nove code subisce DMG fatali, fugge dal campo di battaglia e attiva le code sul campo per attaccare. Quando le code vengono sconfitte, la Volpe a nove code ritorna sul campo di battaglia. Dopo che tutte le code sul campo sono state sconfitte, la Volpe a nove code si trasforma ed evoca un gran numero di volpi.", "", ""], ["Skill_mSkillDesc_1908345_1", "Deals M. DMG to the last deployed unit on the battlefield, prioritizing Defenders.", "Infligge DMG M. all'ultima unità schierata sul campo di battaglia, dando priorità ai difensori.", "", ""], ["Skill_mSkillDesc_1908357_1", "Deals M. DMG to the last deployed unit on the battlefield, prioritizing Defenders.", "Infligge DMG M. all'ultima unità schierata sul campo di battaglia, dando priorità ai difensori.", "", ""], ["Skill_mSkillDesc_803803_1", "Immune to all <span style=\"color: #4A9DF2;\">CC Effects</span> (except Slow).", "Immune a tutti gli <span style=\"color: #4A9DF2;\">effetti di controllo folla</span> (eccetto Rallentamento).", "", ""], ["Skill_mSkillDesc_8202053_1", "Reduces the Redeployment Time of allied heroes by <span style=\"color: #4A9DF2;\">{sk1}%</span>, but increases their Deployment Cost by <span style=\"color: #4A9DF2;\">+{sk2}</span>.", "Riduce il tempo di rischieramento degli eroi alleati di un <span style=\"color: #4A9DF2;\">{sk1}%</span>, ma aumenta il loro Costo di schieramento di <span style=\"color: #4A9DF2;\">+{sk2}</span>.", "", ""], ["Skill_mSkillDesc_8202084_1", "Increases allied heroes' DMG by <span style=\"color: #4A9DF2;\">{sk1}%</span> each round and reduces Basic ATK interval by <span style=\"color: #4A9DF2;\">{sk1}%</span>. Vulnerability (P. DMG) and Vulnerability (M. DMG) increase by <span style=\"color: #4A9DF2;\">{sk2}%</span> each round.", "Aumenta i DMG degli eroi alleati di un <span style=\"color: #4A9DF2;\">{sk1}%</span> ogni turno e riduce l'intervallo dell'ATK base di un <span style=\"color: #4A9DF2;\">{sk1}%</span>. La Vulnerabilità (DMG F.) e la Vulnerabilità (DMG M.) aumentano di un <span style=\"color: #4A9DF2;\">{sk2}%</span> ogni turno.", "", ""], ["Skill_mSkillDesc_8202103_1", "Allied Hero Deployment Limit +<span style=\"color: #4A9DF2;\">{sk1}</span>", "Limite di schieramento eroi alleati +<span style=\"color: #4A9DF2;\">{sk1}</span>", "", ""], ["Skill_mSkillName_1033701_1", "Accelerated Incubation", "Incubazione accelerata", "", ""], ["Skill_mSkillName_3991865_1", "High Quality", "Alta qualità", "", ""], ["Skill_mSkillName_803610_1", "Freeze", "Congela", "", ""], ["Skill_mSkillName_803801_1", "Frostbite Strike", "Colpo dell'assideramento", "", ""], ["Skill_mSkillName_803803_1", "Control Immunity", "Immunità dal controllo", "", ""], ["Skill_mSkillName_804001_1", "Frostbite Rupture", "Frattura dell'assideramento", "", ""], ["Skill_mSkillName_8202053_1", "Time VS Money", "Tempo VS denaro", "", ""], ["Skill_mSkillName_8202084_1", "Heating Up", "Riscaldamento", "", ""], ["Skill_mSkillName_8202103_1", "Rigged Arena", "Arena truccata", "", ""], ["Skill_mSkillSimpleDesc_11015501_1", "Increases ATK by <span style=\"color: #4A9DF2;\">{skm1}%</span>, and reduces the number of attacks required to trigger Nature's Fury enhanced attack by <span style=\"color: #4A9DF2;\">{skm2}</span>. When in Berserker Stance, Basic ATK restores <span style=\"color: #4A9DF2;\">{skm3}%</span> Max HP, and triggering Ground Stomp restores <span style=\"color: #4A9DF2;\">{skm4}%</span> Max HP.", "Aumenta l'ATK di un <span style=\"color: #4A9DF2;\">{skm1}%</span> e riduce il numero di attacchi necessari per attivare l'attacco potenziato Furia della natura di <span style=\"color: #4A9DF2;\">{skm2}</span>. Quando si è nella Posizione del berserker, l'ATK base ripristina un <span style=\"color: #4A9DF2;\">{skm3}%</span> degli HP max, e l'attivazione del Colpo a terra ripristina un <span style=\"color: #4A9DF2;\">{skm4}%</span> degli HP max.", "", ""], ["Skill_mSkillSimpleDesc_11015501_2", "Increases ATK by <span style=\"color: #4A9DF2;\">{skm1}%</span>, and reduces the number of attacks required to trigger Nature's Fury enhanced attack by <span style=\"color: #4A9DF2;\">{skm2}</span>. When in Berserker Stance, Basic ATK restores <span style=\"color: #4A9DF2;\">{skm3}%</span> Max HP, and triggering Ground Stomp restores <span style=\"color: #4A9DF2;\">{skm4}%</span> Max HP.", "Aumenta l'ATK di un <span style=\"color: #4A9DF2;\">{skm1}%</span> e riduce il numero di attacchi necessari per attivare l'attacco potenziato Furia della natura di <span style=\"color: #4A9DF2;\">{skm2}</span>. Quando si è nella Posizione del berserker, l'ATK base ripristina un <span style=\"color: #4A9DF2;\">{skm3}%</span> degli HP max, e l'attivazione del Colpo a terra ripristina un <span style=\"color: #4A9DF2;\">{skm4}%</span> degli HP max.", "", ""], ["Skill_mSkillSimpleDesc_11015501_3", "Increases ATK by <span style=\"color: #4A9DF2;\">{skm1}%</span>, and reduces the number of attacks required to trigger Nature's Fury enhanced attack by <span style=\"color: #4A9DF2;\">{skm2}</span>. When in Berserker Stance, Basic ATK restores <span style=\"color: #4A9DF2;\">{skm3}%</span> Max HP, and triggering Ground Stomp restores <span style=\"color: #4A9DF2;\">{skm4}%</span> Max HP.", "Aumenta l'ATK di un <span style=\"color: #4A9DF2;\">{skm1}%</span> e riduce il numero di attacchi necessari per attivare l'attacco potenziato Furia della natura di <span style=\"color: #4A9DF2;\">{skm2}</span>. Quando si è nella Posizione del berserker, l'ATK base ripristina un <span style=\"color: #4A9DF2;\">{skm3}%</span> degli HP max, e l'attivazione del Colpo a terra ripristina un <span style=\"color: #4A9DF2;\">{skm4}%</span> degli HP max.", "", ""], ["Skill_mSkillSimpleDesc_11015501_4", "Increases ATK by <span style=\"color: #4A9DF2;\">{skm1}%</span>, and reduces the number of attacks required to trigger Nature's Fury enhanced attack by <span style=\"color: #4A9DF2;\">{skm2}</span>. When in Berserker Stance, Basic ATK restores <span style=\"color: #4A9DF2;\">{skm3}%</span> Max HP, and triggering Ground Stomp restores <span style=\"color: #4A9DF2;\">{skm4}%</span> Max HP.", "Aumenta l'ATK di un <span style=\"color: #4A9DF2;\">{skm1}%</span> e riduce il numero di attacchi necessari per attivare l'attacco potenziato Furia della natura di <span style=\"color: #4A9DF2;\">{skm2}</span>. Quando si è nella Posizione del berserker, l'ATK base ripristina un <span style=\"color: #4A9DF2;\">{skm3}%</span> degli HP max, e l'attivazione del Colpo a terra ripristina un <span style=\"color: #4A9DF2;\">{skm4}%</span> degli HP max.", "", ""], ["Skill_mSkillSimpleDesc_11015501_5", "Increases ATK by <span style=\"color: #4A9DF2;\">{skm1}%</span>, and reduces the number of attacks required to trigger Nature's Fury enhanced attack by <span style=\"color: #4A9DF2;\">{skm2}</span>. When in Berserker Stance, Basic ATK restores <span style=\"color: #4A9DF2;\">{skm3}%</span> Max HP, and triggering Ground Stomp restores <span style=\"color: #4A9DF2;\">{skm4}%</span> Max HP.", "Aumenta l'ATK di un <span style=\"color: #4A9DF2;\">{skm1}%</span> e riduce il numero di attacchi necessari per attivare l'attacco potenziato Furia della natura di <span style=\"color: #4A9DF2;\">{skm2}</span>. Quando si è nella Posizione del berserker, l'ATK base ripristina un <span style=\"color: #4A9DF2;\">{skm3}%</span> degli HP max, e l'attivazione del Colpo a terra ripristina un <span style=\"color: #4A9DF2;\">{skm4}%</span> degli HP max.", "", ""], ["Skill_mSkillSimpleDesc_11015501_6", "Increases ATK by <span style=\"color: #4A9DF2;\">{skm1}%</span>, and reduces the number of attacks required to trigger Nature's Fury enhanced attack by <span style=\"color: #4A9DF2;\">{skm2}</span>. When in Berserker Stance, Basic ATK restores <span style=\"color: #4A9DF2;\">{skm3}%</span> Max HP, and triggering Ground Stomp restores <span style=\"color: #4A9DF2;\">{skm4}%</span> Max HP.", "Aumenta l'ATK di un <span style=\"color: #4A9DF2;\">{skm1}%</span> e riduce il numero di attacchi necessari per attivare l'attacco potenziato Furia della natura di <span style=\"color: #4A9DF2;\">{skm2}</span>. Quando si è nella Posizione del berserker, l'ATK base ripristina un <span style=\"color: #4A9DF2;\">{skm3}%</span> degli HP max, e l'attivazione del Colpo a terra ripristina un <span style=\"color: #4A9DF2;\">{skm4}%</span> degli HP max.", "", ""], ["Skill_mSkillSimpleDesc_13000441_1", "Increases faction team members' basic attributes by <span style=\"color: #4A9DF2;\">{skm1}%</span>.<br>Increases faction team members' DMG dealt to enemies inflicted with Slow, Stun, Freeze, Immobilized State, and other CC Effects by <span style=\"color: #4A9DF2;\">{skm2}%</span>. <br>Increases faction team members' DMG by <span style=\"color: #4A9DF2;\">{skm3}%</span>. When the Lord is on the battlefield and an allied summon dies, increases all faction team members' DMG by an additional <span style=\"color: #4A9DF2;\">{skm4}%</span> for <span style=\"color: #4A9DF2;\">{skm5}</span> sec, stacking up to <span style=\"color: #4A9DF2;\">{skm6}</span> time(s).", "Aumenta gli attributi di base dei membri del team della fazione di un <span style=\"color: #4A9DF2;\">{skm1}%</span>.<br>I membri del team della fazione infliggono un <span style=\"color: #4A9DF2;\">{skm2}%</span> di DMG in più ai nemici rallentati, storditi, congelati, immobilizzati o con altri effetti di controllo folla. <br>Aumenta il DMG dei membri del team della fazione di un <span style=\"color: #4A9DF2;\">{skm3}%</span>. Quando il Lord è sul campo di battaglia e un'evocazione alleata muore, aumenta il DMG di tutti i membri del team della fazione di un ulteriore <span style=\"color: #4A9DF2;\">{skm4}%</span> per <span style=\"color: #4A9DF2;\">{skm5}</span> sec. Cumulabile fino a <span style=\"color: #4A9DF2;\">{skm6}</span> volta/e.", "", ""], ["Skill_mSkillSimpleDesc_13000441_2", "Increases faction team members' basic attributes by <span style=\"color: #4A9DF2;\">{skm1}%</span>.<br>Increases faction team members' DMG dealt to enemies inflicted with Slow, Stun, Freeze, Immobilized State, and other CC Effects by <span style=\"color: #4A9DF2;\">{skm2}%</span>. <br>Increases faction team members' DMG by <span style=\"color: #4A9DF2;\">{skm3}%</span>. When the Lord is on the battlefield and an allied summon dies, increases all faction team members' DMG by an additional <span style=\"color: #4A9DF2;\">{skm4}%</span> for <span style=\"color: #4A9DF2;\">{skm5}</span> sec, stacking up to <span style=\"color: #4A9DF2;\">{skm6}</span> time(s).", "Aumenta gli attributi di base dei membri del team della fazione di un <span style=\"color: #4A9DF2;\">{skm1}%</span>.<br>I membri del team della fazione infliggono un <span style=\"color: #4A9DF2;\">{skm2}%</span> di DMG in più ai nemici rallentati, storditi, congelati, immobilizzati o con altri effetti di controllo folla. <br>Aumenta il DMG dei membri del team della fazione di un <span style=\"color: #4A9DF2;\">{skm3}%</span>. Quando il Lord è sul campo di battaglia e un'evocazione alleata muore, aumenta il DMG di tutti i membri del team della fazione di un ulteriore <span style=\"color: #4A9DF2;\">{skm4}%</span> per <span style=\"color: #4A9DF2;\">{skm5}</span> sec. Cumulabile fino a <span style=\"color: #4A9DF2;\">{skm6}</span> volta/e.", "", ""], ["Skill_mSkillSimpleDesc_13000441_3", "Increases faction team members' basic attributes by <span style=\"color: #4A9DF2;\">{skm1}%</span>.<br>Increases faction team members' DMG dealt to enemies inflicted with Slow, Stun, Freeze, Immobilized State, and other CC Effects by <span style=\"color: #4A9DF2;\">{skm2}%</span>. <br>Increases faction team members' DMG by <span style=\"color: #4A9DF2;\">{skm3}%</span>. When the Lord is on the battlefield and an allied summon dies, increases all faction team members' DMG by an additional <span style=\"color: #4A9DF2;\">{skm4}%</span> for <span style=\"color: #4A9DF2;\">{skm5}</span> sec, stacking up to <span style=\"color: #4A9DF2;\">{skm6}</span> time(s).", "Aumenta gli attributi di base dei membri del team della fazione di un <span style=\"color: #4A9DF2;\">{skm1}%</span>.<br>I membri del team della fazione infliggono un <span style=\"color: #4A9DF2;\">{skm2}%</span> di DMG in più ai nemici rallentati, storditi, congelati, immobilizzati o con altri effetti di controllo folla. <br>Aumenta il DMG dei membri del team della fazione di un <span style=\"color: #4A9DF2;\">{skm3}%</span>. Quando il Lord è sul campo di battaglia e un'evocazione alleata muore, aumenta il DMG di tutti i membri del team della fazione di un ulteriore <span style=\"color: #4A9DF2;\">{skm4}%</span> per <span style=\"color: #4A9DF2;\">{skm5}</span> sec. Cumulabile fino a <span style=\"color: #4A9DF2;\">{skm6}</span> volta/e.", "", ""], ["Skill_mSkillSimpleDesc_13000441_4", "Increases faction team members' basic attributes by <span style=\"color: #4A9DF2;\">{skm1}%</span>.<br>Increases faction team members' DMG dealt to enemies inflicted with Slow, Stun, Freeze, Immobilized State, and other CC Effects by <span style=\"color: #4A9DF2;\">{skm2}%</span>. <br>Increases faction team members' DMG by <span style=\"color: #4A9DF2;\">{skm3}%</span>. When the Lord is on the battlefield and an allied summon dies, increases all faction team members' DMG by an additional <span style=\"color: #4A9DF2;\">{skm4}%</span> for <span style=\"color: #4A9DF2;\">{skm5}</span> sec, stacking up to <span style=\"color: #4A9DF2;\">{skm6}</span> time(s).", "Aumenta gli attributi di base dei membri del team della fazione di un <span style=\"color: #4A9DF2;\">{skm1}%</span>.<br>I membri del team della fazione infliggono un <span style=\"color: #4A9DF2;\">{skm2}%</span> di DMG in più ai nemici rallentati, storditi, congelati, immobilizzati o con altri effetti di controllo folla. <br>Aumenta il DMG dei membri del team della fazione di un <span style=\"color: #4A9DF2;\">{skm3}%</span>. Quando il Lord è sul campo di battaglia e un'evocazione alleata muore, aumenta il DMG di tutti i membri del team della fazione di un ulteriore <span style=\"color: #4A9DF2;\">{skm4}%</span> per <span style=\"color: #4A9DF2;\">{skm5}</span> sec. Cumulabile fino a <span style=\"color: #4A9DF2;\">{skm6}</span> volta/e.", "", ""], ["Skill_mSkillSimpleDesc_13000441_5", "Increases faction team members' basic attributes by <span style=\"color: #4A9DF2;\">{skm1}%</span>.<br>Increases faction team members' DMG dealt to enemies inflicted with Slow, Stun, Freeze, Immobilized State, and other CC Effects by <span style=\"color: #4A9DF2;\">{skm2}%</span>. <br>Increases faction team members' DMG by <span style=\"color: #4A9DF2;\">{skm3}%</span>. When the Lord is on the battlefield and an allied summon dies, increases all faction team members' DMG by an additional <span style=\"color: #4A9DF2;\">{skm4}%</span> for <span style=\"color: #4A9DF2;\">{skm5}</span> sec, stacking up to <span style=\"color: #4A9DF2;\">{skm6}</span> time(s).", "Aumenta gli attributi di base dei membri del team della fazione di un <span style=\"color: #4A9DF2;\">{skm1}%</span>.<br>I membri del team della fazione infliggono un <span style=\"color: #4A9DF2;\">{skm2}%</span> di DMG in più ai nemici rallentati, storditi, congelati, immobilizzati o con altri effetti di controllo folla. <br>Aumenta il DMG dei membri del team della fazione di un <span style=\"color: #4A9DF2;\">{skm3}%</span>. Quando il Lord è sul campo di battaglia e un'evocazione alleata muore, aumenta il DMG di tutti i membri del team della fazione di un ulteriore <span style=\"color: #4A9DF2;\">{skm4}%</span> per <span style=\"color: #4A9DF2;\">{skm5}</span> sec. Cumulabile fino a <span style=\"color: #4A9DF2;\">{skm6}</span> volta/e.", "", ""], ["Skill_mSkillSimpleDesc_8202053_1", "Reduces the Redeployment Time of allied heroes by <span style=\"color: #4A9DF2;\">{skm1}%</span>, but increases their Deployment Cost by <span style=\"color: #4A9DF2;\">+{skm2}</span>.", "Riduce il tempo di rischieramento degli eroi alleati di un <span style=\"color: #4A9DF2;\">{skm1}%</span>, ma aumenta il loro Costo di schieramento di <span style=\"color: #4A9DF2;\">+{skm2}</span>.", "", ""], ["Skill_mSkillSimpleDesc_8202084_1", "Increases allied heroes' DMG by <span style=\"color: #4A9DF2;\">{skm1}%</span> each round and reduces Basic ATK Interval by <span style=\"color: #4A9DF2;\">{skm1}%</span>. Vulnerability (P. DMG) and Vulnerability (M. DMG) increase by <span style=\"color: #4A9DF2;\">{skm2}%</span> each round.", "Aumenta i DMG degli eroi alleati di un <span style=\"color: #4A9DF2;\">{skm1}%</span> ogni turno e riduce l'intervallo dell'ATK base di un <span style=\"color: #4A9DF2;\">{skm1}%</span>. La Vulnerabilità (DMG F.) e la Vulnerabilità (DMG M.) aumentano di un <span style=\"color: #4A9DF2;\">{skm2}%</span> ogni turno.", "", ""], ["Skill_mSkillSimpleDesc_8202103_1", "Allied Hero Deployment Limit +<span style=\"color: #4A9DF2;\">{skm1}</span>", "Limite di schieramento eroi alleati +<span style=\"color: #4A9DF2;\">{skm1}</span>", "", ""], ["Skill_mSkillSimpleDesc_8203031_1", "Hotspot appears on both players' battlefields. Heroes standing on the Hotspot have all attributes increased by 20%.", "L'Hotspot appare sui campi di battaglia di entrambi i giocatori. Gli eroi che si trovano sull'Hotspot hanno tutti gli attributi aumentati del 20%.", "", ""], ["Stage_mStageDesc_5003001", "In this epic battle, you will face an unprecedented enemy - Semrah. Hailing from ancient times, Semrah fights in 3 Battle Modes, each posing a tough challenge.", "In questa battaglia epica dovrai affrontare un nemico ancestrale senza precedenti: Semrah. Dovrai affrontarlo in 3 modalità di battaglia, ognuna delle quali rappresenta una sfida molto difficile.", "", ""], ["Stage_mStageDesc_5003002", "In this epic battle, you will face an unprecedented enemy - Semrah. Hailing from ancient times, Semrah fights in 3 Battle Modes, each posing a tough challenge.", "In questa battaglia epica dovrai affrontare un nemico ancestrale senza precedenti: Semrah. Dovrai affrontarlo in 3 modalità di battaglia, ognuna delle quali rappresenta una sfida molto difficile.", "", ""], ["Stage_mStageDesc_8101001", "Starting from Round 5, <span style=\"color: #fd4540;\">all monsters gain Invisibility and become untargetable</span> for 7 sec.", "A partire dal 5º turno, <span style=\"color: #fd4540;\">tutti i mostri ottengono Invisibilità e non possono essere presi di mira</span> per 7 sec.", "", ""], ["Stage_mStageDesc_8101002", "Starting from Round 5, <span style=\"color: #fd4540;\">all monsters gain Invincibility upon taking DMG for the first time, becoming immune to all DMG</span> for 4 sec.", "A partire dal 5º turno, <span style=\"color: #fd4540;\">tutti i mostri ottengono Invincibilità quando subiscono DMG per la prima volta, diventando immuni a tutti i DMG</span> per 4 sec.", "", ""], ["Stage_mStageDesc_8101003", "Starting from Round 5, <span style=\"color: #fd4540;\">all heroes continuously take True DMG equal to 4% of their Max HP per sec</span>.", "A partire dal 5º turno, <span style=\"color: #fd4540;\">tutti gli eroi subiscono ininterrottamente DMG effettivi pari al 4% dei loro HP max al sec</span>.", "", ""], ["Stage_mStageDesc_8201011", "Team up with your friends to defeat the enemy Boss and fend off the tides of enemies.", "Unisciti ai tuoi amici per sconfiggere il boss e respingere le ondate di nemici.", "", ""], ["Stage_mStageDesc_8201012", "Team up with your friends to defeat the enemy Boss and fend off the tides of enemies.", "Unisciti ai tuoi amici per sconfiggere il boss e respingere le ondate di nemici.", "", ""], ["Stage_mStageDesc_8201013", "Team up with your friends to defeat the enemy Boss and fend off the tides of enemies.", "Unisciti ai tuoi amici per sconfiggere il boss e respingere le ondate di nemici.", "", ""], ["Stage_mStageDesc_8201014", "Team up with your friends to defeat the enemy Boss and fend off the tides of enemies.", "Unisciti ai tuoi amici per sconfiggere il boss e respingere le ondate di nemici.", "", ""], ["Stage_mStageDesc_8201015", "Team up with your friends to defeat the enemy Boss and fend off the tides of enemies.", "Unisciti ai tuoi amici per sconfiggere il boss e respingere le ondate di nemici.", "", ""], ["Stage_mStageFailDesc_5003001", "Pay extra attention to Semrah's Battle Mode and exploit its weakness.", "Presta particolare attenzione alla modalità di battaglia di Semrah e sfrutta la sua debolezza.", "", ""], ["Stage_mStageFailDesc_5003002", "Pay extra attention to Semrah's Battle Mode and exploit its weakness.", "Presta particolare attenzione alla modalità di battaglia di Semrah e sfrutta la sua debolezza.", "", ""], ["Stage_mStageIdDesc_5003001", "Apocalypse I - Playtest", "Apocalisse I - Test di gioco", "", ""], ["Stage_mStageIdDesc_5003002", "Apocalypse II - Playtest", "Apocalisse II - Test di gioco", "", ""], ["Stage_mStageIdDesc_8201011", "Stage 1", "Fase 1", "", ""], ["Stage_mStageIdDesc_8201012", "Stage 2", "Fase 2", "", ""], ["Stage_mStageIdDesc_8201013", "Stage 3", "Fase 3", "", ""], ["Stage_mStageIdDesc_8201014", "Stage 4", "Fase 4", "", ""], ["Stage_mStageIdDesc_8201015", "Stage 5", "Fase 5", "", ""], ["Stage_mStageIdDesc_991001", "Test 1-1", "Test 1-1", "", ""], ["Stage_mStageIdDesc_991002", "Test 1-2", "Test 1-2", "", ""], ["Stage_mStageIdDesc_991003", "Test 1-3", "Test 1-3", "", ""], ["Stage_mStageName_5003001", "Semrah", "Semrah", "", ""], ["Stage_mStageName_5003002", "Semrah", "Semrah", "", ""], ["Stage_mStageName_8201011", "Co-op Mode", "Modalità cooperativa", "", ""], ["Stage_mStageName_8201012", "Co-op Mode", "Modalità cooperativa", "", ""], ["Stage_mStageName_8201013", "Co-op Mode", "Modalità cooperativa", "", ""], ["Stage_mStageName_8201014", "Co-op Mode", "Modalità cooperativa", "", ""], ["Stage_mStageName_8201015", "Co-op Mode", "Modalità cooperativa", "", ""], ["UILanguage_mKeyValue_Form_BackpackIntegration_SubTitle", "Sort", "Ordina", "", ""], ["UILanguage_mKeyValue_Panel_BackpackEquipPanel_EquipedText", "Equipped", "In uso", "", ""], ["UILanguage_mKeyValue_Panel_MaterialPanel_GetWayTitle_Text", "Access", "Accesso", "", ""], ["UILanguage_mKeyValue_Panel_MaterialPanel_Text_Use", "Use", "Usa", "", ""], ["UnionRaise_mRaiseText_15", "Donate <color=#28d37c>{num}</color> Mythic Extract(s).", "Dona <color=#28d37c>{num}</color> Estratto/i mitico/i.", "", ""], ["UnionRaise_mRaiseText_16", "Donate <color=#28d37c>{num}</color> 5-star Psychic Power(s).", "Dona <color=#28d37c>{num}</color> Potere/i psichico/i a 5 stelle.", "", ""], ["UnionRaise_mRaiseTitle_15", "Promotion Insignia III", "Stemma di promozione III", "", ""], ["UnionRaise_mRaiseTitle_16", "Hero Star Up", "Star Up eroe", "", ""], ["Unit_mDescribe_37105", "Scalekin mages, adept in the art of poisonous magic, possess the ability to <color=#ff4500>inflict poison on enemies</color>.", "I Maghi scagliadura, esperti nell'arte della magia velenosa, possiedono la capacità di <color=#ff4500> infliggere veleno ai nemici</color>.", "", ""], ["Unit_mDescribe_37106", "Elite Skeleton Archers that can deal massive DMG from afar.", "Élite di Scheletri arcieri possono infliggere molti DMG a distanza.", "", ""], ["Unit_mDescribe_37107", "Small spiders, very aggressive but weak individually.", "Piccoli ragni, molto aggressivi, ma deboli individualmente.", "", ""], ["Unit_mDescribe_37108", "Toxic Suicides will explode when approaching enemies, <color=#ff4500>dealing moderate AoE DMG and poisoning them</color>.", "I Suicidi tossici esplodono quando si avvicinano ai nemici, <color=#ff4500>infliggendo moderati DMG AoE e avvelenandoli</color>.", "", ""], ["Unit_mDescribe_37110", "Clad in giant shields and possessing unyielding skeletal frames, they are renowned for their exceptional DEF.", "Rivestiti di scudi giganti e dotati di strutture scheletriche inflessibili, sono rinomati per la loro eccezionale DEF.", "", ""], ["Unit_mDescribe_37112", "Produces a Queen Spider when left out of combat for a while. Eliminate it before it hatches.", "Produce una Regina ragno, se non partecipa al combattimento per un po'. Eliminalo prima che si schiuda.", "", ""], ["Unit_mFeature_10408", "Ludwig has been reborn from the abyss. With a horrifying power granted by his master - the Eldritch God. Ludwig has now lost his humanity.", "Ludwig è rinato dall'Abisso. Con un orribile potere concesso dal suo padrone, il Dio Eldritch. Ludwig ha perso la sua umanità.", "", ""], ["Unit_mFeature_10409", "Ludwig has been reborn from the abyss. With a horrifying power granted by his master - the Eldritch God. Ludwig has now lost his humanity.", "Ludwig è rinato dall'Abisso. Con un orribile potere concesso dal suo padrone, il Dio Eldritch. Ludwig ha perso la sua umanità.", "", ""], ["Unit_mFeature_10410", "Ludwig has been reborn from the abyss. With a horrifying power granted by his master - the Eldritch God. Ludwig has now lost his humanity.", "Ludwig è rinato dall'Abisso. Con un orribile potere concesso dal suo padrone, il Dio Eldritch. Ludwig ha perso la sua umanità.", "", ""], ["Unit_mFeature_37105", "Scalekin mages, adept in the art of poisonous magic, possess the ability to inflict continuous Poison DMG on enemies.", "Maghi scagliadura che usano la magia del veleno, in grado di infliggere danni da avvelenamento continui ai nemici.", "", ""], ["Unit_mFeature_37106", "Elite Skeleton Archers that can deal massive DMG from afar.", "Élite di Scheletri arcieri possono infliggere molti DMG a distanza.", "", ""], ["Unit_mFeature_37107", "Small spiders, very aggressive but weak individually.", "Piccoli ragni, molto aggressivi, ma deboli individualmente.", "", ""], ["Unit_mFeature_37108", "The inferior zraks, whose bodies are filled with corrosive liquids, will launch suicide attacks on enemies.", "Gli Zrak inferiori, i cui corpi sono pieni di liquidi corrosivi, sferrano attacchi suicidi contro i nemici.", "", ""], ["Unit_mFeature_37110", "Equipped with a giant shield, these stiff skeletons are able to hold off heavy attacks.", "Dotati di uno scudo gigante, questi scheletri rigidi sono in grado di respingere gli attacchi pesanti.", "", ""], ["Unit_mFeature_37112", "Produces a Queen Spider when left out of combat for a while. Eliminate it before it hatches.", "Produce una Regina ragno, se non partecipa al combattimento per un po'. Eliminalo prima che si schiuda.", "", ""], ["Unit_mName_37105", "Poison Mage", "Mago del veleno", "", ""], ["Unit_mName_37106", "Elite Skeleton Archer", "Scheletro arciere d'élite", "", ""], ["Unit_mName_37107", "Small Arachnid", "Aracnide piccolo", "", ""], ["Unit_mName_37108", "Suicide", "Suicida", "", ""], ["Unit_mName_37110", "Skeletal Giant-Shielder", "Scheletro gigante-scudiero", "", ""], ["Unit_mName_37112", "Huge Spider Egg", "Uovo di ragno enorme", "", ""], ["Unit_mFeature_16474", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "Le creature nate per manipolare le pietre attaccano senza sosta chiunque si intrometta nel loro territorio.", "", ""], ["Unit_mFeature_16475", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "Le creature nate per manipolare le pietre attaccano senza sosta chiunque si intrometta nel loro territorio.", "", ""], ["Unit_mFeature_16481", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "Le creature nate per manipolare le pietre attaccano senza sosta chiunque si intrometta nel loro territorio.", "", ""], ["Unit_mFeature_16487", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "Le creature nate per manipolare le pietre attaccano senza sosta chiunque si intrometta nel loro territorio.", "", ""], ["Unit_mFeature_16496", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "Le creature nate per manipolare le pietre attaccano senza sosta chiunque si intrometta nel loro territorio.", "", ""], ["Unit_mFeature_16497", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "Le creature nate per manipolare le pietre attaccano senza sosta chiunque si intrometta nel loro territorio.", "", ""], ["Unit_mFeature_18133", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "Le creature nate per manipolare le pietre attaccano senza sosta chiunque si intrometta nel loro territorio.", "", ""], ["Unit_mFeature_18137", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "Le creature nate per manipolare le pietre attaccano senza sosta chiunque si intrometta nel loro territorio.", "", ""], ["Unit_mFeature_11127", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "Le creature nate per manipolare le pietre attaccano senza sosta chiunque si intrometta nel loro territorio.", "", ""], ["Stage_mStageDesc_9042001", "The Nine-Tailed Fox, resurrected by the grievance from the Shang Dynasty, wreaks havoc upon the mortal realm with her illusions. Four supreme arrays must be laid to obliterate its true spirit.<br><br>Fire Realm: Molten lava surges as crimson chains, coiling round her nine tails to scorch demonic bones. The fox’s wails crackle like searing thunder.", "La Volpe a nove code, resuscitata dal rancore della dinastia Shang, semina il caos nel regno mortale con le sue illusioni. Quattro schieramenti supremi devono essere disposti per annientare il suo vero spirito.<br><br>Regno del fuoco: la lava fusa si impenna come catene cremisi, avvolgendosi attorno alle sue nove code per bruciare le ossa demoniache. I lamenti della volpe crepitano come tuono rovente.", "", ""], ["Item_mItemName_214901", "Shawl of the Lifegiver", "Scialle del Donavita", "", ""], ["Skill_mSkillSimpleDesc_232170_1", "When the Talent is triggered, increases the hero's DMG by <span style=\"color: #4A9DF2;\">{skm1}%</span>, with an additional <span style=\"color: #4A9DF2;\">{skm2}%</span> against Elite and Boss units for <span style=\"color: #4A9DF2;\">{skm3}</span> sec.", "Quando il talento viene attivato, aumenta il DMG dell'eroe di un <span style=\"color: #4A9DF2;\">{skm1}%</span>, con un ulteriore <span style=\"color: #4A9DF2;\">{skm2}%</span> contro unità élite e boss per <span style=\"color: #4A9DF2;\">{skm3}</span> sec.", "", ""], ["CommonText_mMessage_25947", "Corresponding Arena Challenge Attack Mode", "Modalità Attacco Sfida Arena corrispondente", "", ""], ["CommonText_mMessage_25948", "Corresponding Arena Challenge Defense Mode", "Modalità DEF Sfida Arena corrispondente", "", ""], ["Skill_mSkillSimpleDesc_220903_5", "Applies <span style=\"color: #28d37c;\">[322095]</span> to <span style=\"color: #4A9DF2;\">1</span> ally with the lowest HP percentage in range for <span style=\"color: #4A9DF2;\">{skm1}</span> sec.", "Applica <span style=\"color: #28d37c;\">[322095]</span> a <span style=\"color: #4A9DF2;\">1</span> alleato con la percentuale di HP più bassa nel raggio d'azione per <span style=\"color: #4A9DF2;\">{skm1}</span> sec.", "", ""], ["Skill_mSkillSimpleDesc_220903_4", "Applies <span style=\"color: #28d37c;\">[322094]</span> to <span style=\"color: #4A9DF2;\">1</span> ally with the lowest HP percentage in range for <span style=\"color: #4A9DF2;\">{skm1}</span> sec.", "Applica <span style=\"color: #28d37c;\">[322094]</span> a <span style=\"color: #4A9DF2;\">1</span> alleato con la percentuale di HP più bassa nel raggio d'azione per <span style=\"color: #4A9DF2;\">{skm1}</span> sec.", "", ""], ["Skill_mSkillSimpleDesc_220903_3", "Applies <span style=\"color: #28d37c;\">[322093]</span> to <span style=\"color: #4A9DF2;\">1</span> ally with the lowest HP percentage in range for <span style=\"color: #4A9DF2;\">{skm1}</span> sec.", "Applica <span style=\"color: #28d37c;\">[322093]</span> a <span style=\"color: #4A9DF2;\">1</span> alleato con la percentuale di HP più bassa nel raggio d'azione per <span style=\"color: #4A9DF2;\">{skm1}</span> sec.", "", ""], ["Skill_mSkillSimpleDesc_220903_2", "Applies <span style=\"color: #28d37c;\">[322092]</span> to <span style=\"color: #4A9DF2;\">1</span> ally with the lowest HP percentage in range for <span style=\"color: #4A9DF2;\">{skm1}</span> sec.", "Applica <span style=\"color: #28d37c;\">[322092]</span> a <span style=\"color: #4A9DF2;\">1</span> alleato con la percentuale di HP più bassa nel raggio d'azione per <span style=\"color: #4A9DF2;\">{skm1}</span> sec.", "", ""], ["LANG_STRID_notice_NineTailedNightmare", "Nine-Tailed Nightmare Event Intro", "Introduzione all'evento Incubo a nove code", "", ""], ["LANG_STRID_push_long9_title_1", "Grimmscale Invasion Launches", "Invasione degli Scagliafosca in arrivo", "", ""], ["LANG_STRID_push_long9_title_2", "Commanders can challenge Sauryan, Wing of Chaos infinitely every day. Rewards are based on the highest total damage dealt in a single challenge attempt.", "I Comandanti possono sfidare Sauryan, l'Ala del caos infinite volte ogni giorno. Le ricompense si basano sul danno totale più alto inflitto in un singolo tentativo di sfida.", "", ""], ["LANG_STRID_push_xyx_title_1", "Zombie Invasion Starts!", "Inizia l'Invasione degli zombie!", "", ""], ["LANG_STRID_push_xyx_title_2", "Build your hero's skills, equip powerful Relics, and battle through waves of monsters to survive!", "Potenzia le skill del tuo eroe, equipaggia potenti Reliquie e combatti attraverso ondate di mostri per sopravvivere!", "", ""], ["LANG_STRID_notice_jwhpv", "Event Trailer: Nine-Tailed Nightmare", "Trailer dell'evento: Incubo a nove code", "", ""], ["LANG_STRID_push_jwhyy1", "Nine-Tailed Nightmare Is Here!", "L'Incubo a nove code è qui!", "", ""], ["LANG_STRID_push_jwhyy2", "The new Legendary heroes Ne Zha and Erlang Shen arrive! Join the events to claim event-exclusive rewards, including Exclusive Artifacts, Summoning Crystals, Avatar, Emote, and more! Plus, Erlang Shen's time-limited skin is now available!", "I nuovi eroi Leggendari Ne Zha ed Erlang Shen sono arrivati! Partecipa agli eventi per richiedere ricompense esclusive dell'evento, tra cui manufatti esclusivi, Cristalli di evocazione, avatar, emote e altro! Inoltre, è disponibile la skin a tempo limitato di Erlang Shen!", "", ""], ["LANG_STRID_notice_NineTailed2", "Nine-Tailed Nightmare Starts!", "Inizia l'Incubo a nove code!", "", ""], ["LANG_STRID_notice_NineTailed3", "Join the event to obtain event-exclusive rewards, including Exclusive Artifacts, Avatar, Avatar Border, Summoning Crystals, and more!", "Partecipa all'evento per ottenere ricompense esclusive dell'evento, tra cui manufatti esclusivi, avatar, cornice avatar, Cristalli di evocazione e altro!", "", ""], ["LANG_STRID_push_shardsummon_nezha", "Collect shards to assemble Ne Zha's Exclusive Artifact: Fire-Tipped Spear!", "Raccogli frammenti per assemblare il manufatto esclusivo di Ne Zha: Lancia dalla punta infuocata!", "", ""], ["LANG_STRID_push_shardsummon_sqhcending", "Artifact Shard Assembly Countdown", "Conto alla rovescia per l'Assemblaggio dei Frammenti di manufatto", "", ""], ["LANG_STRID_push_shardsummon_nezhaend2", "Last chance to collect shards and assemble Ne Zha's Exclusive Artifact: Fire-Tipped Spear! Don't miss out!", "Ultima chance di raccogliere frammenti e assemblare il manufatto esclusivo di Ne Zha: Lancia dalla punta infuocata! Non perdere quest'opportunità!", "", ""], ["LANG_STRID_notice_CreativeShort", "Creative Short", "Corto creativo", "", ""], ["LANG_STRID_compete_brief", "After the event starts, Commanders earn League points by participating in the Arena, Guild - Drake's Chasm and spending Stamina and can claim Personal Score Rewards. Commanders within the same League compete against each other for ranking rewards. After the event ends, Commanders who have earned points can claim the Basic League Rewards. Members of the League with a higher total score will receive additional Champion League Reward.", "Dopo l'inizio dell'evento, i Comandanti guadagnano punti Lega partecipando all'Arena, Gilda - Baratro del drago e consumando Vigore, e possono richiedere le Ricompense Punteggio Personale. I Comandanti nella stessa Lega competono tra loro per le ricompense di rango. Al termine dell'evento, i Comandanti che hanno guadagnato punti possono richiedere le Ricompense della Lega di base. I membri della Lega con un punteggio totale più alto riceveranno un'ulteriore Ricompensa della Lega dei cmpioni.", "", ""], ["LANG_STRID_Anniversary_Discount_Event_Des_01", "Discount Tokens obtained from event quests can be used to randomly discount an item on the event page once. Each item can be discounted up to 3 times.", "I Gettoni sconto ottenuti dalle quest dell'evento possono essere usati per scontare casualmente un item nella pagina dell'evento. Ogni item può essere scontato fino a 3 volte.", "", ""], ["LANG_STRID_FishingRanking", "<color=#e1e1e1>After the event ends, the top 3 Commanders on the leaderboard will each receive a physical merchandise reward. Contact info will be requested via in-game mail for delivery.</color>", "<color=#e1e1e1>Al termine dell'evento, i primi 3 Comandanti in classifica riceveranno ciascuno un premio fisico. Le informazioni di contatto saranno richieste tramite e-mail di gioco per la consegna.</color>", "", ""], ["LANG_STRID_notice_nzgl", "Hero Gameplay: Ne Zha", "Gameplay eroe: Ne Zha", "", ""], ["LANG_STRID_notice_yjgl", "Hero Gameplay: Erlang Shen", "Gameplay eroe: Erlang Shen", "", ""], ["LANG_STRID_GDP_title_26", "Celestial Season", "Stagione celestiale", "", ""], ["LANG_STRID_activity_popup_GDP_htj", "Gold Dragon Pass - Celestial Season", "Pass del Drago d'oro - Stagione celestiale", "", ""], ["LANG_STRID_CompeteEvent_Rule11", "<color=#e1e1e1>Consume general items to gain points.</color>", "<color=#e1e1e1>Consuma gli item generali per ottenere punti.</color>", "", ""], ["LANG_STRID_CompeteEvent_Rule12", "<color=#e1e1e1>Consume Mythril and Meteorite to gain points.</color>", "<color=#e1e1e1>Consuma Mythril e Meteoriti per ottenere punti.</color>", "", ""], ["LANG_STRID_Moon_Dec_01", "Shadows of Tomorrow", "Ombre del domani", "", ""], ["LANG_STRID_Anniversary_Discount_Event_Detail", "<span style=\"color: #cec2b1;\">Discount Event</span><br>Each use of a Discount Token will apply a <span style=\"color: #28d37c;\">random discount</span> to a random item in the event. Participate in event quests to obtain Discount Tokens. All unused Discount Tokens will be removed after the event ends.<br>Players may choose to purchase event items at their original prices without using any Discount Tokens.<br><br>Each time a Discount Token is used, one item will be randomly selected from the three available in the event interface for a discount. After each discount, the price of the currently selected item will be further reduced. <span style=\"color: #28d37c;\">Each item reaches its maximum discount after being discounted 3 times</span>.<br>Only items that have not reached the maximum discount and have not been purchased can continue to participate in the discount event.", "<span style=\"color: #cec2b1;\">Evento sconti</span><br>Ogni utilizzo di un Gettone sconto applicherà uno <span style=\"color: #28d37c;\">sconto casuale</span> a un item casuale presente nell'evento. Partecipa alle quest dell'evento per ottenere i Gettoni sconto. Tutti i Gettoni sconto non utilizzati saranno rimossi al termine dell'evento.<br>I giocatori hanno la possibilità di acquistare gli item dell'evento ai loro prezzi originali senza utilizzare alcun Gettone sconto.<br><br>Ogni volta che viene utilizzato un Gettone sconto, un item verrà selezionato casualmente tra i tre disponibili nell'interfaccia dell'evento per uno sconto. Dopo ogni sconto, il prezzo dell'item attualmente selezionato sarà ulteriormente ridotto. <span style=\"color: #28d37c;\">Ogni item raggiunge il suo sconto massimo dopo aver ricevuto 3 sconti</span>.<br>Solo gli item che non hanno raggiunto lo sconto massimo e non sono stati acquistati possono continuare a partecipare all'evento degli sconti.", "", ""]];
+            let showingRaw = false;
+            let tableData = formattedData;
+            let dataTable;
+        
+            function getStateKey(index) {
+                return "state_StringZ Visualizer - Italian_row_" + index; 
+            }
+            
+            function getNotesKey(index) {
+                return "notes_StringZ Visualizer - Italian_row_" + index;
+            }
+        
+            function generateRowWithState(row, idx) {
+                const savedState = localStorage.getItem(getStateKey(idx)) || "";
+                const savedNotes = localStorage.getItem(getNotesKey(idx)) || "";
+                
+                const selectHTML = '<select class="state-select ' + savedState.toLowerCase() + '">' +
+                    '<option value="" ' + (savedState === "" ? "selected" : "") + '></option>' +
+                    '<option value="Pass" ' + (savedState === "Pass" ? "selected" : "") + '>Pass</option>' +
+                    '<option value="Fail" ' + (savedState === "Fail" ? "selected" : "") + '>Fail</option>' +
+                    '</select>';
+                
+                const notesHTML = '<input type="text" class="notes-input" value="' + 
+                    savedNotes.replace(/"/g, '&quot;') + 
+                    '" placeholder="Personal notes..." maxlength="200">';
+                
+                const newRow = row.slice();
+                const stateIndex = headers.indexOf("State") + 1;
+                const notesIndex = headers.indexOf("Notes") + 1;
+                newRow[stateIndex] = selectHTML;
+                newRow[notesIndex] = notesHTML;
+                return newRow;
+            }
+        
+            function renderData(data) {
+                tableData = data;
+                const transformed = data.map((row, idx) => {
+                  const rowWithNumber = [idx + 1, ...row];
+                  return generateRowWithState(rowWithNumber, idx);
+                });
+        
+                if (!dataTable) {
+                    const columnsWithNumber = [{ title: '#' }, ...headers.map(h => ({ title: h }))];
+                    dataTable = $('#myTable').DataTable({
+                        data: transformed,
+                        columns: columnsWithNumber,
+                        scrollX: true,
+                        paging: true,
+                        searching: true,
+                        ordering: true,
+                        deferRender: true,
+                        lengthMenu: [[-1, 10, 25, 50], ["All", 10, 25, 50]],
+                        order: [],
+                        columnDefs: [
+                            {
+                                targets: headers.indexOf("State"),
+                                orderable: true
+                            }
+                        ]
+                    });
+        
+                    $('#myTable tbody').on('change', 'select.state-select', function () {
+                        const rowIdx = dataTable.row($(this).closest('tr')).index();
+                        const value = $(this).val();
+                        localStorage.setItem(getStateKey(rowIdx), value);
+                        this.className = "state-select " + value.toLowerCase();
+                    });
+                    
+                    $('#myTable tbody').on('input', 'input.notes-input', function () {
+                        const rowIdx = dataTable.row($(this).closest('tr')).index();
+                        const value = $(this).val();
+                        localStorage.setItem(getNotesKey(rowIdx), value);
+                    });
+
+                    $('#myTable tbody').on('keydown', 'input.notes-input', function(e) {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        $(this).blur(); // Remove focus from notes
+                      }
+                    });
+                } else {
+                    const currentPage = dataTable.page();
+                    const currentLength = dataTable.page.len();
+                    dataTable.clear().rows.add(transformed).draw(false);
+                    dataTable.page.len(currentLength).draw();
+                    dataTable.page(currentPage).draw(false);
+                }
+            }
+        
+            function toggleData() {
+                showingRaw = !showingRaw;
+                renderData(showingRaw ? rawData : formattedData);
+                
+                // Update button text
+                const btn = document.querySelector('.toggle-btn');
+                btn.textContent = showingRaw ? 'Show Formatted' : 'Show Raw';
+            }
+        
+            function clearAllStates() {
+                const total = tableData.length;
+                let clearedCount = 0;
+                
+                for (let i = 0; i < total; i++) {
+                    const stateKey = getStateKey(i);
+                    const notesKey = getNotesKey(i);
+                    
+                    if (localStorage.getItem(stateKey)) {
+                        localStorage.removeItem(stateKey);
+                        clearedCount++;
+                    }
+                    if (localStorage.getItem(notesKey)) {
+                        localStorage.removeItem(notesKey);
+                    }
+                }
+                
+                renderData(tableData);
+                
+                // Better user feedback
+                if (clearedCount > 0) {
+                    alert(`✅ Cleared ${clearedCount} review states and all notes!`);
+                } else {
+                    alert('ℹ️ No review states to clear.');
+                }
+            }
+        
+            function getProgress() {
+                const total = tableData.length;
+                let reviewed = 0;
+                let passed = 0;
+                let failed = 0;
+                
+                for (let i = 0; i < total; i++) {
+                    const state = localStorage.getItem(getStateKey(i));
+                    if (state) {
+                        reviewed++;
+                        if (state === 'Pass') passed++;
+                        if (state === 'Fail') failed++;
+                    }
+                }
+                
+                return { total, reviewed, passed, failed };
+            }
+            
+            function updateProgressDisplay() {
+                const progress = getProgress();
+                const percentage = Math.round((progress.reviewed / progress.total) * 100);
+                
+                // Update the info banner with progress
+                const banner = document.querySelector('.info-banner p');
+                if (banner) {
+                    const originalText = banner.textContent.split('•')[0] + '•';
+                    banner.innerHTML = `${originalText} 📊 <strong>${progress.reviewed}/${progress.total}</strong> reviewed (<strong>${percentage}%</strong>) • ✅ <strong>${progress.passed}</strong> passed • ❌ <strong>${progress.failed}</strong> failed`;
+                }
+            }
+        
+            function toggleDarkMode() {
+                const body = document.body;
+                const btn = document.querySelector('.dark-mode-btn');
+                const isDark = body.getAttribute('data-theme') === 'dark';
+                
+                if (isDark) {
+                    body.removeAttribute('data-theme');
+                    btn.textContent = '🌙 Dark';
+                    localStorage.setItem('visualizer-theme', 'light');
+                } else {
+                    body.setAttribute('data-theme', 'dark');
+                    btn.textContent = '☀️ Light'; 
+                    localStorage.setItem('visualizer-theme', 'dark');
+                }
+            }
+            
+            function initializeTheme() {
+                const savedTheme = localStorage.getItem('visualizer-theme');
+                const btn = document.querySelector('.dark-mode-btn');
+                
+                if (savedTheme === 'dark') {
+                    document.body.setAttribute('data-theme', 'dark');
+                    btn.textContent = '☀️ Light';
+                } else {
+                    btn.textContent = '🌙 Dark';
+                }
+            }
+
+            // New copyToClipboard function to copy ONLY the rawText
+            // Can be updated to copy depending on the Formatting/Raw toggle
+            function copyToClipboard(text, element) {
+                const rowIndex = dataTable.row(element).index();
+                const cellIndex = $(element).index();
+
+                let rawText = text;
+                if (!showingRaw && rawData[rowIndex]) {
+                    rawText = rawData[rowIndex][cellIndex - 1];
+                }
+    
+                // Decode HTML entities to get original text
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = rawText;
+                const decodedText = tempDiv.textContent || tempDiv.innerText || rawText;
+
+                navigator.clipboard.writeText(decodedText).then(() => {
+                    // Show feedback
+                    const feedback = document.createElement('div');
+                    feedback.className = 'copy-feedback show';
+                    feedback.textContent = 'Copied!';
+                    element.style.position = 'relative';
+                    element.appendChild(feedback);
+
+                    setTimeout(() => {
+                        feedback.classList.remove('show');
+                        setTimeout(() => {
+                            if (feedback.parentNode) {
+                                feedback.parentNode.removeChild(feedback);
+                            }
+                            $(element).removeClass('copyable-cell');
+                        }, 300);
+                    }, 1000);
+                });
+            }        
+
+            $(document).ready(function () {
+              initializeTheme();
+              renderData(formattedData);
+              $('#clearState').click(clearAllStates);
+  
+              // Update progress on page load
+              updateProgressDisplay();
+  
+              // Update progress when states change
+              $('#myTable tbody').on('change', 'select.state-select', function () {
+                  setTimeout(updateProgressDisplay, 100);
+              });
+
+              $('#myTable tbody').on('mouseenter', 'td:nth-child(2), td:nth-child(3), td:nth-child(4)', function() {
+                $(this).addClass('copyable-cell');
+              }).on('mouseleave', 'td:nth-child(2), td:nth-child(3), td:nth-child(4)', function() {
+                if (!$(this).find('.copy-feedback').length) {
+                  $(this).removeClass('copyable-cell');
+                }
+              }).on('click', 'td:nth-child(2), td:nth-child(3), td:nth-child(4)', function() {
+                const text = $(this).text().trim();
+                if (text) {
+                  copyToClipboard(text, this);
+                }
+              });
+
+              // Initialize keyboard navigation and show initial hint
+              initKeyboardNavigation();
+              showInitialHint();
+            });
+
+            // Keyboard shortcuts
+            let currentRowIndex = 0;
+            let isKeyboardMode = false;
+
+            function initKeyboardNavigation() {
+              $(document).keydown(function(e) {
+                // Important, don't interfere when typing in inputs
+                if (e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT') return;
+
+                // Even more important! DO NOT INTERFERE WITH BROWSER SHORTCUTS
+                if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+                // Don't interfere with Fn keys either
+                if (e.key.startsWith('F') && e.key.length > 1) return;
+
+                const table = $('#myTable').DataTable();
+                const totalRows = table.rows().count();
+
+                switch(e.key.toLowerCase()) {
+                  case 'p':
+                    e.preventDefault();
+                    markCurrentRow('Pass');
+                    break;
+                  case 'f':
+                    e.preventDefault();
+                    markCurrentRow('Fail');
+                    break;
+                  case 'c':
+                    e.preventDefault();
+                    clearCurrentRow();
+                    break;
+                  case 'arrowdown':
+                  case 'j':
+                    e.preventDefault();
+                    navigateRow(1);
+                    break;
+                  case 'arrowup':
+                  case 'k':
+                    e.preventDefault();
+                    navigateRow(-1);
+                    break;
+                  case 'enter':
+                    e.preventDefault();
+                    focusNotes();
+                    break;
+                  case 'escape':
+                    e.preventDefault();
+                    exitKeyboardMode();
+                    break;
+                  case ' ':
+                    e.preventDefault();
+                    enterKeyboardMode();
+                    break;
+                }
+              });
+            }
+
+            function markCurrentRow(state) {
+              if (!isKeyboardMode) return;
+
+              const currentRow = getCurrentRow();
+              if (currentRow.length) {
+                const select = currentRow.find('.state-select');
+                select.val(state).trigger('change');
+                navigateRow(1);
+              }
+            }
+
+            function clearCurrentRow() {
+              if (!isKeyboardMode) return;
+
+              const currentRow = getCurrentRow();
+              if (currentRow.length) {
+                currentRow.find('.state-select').val('').trigger('change');
+                // currentRow.find('.notes-input').val('').trigger('input');
+              }
+            }
+
+            function navigateRow(direction) {
+              if (!isKeyboardMode) return;
+
+              const table = $('#myTable').DataTable();
+              const totalRows = table.rows().count();
+
+              currentRowIndex += direction;
+              if (currentRowIndex < 0) currentRowIndex = 0;
+              if (currentRowIndex >= totalRows) currentRowIndex = totalRows - 1;
+
+              highlightCurrentRow();
+              scrollToCurrentRow();
+            }
+
+            function getCurrentRow() {
+              const table = $('#myTable').DataTable();
+              return $(table.row(currentRowIndex).node());
+            }
+
+            function highlightCurrentRow() {
+              $('#myTable tbody tr').removeClass('keyboard-focus');
+
+              const currentRow = getCurrentRow();
+              currentRow.addClass('keyboard-focus');
+            }
+
+            function scrollToCurrentRow() {
+              const currentRow = getCurrentRow();
+              if (currentRow.length) {
+                currentRow[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }
+            }
+
+            function focusNotes() {
+              if (!isKeyboardMode) return;
+
+              const currentRow = getCurrentRow();
+              const notesInput = currentRow.find('.notes-input');
+              if (notesInput.length) {
+                notesInput.focus();
+              }
+            }
+
+            function enterKeyboardMode() {
+              isKeyboardMode = true;
+              <!-- currentRowIndex = 0; -->
+              highlightCurrentRow();
+              showKeyboardHint();
+            }
+
+            function exitKeyboardMode() {
+              isKeyboardMode = false;
+              $('#myTable tbody tr').removeClass('keyboard-focus')
+              hideKeyboardHint();
+            }
+
+            function showInitialHint() {
+                $('.keyboard-hint').remove();
+    
+                $('body').append(`
+                    <div class="keyboard-hint" style="
+                        position: fixed; 
+                        top: 15px; 
+                        right: 10px; 
+                        background: var(--bg-banner); 
+                        color: var(--text-primary);
+                        padding: 8px 12px; 
+                        border-radius: 4px; 
+                        font-size: 13px;
+                        font-weight: 500;
+                        z-index: 9999;
+                        border: 1px solid var(--border-color);
+                        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                    ">
+                        Press <kbd>Space</kbd> to start keyboard navigation
+                    </div>
+                `);
+
+                // Auto-hide if not in keyboard mode
+                setTimeout(() => {
+                  if (!isKeyboardMode) {
+                    $('.keyboard-hint').fadeOut(1000, function() {
+                      $(this).remove();
+                    });
+                  }
+                }, 4000);
+            }
+
+            function showKeyboardHint() {
+              $('.keyboard-hint').remove();
+  
+              $('body').append(`
+                  <div class="keyboard-hint" style="
+                      position: fixed; 
+                      top: 15px; 
+                      right: 10px; 
+                      background: var(--bg-banner); 
+                      color: var(--text-primary);
+                      padding: 8px 12px; 
+                      border-radius: 4px; 
+                      font-size: 13px;
+                      font-weight: 500;
+                      z-index: 9999;
+                      border: 1px solid var(--border-color);
+                      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                  ">
+                      Press <kbd>Esc</kbd> to exit keyboard mode
+                  </div>
+              `);
+
+              $('body').append(`
+              <div class="shortcut-summary" style="
+                  position: fixed;
+                  top: 60px;
+                  right: 10px;
+                  background: #007bff;
+                  color: white;
+                  padding: 10px 12px;
+                  border-radius: 6px;
+                  font-size: 11px;
+                  z-index: 9998;
+                  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+                  font-family: monospace;
+              ">
+                  <kbd style="background: rgba(255,255,255,0.2);">P</kbd>ass 
+                  <kbd style="background: rgba(255,255,255,0.2);">F</kbd>ail 
+                  <kbd style="background: rgba(255,255,255,0.2);">C</kbd>lear 
+                  <kbd style="background: rgba(255,255,255,0.2);">↑↓</kbd>Nav 
+                  <kbd style="background: rgba(255,255,255,0.2);">⏎</kbd>Notes
+              </div>
+            `);
+
+              setTimeout(() => {
+                $('.shortcut-summary').fadeOut(800, function() {
+                  $(this).remove();
+                });
+              }, 5000);
+            }            
+
+            function hideKeyboardHint() {
+              $('#keyboard-hint').remove();
+              $('.shortcut-summary').remove();
+              showInitialHint();
+            }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>StringZ Visualizer - CN</title>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <style>
+      :root {
+        /* Light mode colors */
+        --bg-primary: #f8f9fa;
+        --bg-secondary: white;
+        --bg-banner: #f8f9fa;
+        --text-primary: #333;
+        --text-secondary: #6c757d;
+        --text-muted: #495057;
+        --border-color: #dee2e6;
+        --table-header-bg: #f8f9fa;
+        --table-border: #dee2e6;
+        --button-bg: #6c757d;
+        --button-hover: #5a6268;
+        --input-bg: white;
+      }
+      
+      [data-theme="dark"] {
+        /* Dark mode colors */
+        --bg-primary: #1a1a1a;
+        --bg-secondary: #2d2d2d;
+        --bg-banner: #343a40;
+        --text-primary: #f8f9fa;
+        --text-secondary: #adb5bd;
+        --text-muted: #ced4da;
+        --border-color: #495057;
+        --table-header-bg: #343a40;
+        --table-border: #495057;
+        --button-bg: #495057;
+        --button-hover: #5a6268;
+        --input-bg: #343a40;
+      }
+      
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: var(--bg-primary);
+        margin: 0;
+        padding: 0;
+        color: var(--text-primary);
+        transition: background-color 0.3s ease, color 0.3s ease;
+      }
+      
+      .toggle-btn {
+        position: fixed;
+        top: 15px;
+        left: 15px;
+        z-index: 9999;
+        padding: 8px 16px;
+        background-color: var(--button-bg);
+        color: white;
+        border: 1px solid var(--button-bg);
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        font-size: 14px;
+        transition: background-color 0.2s ease;
+      }
+      
+      .toggle-btn:hover {
+        background-color: var(--button-hover);
+        border-color: var(--button-hover);
+      }
+      
+      .dark-mode-btn {
+        position: fixed;
+        top: 15px;
+        left: 150px;
+        z-index: 9999;
+        padding: 8px 16px;
+        background-color: var(--button-bg);
+        color: white;
+        border: 1px solid var(--button-bg);
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        font-size: 14px;
+        transition: background-color 0.2s ease;
+      }
+      
+      .dark-mode-btn:hover {
+        background-color: var(--button-hover);
+        border-color: var(--button-hover);
+      }
+      
+      #clearState {
+        float: left;
+        margin-right: 15px;
+        margin-bottom: 15px;
+        padding: 8px 16px;
+        background-color: #dc3545;
+        color: white;
+        border: 1px solid #dc3545;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        font-size: 14px;
+        transition: background-color 0.2s ease;
+      }
+      
+      #clearState:hover {
+        background-color: #c82333;
+        border-color: #bd2130;
+      }
+      
+      .container {
+        padding: 70px 30px 30px 30px;
+        background: var(--bg-secondary);
+        margin: 0;
+        min-height: 100vh;
+        transition: background-color 0.3s ease;
+      }
+      
+      .info-banner {
+        background-color: var(--bg-banner);
+        border: 1px solid var(--border-color);
+        color: var(--text-muted);
+        padding: 20px;
+        margin-bottom: 25px;
+        border-radius: 4px;
+        text-align: center;
+        transition: background-color 0.3s ease, border-color 0.3s ease;
+      }
+      
+      .info-banner h2 {
+        margin: 0 0 10px 0;
+        font-size: 24px;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+      
+      .info-banner p {
+        margin: 0;
+        font-size: 14px;
+        color: var(--text-secondary);
+      }
+      
+      #myTable {
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        overflow: hidden;
+        transition: border-color 0.3s ease;
+      }
+      
+      #myTable td {
+        user-select: text !important;
+        padding: 12px 8px;
+        vertical-align: top;
+        border-bottom: 1px solid var(--table-border);
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+        transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+      }
+      
+      #myTable th {
+        background-color: var(--table-header-bg);
+        border-bottom: 2px solid var(--border-color);
+        color: var(--text-muted);
+        font-weight: 600;
+        padding: 15px 8px;
+        text-align: center;
+        transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+      }
+      
+      /* Enhanced styling for different columns */
+      #myTable td:first-child {
+        text-align: center;
+        font-family: 'Courier New', monospace;
+        font-size: 12px;
+        color: var(--text-secondary);
+        /*<!-- max-width: 120px; -->*/
+        width: 50px;
+      }
+      
+      #myTable td:nth-child(2) {
+        font-family: 'Courier New', monospace;
+        font-size: 12px;
+        color: var(--text-secondary);
+        text-align: left;
+        /*line-height: 1.4;*/
+        max-width: 120px;
+      }
+
+      #myTable td:nth-child(3), #myTable td:nth-child(4) {
+        line-height: 1.4;
+        max-width: 300px;
+        word-wrap: break-word;
+        text-align: left;
+      }
+      
+      #myTable td:nth-child(5) {
+        text-align: center;
+        font-weight: 600;
+        color: var(--text-muted);
+        font-size: 14px;
+        width: 80px;
+      }
+      
+      #myTable td:nth-child(6) {
+        min-width: 120px;
+        max-width: 150px;
+        text-align: center;
+      }
+
+      #myTable td:nth-child(7) {
+        min-width: 150px;
+        max-width: 200px;
+      }
+      
+      select.state-select {
+        width: 100%;
+        font-weight: 500;
+        padding: 6px 8px;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        font-size: 14px;
+        background-color: var(--input-bg);
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+      }
+      
+      input.notes-input {
+        width: 100%;
+        padding: 6px 8px;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        font-size: 12px;
+        background-color: var(--input-bg);
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+      }
+      
+      input.notes-input:focus {
+        outline: none;
+        border-color: #80bdff;
+        box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+      }
+      
+      input.notes-input::placeholder {
+        color: var(--text-secondary);
+        font-style: italic;
+      }
+      
+      select.state-select:focus {
+        outline: none;
+        border-color: #80bdff;
+        box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+      }
+      
+      select.state-select.pass {
+        color: #28a745;
+        border-color: #28a745;
+      }
+      
+      select.state-select.fail {
+        color: #dc3545;
+        border-color: #dc3545;
+      }
+      
+      /* DataTables styling */
+      .dataTables_wrapper {
+        color: var(--text-primary);
+      }
+      
+      .dataTables_wrapper .dataTables_length,
+      .dataTables_wrapper .dataTables_filter,
+      .dataTables_wrapper .dataTables_info,
+      .dataTables_wrapper .dataTables_paginate {
+        margin: 15px 0;
+      }
+      
+      .dataTables_wrapper .dataTables_filter input {
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        padding: 6px 12px;
+        margin-left: 8px;
+        background-color: var(--input-bg);
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+      }
+      
+      .dataTables_wrapper .dataTables_length select {
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        padding: 4px 8px;
+        margin: 0 8px;
+        background-color: var(--input-bg);
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+      }
+      
+      .dataTables_wrapper .dataTables_paginate .paginate_button {
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        padding: 6px 12px;
+        margin: 0 2px;
+        background-color: var(--input-bg);
+        color: var(--text-primary) !important;
+        transition: all 0.3s ease;
+      }
+      
+      .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+        background-color: var(--bg-banner);
+        border-color: var(--text-secondary);
+      }
+      
+      .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+        background-color: #007bff;
+        border-color: #007bff;
+        color: white !important;
+      }
+
+      /* Copy feature styling */
+    .copyable-cell {
+        cursor: pointer;
+        position: relative;
+        transition: background-color 0.2s ease;
+    }
+
+    .copyable-cell:hover {
+        background-color: rgba(0, 123, 255, 0.1) !important;
+    }
+
+    .copy-feedback {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #28a745;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        z-index: 1000;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .copy-feedback.show {
+        opacity: 1;
+    }
+
+    .keyboard-focus {
+      background-color: rgba(0, 123, 255, 0.08) !important;
+      border: 2px solid #007bff !important;
+      box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2) !important;
+    }
+
+    .keyboard-focus td {
+      background-color: rgba(0, 123, 255, 0.05) !important;
+    }
+
+    kbd {
+      background-color: var(--button-bg);
+      color: white;
+      padding: 2px 4px;
+      border-radius: 3px;
+      font-size: 11px;
+      font-family: monospace;
+    }
+    </style>
+  </head>
+  <body>
+    <button class="toggle-btn" onclick="toggleData()">Show Raw</button>
+    <button class="dark-mode-btn" onclick="toggleDarkMode()">🌙 Dark</button>
+    <div class="container">
+      <div class="info-banner">
+        <h2>StringZ Visualizer - CN</h2>
+        <p>📊
+          <strong>270</strong>
+          strings • 🌍
+          <strong>EN</strong>
+          →
+          <strong>CN</strong>
+          • 📝
+          <strong>270</strong>
+          words • 🛠️ Generated by StringZ</p>
+      </div>
+      <button id="clearState">Clear All States</button>
+      <table id="myTable" class="display" style="width:100%"></table>
+    </div>
+    <script>
+      const headers = ["strId", "EN", "CN", "State", "Notes"];
+            const rawData = [["BUFFAttribute_mName_8202044", "DMG Increase", "伤害提升", "", ""], ["BUFFAttribute_mName_8202045", "DMG Reduction", "伤害降低", "", ""], ["BUFFAttribute_mTips_322928", "Fire-Tipped Spear ignores {30,num}% of the enemy&#x27;s DEF. Universe Ring bounces {31,num} extra time(s) and can hit the same target multiple times. Yin-Yang Blade executes common monsters with HP below {32,num}%.", "火尖枪会无视敌人{30,num}%的防御；乾坤圈会额外弹射{31,num}次并可对相同目标重复弹射；阴阳剑会斩杀血量低于{32,num}%的普通怪物。", "", ""], ["ChampionshipPlan_mChampionshipDesc_833", "Participate in Artifact Material Raid to win trophies and redeem rewards.", "参与神器材料副本，获得奖杯，兑换大奖", "", ""], ["ChampionshipPlan_mChampionshipDesc_834", "Level up/star up/promote heroes or upgrade heroes&#x27; skills to win trophies and redeem rewards.", "升级升星进阶英雄，升级技能，获得奖杯，兑换大奖", "", ""], ["ChampionshipPlan_mChampionshipDesc_835", "Participate in Gear Raid I to win trophies and redeem rewards.", "参与装备副本I，获得奖杯，兑换大奖", "", ""], ["ChampionshipPlan_mChampionshipDesc_836", "Participate in Gear Raid II to win trophies and redeem rewards.", "参与装备副本II，获得奖杯，兑换大奖", "", ""], ["ChampionshipPlan_mChampionshipDesc_837", "Summon heroes to win trophies and redeem rewards.", "召唤英雄，获得奖杯，兑换大奖", "", ""], ["ChampionshipPlan_mChampionshipDesc_838", "Participate in Artifact Material Raid to win trophies and redeem rewards.", "参与神器材料副本，获得奖杯，兑换大奖", "", ""], ["ChampionshipPlan_mChampionshipDesc_839", "Participate in Gear Raid III to win trophies and redeem rewards.", "参与装备副本III，获得奖杯，兑换大奖", "", ""], ["ChampionshipPlan_mChampionshipDesc_840", "Level up/star up/promote heroes or upgrade heroes&#x27; skills to win trophies and redeem rewards.", "升级升星进阶英雄，升级技能，获得奖杯，兑换大奖", "", ""], ["ChampionshipPlan_mChampionshipDesc_841", "Participate in Gear Raid I to win trophies and redeem rewards.", "参与装备副本I，获得奖杯，兑换大奖", "", ""], ["ChampionshipPlan_mChampionshipDesc_842", "Participate in Gear Raid II to win trophies and redeem rewards.", "参与装备副本II，获得奖杯，兑换大奖", "", ""], ["ChampionshipPlan_mChampionshipGlobalName_837", "Arrival of Heroes Ultimate Leaderboard", "英雄降临巅峰排行榜", "", ""], ["ChampionshipPlan_mChampionshipName_833", "Mystery of Artifacts", "神器秘境", "", ""], ["ChampionshipPlan_mChampionshipName_834", "Hero Training", "英雄培养", "", ""], ["ChampionshipPlan_mChampionshipName_835", "The Lost Legacy", "失落遗产", "", ""], ["ChampionshipPlan_mChampionshipName_836", "Vault in the Sands", "沙海宝库", "", ""], ["ChampionshipPlan_mChampionshipName_837", "Arrival of Heroes", "英雄降临", "", ""], ["ChampionshipPlan_mChampionshipName_838", "Mystery of Artifacts", "神器秘境", "", ""], ["ChampionshipPlan_mChampionshipName_839", "Forgotten Palace", "迷失之地", "", ""], ["ChampionshipPlan_mChampionshipName_840", "Hero Training", "英雄培养", "", ""], ["ChampionshipPlan_mChampionshipName_841", "The Lost Legacy", "失落遗产", "", ""], ["ChampionshipPlan_mChampionshipName_842", "Vault in the Sands", "沙海宝库", "", ""], ["Chapter_mChapterName_4301", "Titanic Ruins - Playtest", "泰坦废墟-试玩", "", ""], ["CommonText_mMessage_25116", "Awaken the mystical power within.", "唤醒神秘的魔法力量。", "", ""], ["CommonText_mMessage_25125", "Take destiny into your own hands.", "将命运掌握在自己手中。", "", ""], ["CommonText_mMessage_25132", "Reveal cards to earn Dragon&#x27;s Gold by matching the designated patterns.", "揭示卡牌，翻出指定图案可获得对应数量的龙脉金币。", "", ""], ["CommonText_mMessage_25133", "Reveal cards and match 3 identical patterns to earn a &lt;color=&quot;#fdbe36&quot;&gt;{num}&lt;/color&gt;x reward!", "揭示卡牌，翻出3个相同图案可获得&lt;color=&quot;#fdbe36&quot;&gt;{num}&lt;/color&gt;倍奖励。", "", ""], ["CommonText_mMessage_25631", "Number:", "点数：", "", ""], ["CommonText_mMessage_25635", "The [?] corresponds to 3 numbers that will be filled into empty slots in sequence—the resulting number will determine the final amount of Dragon&#x27;s Gold you receive!", "[?]对应的3个数字将依次填入空缺位置——由此产生的数字将决定最终获得的龙脉金币数量！", "", ""], ["CommonText_mMessage_25773", "Nine-Tailed Nightmare", "九尾祸", "", ""], ["CommonText_mMessage_25828", "Locked", "未解锁", "", ""], ["CommonText_mMessage_25829", "Invalid", "已失效", "", ""], ["CommonText_mMessage_25830", "New Recruit", "获取新招募", "", ""], ["CommonText_mMessage_25846", "Officials", "官员", "", ""], ["CommonText_mMessage_25847", "Guild War Officials Appointment", "公会战官员任命", "", ""], ["CommonText_mMessage_25848", "Rank", "职位", "", ""], ["CommonText_mMessage_25849", "Marshal", "统帅", "", ""], ["CommonText_mMessage_25850", "Members", "成员", "", ""], ["CommonText_mMessage_25851", "BP", "战力", "", ""], ["CommonText_mMessage_25852", "Season&#x27;s Attacks", "赛季进攻情况", "", ""], ["CommonText_mMessage_25853", "Actions", "操作", "", ""], ["CommonText_mMessage_25854", "Appoint", "任命", "", ""], ["CommonText_mMessage_25855", "Dismiss", "卸任", "", ""], ["CommonText_mMessage_25856", "No Access", "无权限", "", ""], ["CommonText_mMessage_25857", "All Marshals gain &lt;color=&quot;#e37b00&quot;&gt;{num} extra attack(s) &lt;/color&gt; per Guild War round. Only the Guild Leader and Vice Leaders can appoint a Marshal during the preparation phase. If no appointments are made, this position will be automatically assigned based on members&#x27; contribution and BP.", "所有统帅，每轮公会战可以&lt;color=&quot;#e37b00&quot;&gt;额外获得{num}次进攻次数&lt;/color&gt;，统帅只能由会长和副会长在备战期任命，若未任命会按照贡献度和战力自动分配", "", ""], ["CommonText_mMessage_25858", "Appointed: {num1}/{num2}", "已任命：{num1}/{num2}", "", ""], ["CommonText_mMessage_25859", "Appointment successful. Player gains {num} extra attack(s) per round.", "任命成功，该玩家每轮进攻次数增加{num}次", "", ""], ["CommonText_mMessage_25860", "Marshal slots are full. Dismiss one to continue.", "当前统帅数量已满，请卸任其他统帅后任命", "", ""], ["CommonText_mMessage_25861", "&lt;color=&quot;#feab53&quot;&gt;Are you sure you want to dismiss this player from the Marshal position?&lt;/color&gt;\\nEach Guild can have up to {num1} Marshals, each gaining {num2} extra attack(s) per round.", "&lt;color=&quot;#feab53&quot;&gt;确定卸任该玩家的统帅职位吗？&lt;/color&gt;\\n每个公会最多有{num1}名统帅，统帅每轮进攻次数可增加{num2}次。", "", ""], ["CommonText_mMessage_25862", "Marshal dismissed successfully. Please appoint a new one.", "统帅卸任成功，请任命其他统帅", "", ""], ["CommonText_mMessage_25863", "Guild War Attempts", "公会战次数", "", ""], ["CommonText_mMessage_25931", "Points of the Round", "本次积分", "", ""], ["CommonText_mMessage_26080", "Prioritize Guild War team.", "优先使用公会战的队伍", "", ""], ["CommonText_mMessage_26081", "Playtest mode cannot save battle results or auto-fight.", "试玩模式无法保存对战结果和自动战斗", "", ""], ["CommonText_mMessage_60708", "Score Details", "积分统计", "", ""], ["Difficulty_mDetail_1100001", "Only heroes from &lt;color=&quot;#e37b00&quot;&gt;The Nightmare Council, The Star Piercers&lt;/color&gt; can challenge this stage.\\nLord Skills of each Faction can only affect up to &lt;color=&quot;#fd4540&quot;&gt;5&lt;/color&gt; heroes.", "仅能使用&lt;color=&quot;#e37b00&quot;&gt;噩梦议会,贯星之箭&lt;/color&gt;阵营的英雄挑战副本\\n每个阵营的领主技能最多对&lt;color=&quot;#fd4540&quot;&gt;5&lt;/color&gt;名英雄生效", "", ""], ["Difficulty_mDetail_1100003", "Only heroes from &lt;color=&quot;#e37b00&quot;&gt;The Infernal Blast, The North Throne&lt;/color&gt; can challenge this stage.\\nLord Skills of each Faction can only affect up to &lt;color=&quot;#fd4540&quot;&gt;5&lt;/color&gt; heroes.", "仅能使用&lt;color=&quot;#e37b00&quot;&gt;炼狱爆破,北境王座&lt;/color&gt;阵营的英雄挑战副本\\n每个阵营的领主技能最多对&lt;color=&quot;#fd4540&quot;&gt;5&lt;/color&gt;名英雄生效", "", ""], ["Difficulty_mDetail_1100004", "Only heroes from &lt;color=&quot;#e37b00&quot;&gt;The Esoteria Order, The Chaos Dominion, and The Supreme Arbiters&lt;/color&gt; can challenge this stage.\\nLord Skills of each Faction can only affect up to &lt;color=&quot;#fd4540&quot;&gt;5&lt;/color&gt; heroes.", "仅能使用&lt;color=&quot;#e37b00&quot;&gt;秘法会,混沌征服者,至高仲裁者&lt;/color&gt;阵营的英雄挑战副本\\n每个阵营的领主技能最多对&lt;color=&quot;#fd4540&quot;&gt;5&lt;/color&gt;名英雄生效", "", ""], ["Difficulty_mDetail_1200001", "The following heroes are exempt from map info restrictions.", "以下英雄不受地图信息限制", "", ""], ["Difficulty_mDetail_1200002", "The following heroes are exempt from map info restrictions.", "以下英雄不受地图信息限制", "", ""], ["Difficulty_mDetail_1200003", "The following heroes are exempt from map info restrictions.", "以下英雄不受地图信息限制", "", ""], ["Difficulty_mDetail_1200004", "The following heroes are exempt from map info restrictions.", "以下英雄不受地图信息限制", "", ""], ["Difficulty_mDetail_1300001", "Erlang Shen cannot be deployed in this special stage.", "当前为特殊关卡杨戬无法上阵", "", ""], ["Difficulty_mDetail_32010053", "Mage heroes cannot be included in the team.", "编队中禁止编入法师英雄", "", ""], ["Difficulty_mDetail_32010153", "Destroyers gain the Camaraderie skill. When they die, nearby monsters receive an enhancement.", "毁灭者获得技能同气连枝，死亡时附近的怪物会获得强化", "", ""], ["Difficulty_mDetail_32010163", "When the Priest of Thunder appears, he gains Ghost Form for 30 sec.", "雷之祭司出现时获得幽魂形态，持续30秒", "", ""], ["Difficulty_mDetail_32010364", "Boss enemies restore 1% Max HP per sec, while other enemies restore 5% Max HP per sec.", "首领敌人每秒触发1%的最大生命回复，非首领敌人每秒触发5%的最大生命回复", "", ""], ["Difficulty_mDetail_32010476", "Langlyn&#x27;s Max HP increases by 50%, but cannot be healed.", "兰林的最大生命提高50%，但无法被治疗", "", ""], ["Difficulty_mDetail_32010477", "Langlyn&#x27;s Max HP increases by 75%, but cannot be healed.", "兰林的最大生命提高75%，但无法被治疗", "", ""], ["Difficulty_mDetail_32010478", "Langlyn&#x27;s Max HP increases by 100%, but cannot be healed.", "兰林的最大生命提高100%，但无法被治疗", "", ""], ["ExpStageUI_mRaidName_8201006", "COTD-1", "COTD-1", "", ""], ["ExpStageUI_mRaidName_8201007", "COTD-2", "COTD-2", "", ""], ["ExpStageUI_mRaidName_8201008", "COTD-3", "COTD-3", "", ""], ["ExpStageUI_mRaidName_8201009", "COTD-4", "COTD-4", "", ""], ["ExpStageUI_mRaidName_8201010", "COTD-5", "COTD-5", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010153", "Destroyers gain the Camaraderie skill. When a Destroyer dies, nearby Destroyers receive an enhancement.", "毁灭者获得技能同气连枝，其他毁灭者死亡时，附近的毁灭者会获得强化", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010163", "When the Priest of Thunder appears, he gains Ghost Form for 30 sec.", "雷之祭司出现时获得幽魂形态，持续30秒", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010364", "Boss enemies restore 1% Max HP per sec, while other enemies restore 5% Max HP per sec.", "首领敌人每秒触发1%的最大生命回复，非首领敌人每秒触发5%的最大生命回复", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010476", "Langlyn&#x27;s Max HP increases by 50%, but cannot be healed.", "兰林的最大生命提高50%，但无法被治疗", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010477", "Langlyn&#x27;s Max HP increases by 75%, but cannot be healed.", "兰林的最大生命提高75%，但无法被治疗", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010478", "Langlyn&#x27;s Max HP increases by 100%, but cannot be healed.", "兰林的最大生命提高100%，但无法被治疗", "", ""], ["HeroFactionKingSkill_mName_100441_1", "The Cursed Cult", "诅咒神教", "", ""], ["HeroFactionKingSkill_mName_100441_2", "The Cursed Cult", "诅咒神教", "", ""], ["HeroFactionKingSkill_mName_100441_3", "The Cursed Cult", "诅咒神教", "", ""], ["HeroFactionKingSkill_mName_100441_4", "The Cursed Cult", "诅咒神教", "", ""], ["HeroFactionKingSkill_mName_100441_5", "The Cursed Cult", "诅咒神教", "", ""], ["Item_mItemDesc_110", "Purchase to obtain a 30-Day Monthly Card of Diamonds.", "购买可获得钻石月卡30天天数", "", ""], ["Item_mItemDesc_111", "Purchase to obtain a 30-Day Monthly Card of Summoning.", "购买可获得召唤月卡30天天数", "", ""], ["Item_mItemDesc_112", "Purchase to obtain a 30-Day Monthly Card of Stamina.", "购买可获得体力月卡30天天数", "", ""], ["Item_mItemDesc_31096", "Select 1 event-exclusive hero to join the event. The selected exclusive hero has an increased drop rate &amp; is guaranteed within 200 summons!", "可自选一名限定英雄参与活动，自选的限定英雄掉落概率提升&amp;200抽内必得！", "", ""], ["Item_mItemDesc_31097", "&lt;color=&quot;#eadca2&quot;&gt;Special Summon Offer&lt;/color&gt;\\n\\nGet the necessary materials for Hero Summon", "&lt;color=&quot;#eadca2&quot;&gt;英雄召唤特惠&lt;/color&gt;\\n\\n获得英雄召唤的必需资源", "", ""], ["Item_mItemDesc_3333", "&lt;color=&quot;#498a40&quot;&gt;Exclusive avatar border for the Gold Dragon Pass.&lt;/color&gt;", "&lt;color=&quot;#498a40&quot;&gt;金龙通行证专属限定头像框&lt;/color&gt;", "", ""], ["Item_mItemDesc_3519", "Unknown Clue of Erlang Shen. When obtained, it will automatically convert into a random one from Erlang Shen&#x27;s Clues 1-5.", "杨戬的未知故事线索，获得时将自动转化为杨戬故事线索1~5中的随机一个。", "", ""], ["Item_mItemDesc_3521", "Erlang Shen&#x27;s Clue 2.\\n&lt;color=&quot;#498a40&quot;&gt;Usage: Consume this item via Fate&#x27;s Chapters to unlock the corresponding clue.&lt;/color&gt;", "杨戬的故事线索2。\\n&lt;color=&quot;#498a40&quot;&gt;使用方式：【命运之章】活动。消耗此道具解锁对应线索&lt;/color&gt;", "", ""], ["Item_mItemDesc_3522", "Erlang Shen&#x27;s Clue 3.\\n&lt;color=&quot;#498a40&quot;&gt;Usage: Consume this item via Fate&#x27;s Chapters to unlock the corresponding clue.&lt;/color&gt;", "杨戬的故事线索3。\\n&lt;color=&quot;#498a40&quot;&gt;使用方式：【命运之章】活动。消耗此道具解锁对应线索&lt;/color&gt;", "", ""], ["Item_mItemDesc_3523", "Erlang Shen&#x27;s Clue 4.\\n&lt;color=&quot;#498a40&quot;&gt;Usage: Consume this item via Fate&#x27;s Chapters to unlock the corresponding clue.&lt;/color&gt;", "杨戬的故事线索4。\\n&lt;color=&quot;#498a40&quot;&gt;使用方式：【命运之章】活动。消耗此道具解锁对应线索&lt;/color&gt;", "", ""], ["Item_mItemDesc_3524", "Erlang Shen&#x27;s Clue 5.\\n&lt;color=&quot;#498a40&quot;&gt;Usage: Consume this item via Fate&#x27;s Chapters to unlock the corresponding clue.&lt;/color&gt;", "杨戬的故事线索5。\\n&lt;color=&quot;#498a40&quot;&gt;使用方式：【命运之章】活动。消耗此道具解锁对应线索&lt;/color&gt;", "", ""], ["Item_mItemDesc_35473", "You can obtain the following items:\\nMonthly Card of Diamonds (30-Day)\\nDiamond x500", "可获得以下道具\\n钻石月卡（30天）\\n钻石*500", "", ""], ["Item_mItemDesc_35474", "You can obtain the following items:\\nMonthly Card of Summoning (30-Day)\\nRare Summoning Crystal x500", "可获得以下道具\\n召唤月卡（30天）\\n稀有召唤水晶*500", "", ""], ["Item_mItemDesc_35475", "You can obtain the following items:\\nMonthly Card of Stamina (30-Day)\\nStamina x600\\nAuto-Fight Chance x30", "可获得以下道具\\n体力月卡（30天）\\n体力*600\\n自动战斗次数*30", "", ""], ["Item_mItemDesc_56310", "Grants a random &lt;color=&quot;#498a40&quot;&gt;Lvl. 2-4&lt;/color&gt; Trial Keystone.", "可随机获得&lt;color=&quot;#498a40&quot;&gt;2-4级&lt;/color&gt;的试炼石板", "", ""], ["Item_mItemDesc_56311", "Grants a random &lt;color=&quot;#498a40&quot;&gt;Lvl. 2-5&lt;/color&gt; Trial Keystone.", "可随机获得&lt;color=&quot;#498a40&quot;&gt;2-5级&lt;/color&gt;的试炼石板", "", ""], ["Item_mItemName_110", "Monthly Card of Diamonds (30-Day)", "钻石月卡（30天）", "", ""], ["Item_mItemName_111", "Monthly Card of Summoning (30-Day)", "召唤月卡（30天）", "", ""], ["Item_mItemName_112", "Monthly Card of Stamina (30-Day)", "体力月卡（30天）", "", ""], ["Item_mItemName_31096", "Exclusive Lucky Pick", "限定自选召唤活动", "", ""], ["Item_mItemName_31097", "Turbo Summon Bundle", "召唤加速包", "", ""], ["Item_mItemName_3324", "Avatar Border: Nine-Tailed Nightmare Ranking Champion", "“九尾祸”积分排名冠军头像框", "", ""], ["Item_mItemName_3325", "Avatar Border: Nine-Tailed Nightmare Ranking Runner-Up", "“九尾祸”积分排名亚军头像框", "", ""], ["Item_mItemName_3326", "Avatar Border: Nine-Tailed Nightmare Ranking Third Place", "“九尾祸”积分排名季军头像框", "", ""], ["Item_mItemName_3333", "Avatar Border: Gold Dragon Pass", "“金龙通行证”限定头像框", "", ""], ["Item_mItemName_35473", "Monthly Card of Diamonds", "钻石月卡", "", ""], ["Item_mItemName_35474", "Monthly Card of Summoning", "召唤月卡", "", ""], ["Item_mItemName_35475", "Monthly Card of Stamina", "体力月卡", "", ""], ["Item_mItemName_56310", "Random Trial Keystone (Lvl. 2-4)", "随机试炼石板（2-4级）", "", ""], ["Item_mItemName_56311", "Random Trial Keystone (Lvl. 2-5)", "随机试炼石板（2-5级）", "", ""], ["Quest_mQuestTitle_380034", "Obtain a total of 100 Dragon&#x27;s Gold.", "累计获得100龙脉金币", "", ""], ["Quest_mQuestTitle_380035", "Obtain a total of 200 Dragon&#x27;s Gold.", "累计获得200龙脉金币", "", ""], ["Quest_mQuestTitle_380036", "Obtain a total of 300 Dragon&#x27;s Gold.", "累计获得300龙脉金币", "", ""], ["Quest_mQuestTitle_380037", "Obtain a total of 500 Dragon&#x27;s Gold.", "累计获得500龙脉金币", "", ""], ["Quest_mQuestTitle_380038", "Obtain a total of 800 Dragon&#x27;s Gold.", "累计获得800龙脉金币", "", ""], ["Quest_mQuestTitle_380039", "Obtain a total of 1,000 Dragon&#x27;s Gold.", "累计获得1000龙脉金币", "", ""], ["Quest_mQuestTitle_380040", "Obtain a total of 1,500 Dragon&#x27;s Gold.", "累计获得1500龙脉金币", "", ""], ["Quest_mQuestTitle_380041", "Obtain a total of 2,000 Dragon&#x27;s Gold.", "累计获得2000龙脉金币", "", ""], ["Quest_mQuestTitle_380042", "Obtain a total of 3,000 Dragon&#x27;s Gold.", "累计获得3000龙脉金币", "", ""], ["Quest_mQuestTitle_380043", "Obtain a total of 4,000 Dragon&#x27;s Gold.", "累计获得4000龙脉金币", "", ""], ["Quest_mQuestTitle_380044", "Obtain a total of 5,000 Dragon&#x27;s Gold.", "累计获得5000龙脉金币", "", ""], ["RoleHeadFrame_mSourceDesc_84", "Awarded to the Commander who ranks first on the Points Leaderboard in the Echoes of Woe during the Nine-Tailed Nightmare.", "在“九尾祸”活动的殷墟怨狐副本中积分总榜排名第一的指挥官获得", "", ""], ["RoleHeadFrame_mSourceDesc_85", "Awarded to the Commander who ranks second on the Points Leaderboard in the Echoes of Woe during the Nine-Tailed Nightmare.", "在“九尾祸”活动的殷墟怨狐副本中积分总榜排名第二的指挥官获得", "", ""], ["RoleHeadFrame_mSourceDesc_86", "Awarded to the Commander who ranks third on the Points Leaderboard in the Echoes of Woe during the Nine-Tailed Nightmare.", "在“九尾祸”活动的殷墟怨狐副本中积分总榜排名第三的指挥官获得", "", ""], ["RoleHeadFrame_mSourceDesc_89", "Guild War S10 &quot;Overlord&quot; exclusive avatar border.", "“公会战S10赛季”霸主段位限定头像框", "", ""], ["RoleHeadFrame_mSourceDesc_91", "Obtained from Gold Dragon Pass.", "金龙通行证中获得", "", ""], ["RollDiceBuilding_mName_11_1", "Turn of Luck", "时来运转", "", ""], ["RollDiceBuilding_mName_12_1", "Turn of Luck", "时来运转", "", ""], ["Skill_mSkillDesc_1908301_1", "Swings claws, dealing DMG to all heroes within 1 tile ahead.", "挥舞利爪，对身前1格范围内所有英雄单位造成伤害", "", ""], ["Skill_mSkillDesc_1908304_1", "Swings claws, dealing DMG to all heroes within 1 tile ahead.", "挥舞利爪，对身前1格范围内所有英雄单位造成伤害", "", ""], ["Skill_mSkillDesc_1908315_1", "When the Nine-Tailed Fox takes fatal DMG, she flees the battlefield and activates the tails on the field to attack. When the tails are defeated, the Nine-Tailed Fox returns to the battlefield. After all tails on the field are defeated, the Nine-Tailed Fox transforms and summons a large number of foxes.", "九尾狐每次受到致命伤害后会逃离战场，同时激活场上尾巴发动攻击，击败尾巴九尾狐会继续登场，当场上所有尾巴被击败后，九尾妖狐会变身，同时召唤大量狐狸。", "", ""], ["Skill_mSkillDesc_1908345_1", "Deals M. DMG to the last deployed unit on the battlefield, prioritizing Defenders.", "对场上最后放置单位造成魔法伤害，优先选择守护者职业", "", ""], ["Skill_mSkillDesc_1908357_1", "Deals M. DMG to the last deployed unit on the battlefield, prioritizing Defenders.", "对场上最后放置单位造成魔法伤害，优先选择守护者职业", "", ""], ["Skill_mSkillDesc_803803_1", "Immune to all &lt;color=&quot;#4A9DF2&quot;&gt;CC Effects&lt;/color&gt; (except Slow).", "免疫除减速外的所有&lt;color=&quot;#4A9DF2&quot;&gt;控制效果&lt;/color&gt;", "", ""], ["Skill_mSkillDesc_8202053_1", "Reduces the Redeployment Time of allied heroes by &lt;color=&quot;#4A9DF2&quot;&gt;{sk1}%&lt;/color&gt;, but increases their Deployment Cost by &lt;color=&quot;#4A9DF2&quot;&gt;+{sk2}&lt;/color&gt;.", "己方英雄的再部署时间减少&lt;color=&quot;#4A9DF2&quot;&gt;{sk1}%&lt;/color&gt;，但是上阵费用&lt;color=&quot;#4A9DF2&quot;&gt;+{sk2}&lt;/color&gt;。", "", ""], ["Skill_mSkillDesc_8202084_1", "Increases allied heroes&#x27; DMG by &lt;color=&quot;#4A9DF2&quot;&gt;{sk1}%&lt;/color&gt; each round and reduces Basic ATK interval by &lt;color=&quot;#4A9DF2&quot;&gt;{sk1}%&lt;/color&gt;. Vulnerability (P. DMG) and Vulnerability (M. DMG) increase by &lt;color=&quot;#4A9DF2&quot;&gt;{sk2}%&lt;/color&gt; each round.", "己方英雄对敌人造成的伤害每回合提升&lt;color=&quot;#4A9DF2&quot;&gt;{sk1}%&lt;/color&gt;、普攻间隔减少&lt;color=&quot;#4A9DF2&quot;&gt;{sk1}%&lt;/color&gt;，同时物理易伤和魔法易伤每回合提升&lt;color=&quot;#4A9DF2&quot;&gt;{sk2}%&lt;/color&gt;。", "", ""], ["Skill_mSkillDesc_8202103_1", "Allied Hero Deployment Limit +&lt;color=&quot;#4A9DF2&quot;&gt;{sk1}&lt;/color&gt;", "己方可放置英雄数量&lt;color=&quot;#4A9DF2&quot;&gt;+{sk1}&lt;/color&gt;。", "", ""], ["Skill_mSkillName_1033701_1", "Accelerated Incubation", "急速孵化", "", ""], ["Skill_mSkillName_3991865_1", "High Quality", "高质", "", ""], ["Skill_mSkillName_803610_1", "Freeze", "冰冻", "", ""], ["Skill_mSkillName_803801_1", "Frostbite Strike", "霜蚀之击", "", ""], ["Skill_mSkillName_803803_1", "Control Immunity", "免疫控制", "", ""], ["Skill_mSkillName_804001_1", "Frostbite Rupture", "霜蚀爆裂", "", ""], ["Skill_mSkillName_8202053_1", "Time VS Money", "代偿契约", "", ""], ["Skill_mSkillName_8202084_1", "Heating Up", "愈战愈烈", "", ""], ["Skill_mSkillName_8202103_1", "Rigged Arena", "雄师压境", "", ""], ["Skill_mSkillSimpleDesc_11015501_1", "Increases ATK by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;, and reduces the number of attacks required to trigger Nature&#x27;s Fury enhanced attack by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;. When in Berserker Stance, Basic ATK restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt; Max HP, and triggering Ground Stomp restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; Max HP.", "攻击提升&lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;，丛林之怒触发强化攻击所需的攻击次数-&lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;；若处于咆哮者形态，普攻回复自身&lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;最大生命值的生命，触发裂地震击时回复自身&lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt;最大生命值的生命。", "", ""], ["Skill_mSkillSimpleDesc_11015501_2", "Increases ATK by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;, and reduces the number of attacks required to trigger Nature&#x27;s Fury enhanced attack by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;. When in Berserker Stance, Basic ATK restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt; Max HP, and triggering Ground Stomp restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; Max HP.", "攻击提升&lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;，丛林之怒触发强化攻击所需的攻击次数-&lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;；若处于咆哮者形态，普攻回复自身&lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;最大生命值的生命，触发裂地震击时回复自身&lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt;最大生命值的生命。", "", ""], ["Skill_mSkillSimpleDesc_11015501_3", "Increases ATK by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;, and reduces the number of attacks required to trigger Nature&#x27;s Fury enhanced attack by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;. When in Berserker Stance, Basic ATK restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt; Max HP, and triggering Ground Stomp restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; Max HP.", "攻击提升&lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;，丛林之怒触发强化攻击所需的攻击次数-&lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;；若处于咆哮者形态，普攻回复自身&lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;最大生命值的生命，触发裂地震击时回复自身&lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt;最大生命值的生命。", "", ""], ["Skill_mSkillSimpleDesc_11015501_4", "Increases ATK by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;, and reduces the number of attacks required to trigger Nature&#x27;s Fury enhanced attack by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;. When in Berserker Stance, Basic ATK restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt; Max HP, and triggering Ground Stomp restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; Max HP.", "攻击提升&lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;，丛林之怒触发强化攻击所需的攻击次数-&lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;；若处于咆哮者形态，普攻回复自身&lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;最大生命值的生命，触发裂地震击时回复自身&lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt;最大生命值的生命。", "", ""], ["Skill_mSkillSimpleDesc_11015501_5", "Increases ATK by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;, and reduces the number of attacks required to trigger Nature&#x27;s Fury enhanced attack by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;. When in Berserker Stance, Basic ATK restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt; Max HP, and triggering Ground Stomp restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; Max HP.", "攻击提升&lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;，丛林之怒触发强化攻击所需的攻击次数-&lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;；若处于咆哮者形态，普攻回复自身&lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;最大生命值的生命，触发裂地震击时回复自身&lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt;最大生命值的生命。", "", ""], ["Skill_mSkillSimpleDesc_11015501_6", "Increases ATK by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;, and reduces the number of attacks required to trigger Nature&#x27;s Fury enhanced attack by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;. When in Berserker Stance, Basic ATK restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt; Max HP, and triggering Ground Stomp restores &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; Max HP.", "攻击提升&lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;，丛林之怒触发强化攻击所需的攻击次数-&lt;color=&quot;#4A9DF2&quot;&gt;{skm2}&lt;/color&gt;；若处于咆哮者形态，普攻回复自身&lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;最大生命值的生命，触发裂地震击时回复自身&lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt;最大生命值的生命。", "", ""], ["Skill_mSkillSimpleDesc_13000441_1", "Increases faction team members&#x27; basic attributes by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;.\\nIncreases faction team members&#x27; DMG dealt to enemies inflicted with Slow, Stun, Freeze, Immobilized State, and other CC Effects by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt;. \\nIncreases faction team members&#x27; DMG by &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;. When the Lord is on the battlefield and an allied summon dies, increases all faction team members&#x27; DMG by an additional &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; for &lt;color=&quot;#4A9DF2&quot;&gt;{skm5}&lt;/color&gt; sec, stacking up to &lt;color=&quot;#4A9DF2&quot;&gt;{skm6}&lt;/color&gt; time(s).", "阵营小队成员基础属性提升&lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;。\\n阵营小队成员对受到减速、眩晕、冰冻、定身等控制效果影响的敌人增伤&lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt;。\\n阵营小队成员造成的伤害提升&lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;。当领主在场上且友方召唤物死亡时额外提升所有阵营小队成员伤害&lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt;，持续&lt;color=&quot;#4A9DF2&quot;&gt;{skm5}&lt;/color&gt;秒，最多叠加&lt;color=&quot;#4A9DF2&quot;&gt;{skm6}&lt;/color&gt;层。", "", ""], ["Skill_mSkillSimpleDesc_13000441_2", "Increases faction team members&#x27; basic attributes by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;.\\nIncreases faction team members&#x27; DMG dealt to enemies inflicted with Slow, Stun, Freeze, Immobilized State, and other CC Effects by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt;. \\nIncreases faction team members&#x27; DMG by &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;. When the Lord is on the battlefield and an allied summon dies, increases all faction team members&#x27; DMG by an additional &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; for &lt;color=&quot;#4A9DF2&quot;&gt;{skm5}&lt;/color&gt; sec, stacking up to &lt;color=&quot;#4A9DF2&quot;&gt;{skm6}&lt;/color&gt; time(s).", "阵营小队成员基础属性提升&lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;。\\n阵营小队成员对受到减速、眩晕、冰冻、定身等控制效果影响的敌人增伤&lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt;。\\n阵营小队成员造成的伤害提升&lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;。当领主在场上且友方召唤物死亡时额外提升所有阵营小队成员伤害&lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt;，持续&lt;color=&quot;#4A9DF2&quot;&gt;{skm5}&lt;/color&gt;秒，最多叠加&lt;color=&quot;#4A9DF2&quot;&gt;{skm6}&lt;/color&gt;层。", "", ""], ["Skill_mSkillSimpleDesc_13000441_3", "Increases faction team members&#x27; basic attributes by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;.\\nIncreases faction team members&#x27; DMG dealt to enemies inflicted with Slow, Stun, Freeze, Immobilized State, and other CC Effects by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt;. \\nIncreases faction team members&#x27; DMG by &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;. When the Lord is on the battlefield and an allied summon dies, increases all faction team members&#x27; DMG by an additional &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; for &lt;color=&quot;#4A9DF2&quot;&gt;{skm5}&lt;/color&gt; sec, stacking up to &lt;color=&quot;#4A9DF2&quot;&gt;{skm6}&lt;/color&gt; time(s).", "阵营小队成员基础属性提升&lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;。\\n阵营小队成员对受到减速、眩晕、冰冻、定身等控制效果影响的敌人增伤&lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt;。\\n阵营小队成员造成的伤害提升&lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;。当领主在场上且友方召唤物死亡时额外提升所有阵营小队成员伤害&lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt;，持续&lt;color=&quot;#4A9DF2&quot;&gt;{skm5}&lt;/color&gt;秒，最多叠加&lt;color=&quot;#4A9DF2&quot;&gt;{skm6}&lt;/color&gt;层。", "", ""], ["Skill_mSkillSimpleDesc_13000441_4", "Increases faction team members&#x27; basic attributes by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;.\\nIncreases faction team members&#x27; DMG dealt to enemies inflicted with Slow, Stun, Freeze, Immobilized State, and other CC Effects by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt;. \\nIncreases faction team members&#x27; DMG by &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;. When the Lord is on the battlefield and an allied summon dies, increases all faction team members&#x27; DMG by an additional &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; for &lt;color=&quot;#4A9DF2&quot;&gt;{skm5}&lt;/color&gt; sec, stacking up to &lt;color=&quot;#4A9DF2&quot;&gt;{skm6}&lt;/color&gt; time(s).", "阵营小队成员基础属性提升&lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;。\\n阵营小队成员对受到减速、眩晕、冰冻、定身等控制效果影响的敌人增伤&lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt;。\\n阵营小队成员造成的伤害提升&lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;。当领主在场上且友方召唤物死亡时额外提升所有阵营小队成员伤害&lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt;，持续&lt;color=&quot;#4A9DF2&quot;&gt;{skm5}&lt;/color&gt;秒，最多叠加&lt;color=&quot;#4A9DF2&quot;&gt;{skm6}&lt;/color&gt;层。", "", ""], ["Skill_mSkillSimpleDesc_13000441_5", "Increases faction team members&#x27; basic attributes by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;.\\nIncreases faction team members&#x27; DMG dealt to enemies inflicted with Slow, Stun, Freeze, Immobilized State, and other CC Effects by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt;. \\nIncreases faction team members&#x27; DMG by &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;. When the Lord is on the battlefield and an allied summon dies, increases all faction team members&#x27; DMG by an additional &lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt; for &lt;color=&quot;#4A9DF2&quot;&gt;{skm5}&lt;/color&gt; sec, stacking up to &lt;color=&quot;#4A9DF2&quot;&gt;{skm6}&lt;/color&gt; time(s).", "阵营小队成员基础属性提升&lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;。\\n阵营小队成员对受到减速、眩晕、冰冻、定身等控制效果影响的敌人增伤&lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt;。\\n阵营小队成员造成的伤害提升&lt;color=&quot;#4A9DF2&quot;&gt;{skm3}%&lt;/color&gt;。当领主在场上且友方召唤物死亡时额外提升所有阵营小队成员伤害&lt;color=&quot;#4A9DF2&quot;&gt;{skm4}%&lt;/color&gt;，持续&lt;color=&quot;#4A9DF2&quot;&gt;{skm5}&lt;/color&gt;秒，最多叠加&lt;color=&quot;#4A9DF2&quot;&gt;{skm6}&lt;/color&gt;层。", "", ""], ["Skill_mSkillSimpleDesc_8202053_1", "Reduces the Redeployment Time of allied heroes by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;, but increases their Deployment Cost by &lt;color=&quot;#4A9DF2&quot;&gt;+{skm2}&lt;/color&gt;.", "己方英雄的再部署时间减少&lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;，但是上阵费用&lt;color=&quot;#4A9DF2&quot;&gt;+{skm2}&lt;/color&gt;。", "", ""], ["Skill_mSkillSimpleDesc_8202084_1", "Increases allied heroes&#x27; DMG by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt; each round and reduces Basic ATK Interval by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;. Vulnerability (P. DMG) and Vulnerability (M. DMG) increase by &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt; each round.", "己方英雄对敌人造成的伤害每回合提升&lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;、普攻间隔减少&lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;，同时物理易伤和魔法易伤每回合提升&lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt;。", "", ""], ["Skill_mSkillSimpleDesc_8202103_1", "Allied Hero Deployment Limit +&lt;color=&quot;#4A9DF2&quot;&gt;{skm1}&lt;/color&gt;", "己方可放置英雄数量&lt;color=&quot;#4A9DF2&quot;&gt;+{skm1}&lt;/color&gt;。", "", ""], ["Skill_mSkillSimpleDesc_8203031_1", "Hotspot appears on both players&#x27; battlefields. Heroes standing on the Hotspot have all attributes increased by 20%.", "双方玩家的战场上会出现增幅阵地，上阵增幅阵地的英雄全属性提升20%。", "", ""], ["Stage_mStageDesc_5003001", "In this epic battle, you will face an unprecedented enemy - Semrah. Hailing from ancient times, Semrah fights in 3 Battle Modes, each posing a tough challenge.", "在这场宏伟的战斗中，将遭遇前所未有的敌人——塞姆拉。古老的塞姆拉拥有3种战斗模式，每种模式都将是极为艰难的考验。", "", ""], ["Stage_mStageDesc_5003002", "In this epic battle, you will face an unprecedented enemy - Semrah. Hailing from ancient times, Semrah fights in 3 Battle Modes, each posing a tough challenge.", "在这场宏伟的战斗中，将遭遇前所未有的敌人——塞姆拉。古老的塞姆拉拥有3种战斗模式，每种模式都将是极为艰难的考验。", "", ""], ["Stage_mStageDesc_8101001", "Starting from Round 5, &lt;color=&quot;#fd4540&quot;&gt;all monsters gain Invisibility and become untargetable&lt;/color&gt; for 7 sec.", "第5回合开始，&lt;color=&quot;#fd4540&quot;&gt;所有怪物获得隐身效果，无法被选中为目标&lt;/color&gt;，持续7秒。", "", ""], ["Stage_mStageDesc_8101002", "Starting from Round 5, &lt;color=&quot;#fd4540&quot;&gt;all monsters gain Invincibility upon taking DMG for the first time, becoming immune to all DMG&lt;/color&gt; for 4 sec.", "第5回合开始，&lt;color=&quot;#fd4540&quot;&gt;所有怪物第一次受到伤害后获得无敌效果，免疫所有伤害&lt;/color&gt;，持续4秒。", "", ""], ["Stage_mStageDesc_8101003", "Starting from Round 5, &lt;color=&quot;#fd4540&quot;&gt;all heroes continuously take True DMG equal to 4% of their Max HP per sec&lt;/color&gt;.", "第5回合开始，&lt;color=&quot;#fd4540&quot;&gt;所有英雄会持续受到每秒最大生命值4%的真实伤害&lt;/color&gt;。", "", ""], ["Stage_mStageDesc_8201011", "Team up with your friends to defeat the enemy Boss and fend off the tides of enemies.", "与你的好友一起，击败敌方首领，阻挡如潮水般的敌人进攻吧", "", ""], ["Stage_mStageDesc_8201012", "Team up with your friends to defeat the enemy Boss and fend off the tides of enemies.", "与你的好友一起，击败敌方首领，阻挡如潮水般的敌人进攻吧", "", ""], ["Stage_mStageDesc_8201013", "Team up with your friends to defeat the enemy Boss and fend off the tides of enemies.", "与你的好友一起，击败敌方首领，阻挡如潮水般的敌人进攻吧", "", ""], ["Stage_mStageDesc_8201014", "Team up with your friends to defeat the enemy Boss and fend off the tides of enemies.", "与你的好友一起，击败敌方首领，阻挡如潮水般的敌人进攻吧", "", ""], ["Stage_mStageDesc_8201015", "Team up with your friends to defeat the enemy Boss and fend off the tides of enemies.", "与你的好友一起，击败敌方首领，阻挡如潮水般的敌人进攻吧", "", ""], ["Stage_mStageFailDesc_5003001", "Pay extra attention to Semrah&#x27;s Battle Mode and exploit its weakness.", "注意塞姆拉战斗模式，每种模式都有着可以突破的弱点。", "", ""], ["Stage_mStageFailDesc_5003002", "Pay extra attention to Semrah&#x27;s Battle Mode and exploit its weakness.", "注意塞姆拉战斗模式，每种模式都有着可以突破的弱点。", "", ""], ["Stage_mStageIdDesc_5003001", "Apocalypse I - Playtest", "末日Ⅰ-试玩", "", ""], ["Stage_mStageIdDesc_5003002", "Apocalypse II - Playtest", "末日Ⅱ-试玩", "", ""], ["Stage_mStageIdDesc_8201011", "Stage 1", "关卡1", "", ""], ["Stage_mStageIdDesc_8201012", "Stage 2", "关卡2", "", ""], ["Stage_mStageIdDesc_8201013", "Stage 3", "关卡3", "", ""], ["Stage_mStageIdDesc_8201014", "Stage 4", "关卡4", "", ""], ["Stage_mStageIdDesc_8201015", "Stage 5", "关卡5", "", ""], ["Stage_mStageIdDesc_991001", "Test 1-1", "Test1-1", "", ""], ["Stage_mStageIdDesc_991002", "Test 1-2", "Test1-2", "", ""], ["Stage_mStageIdDesc_991003", "Test 1-3", "Test1-3", "", ""], ["Stage_mStageName_5003001", "Semrah", "塞姆拉", "", ""], ["Stage_mStageName_5003002", "Semrah", "塞姆拉", "", ""], ["Stage_mStageName_8201011", "Co-op Mode", "合作模式", "", ""], ["Stage_mStageName_8201012", "Co-op Mode", "合作模式", "", ""], ["Stage_mStageName_8201013", "Co-op Mode", "合作模式", "", ""], ["Stage_mStageName_8201014", "Co-op Mode", "合作模式", "", ""], ["Stage_mStageName_8201015", "Co-op Mode", "合作模式", "", ""], ["UILanguage_mKeyValue_Form_BackpackIntegration_SubTitle", "Sort", "排序", "", ""], ["UILanguage_mKeyValue_Panel_BackpackEquipPanel_EquipedText", "Equipped", "已装备", "", ""], ["UILanguage_mKeyValue_Panel_MaterialPanel_GetWayTitle_Text", "Access", "Access", "", ""], ["UILanguage_mKeyValue_Panel_MaterialPanel_Text_Use", "Use", "使用", "", ""], ["UnionRaise_mRaiseText_15", "Donate &lt;color=#28d37c&gt;{num}&lt;/color&gt; Mythic Extract(s).", "募集&lt;color=#28d37c&gt;{num}&lt;/color&gt;个神话精粹", "", ""], ["UnionRaise_mRaiseText_16", "Donate &lt;color=#28d37c&gt;{num}&lt;/color&gt; 5-star Psychic Power(s).", "募集&lt;color=#28d37c&gt;{num}&lt;/color&gt;个5星通灵体", "", ""], ["UnionRaise_mRaiseTitle_15", "Promotion Insignia III", "进阶材料III", "", ""], ["UnionRaise_mRaiseTitle_16", "Hero Star Up", "角色升星", "", ""], ["Unit_mDescribe_37105", "Scalekin mages, adept in the art of poisonous magic, possess the ability to &lt;color=#ff4500&gt;inflict poison on enemies&lt;/color&gt;.", "掌握毒系魔法的蜥蜴人法师，&lt;color=#ff4500&gt;攻击能够使敌人中毒&lt;/color&gt;。", "", ""], ["Unit_mDescribe_37106", "Elite Skeleton Archers that can deal massive DMG from afar.", "骷髅弓手中的精英，能够造成较高的远程伤害。", "", ""], ["Unit_mDescribe_37107", "Small spiders, very aggressive but weak individually.", "小型蜘蛛，攻击欲望极强，但个体较弱。", "", ""], ["Unit_mDescribe_37108", "Toxic Suicides will explode when approaching enemies, &lt;color=#ff4500&gt;dealing moderate AoE DMG and poisoning them&lt;/color&gt;.", "剧毒爆虫在接近敌人时会自爆，造成&lt;color=#ff4500&gt;造成少量范围伤害并使敌人中毒&lt;/color&gt;。", "", ""], ["Unit_mDescribe_37110", "Clad in giant shields and possessing unyielding skeletal frames, they are renowned for their exceptional DEF.", "手持巨盾的强壮骷髅兵，防御能力很强。", "", ""], ["Unit_mDescribe_37112", "Produces a Queen Spider when left out of combat for a while. Eliminate it before it hatches.", "待机一段时间后能够孵化出蛛后，请在孵化前尽快击杀", "", ""], ["Unit_mFeature_10408", "Ludwig has been reborn from the abyss. With a horrifying power granted by his master - the Eldritch God. Ludwig has now lost his humanity.", "路德维希自深渊中焕然新生，它的主人赐予了它可怕的邪神之力，如今的路德维希人性尽失。", "", ""], ["Unit_mFeature_10409", "Ludwig has been reborn from the abyss. With a horrifying power granted by his master - the Eldritch God. Ludwig has now lost his humanity.", "路德维希自深渊中焕然新生，它的主人赐予了它可怕的邪神之力，如今的路德维希人性尽失。", "", ""], ["Unit_mFeature_10410", "Ludwig has been reborn from the abyss. With a horrifying power granted by his master - the Eldritch God. Ludwig has now lost his humanity.", "路德维希自深渊中焕然新生，它的主人赐予了它可怕的邪神之力，如今的路德维希人性尽失。", "", ""], ["Unit_mFeature_37105", "Scalekin mages, adept in the art of poisonous magic, possess the ability to inflict continuous Poison DMG on enemies.", "掌握毒系魔法的蜥蜴人法师，能够对敌人造成持续毒性伤害。", "", ""], ["Unit_mFeature_37106", "Elite Skeleton Archers that can deal massive DMG from afar.", "骷髅弓手中的精英，能够造成较高的远程伤害。", "", ""], ["Unit_mFeature_37107", "Small spiders, very aggressive but weak individually.", "小型蜘蛛，攻击欲望极强，但个体较弱。", "", ""], ["Unit_mFeature_37108", "The inferior zraks, whose bodies are filled with corrosive liquids, will launch suicide attacks on enemies.", "虫族中的下等成员，体内充满腐蚀性液体，会对敌人发起自杀式攻击。", "", ""], ["Unit_mFeature_37110", "Equipped with a giant shield, these stiff skeletons are able to hold off heavy attacks.", "手持巨盾的强壮骷髅兵，使用巨大盾牌来抵挡，并且可以把强力的攻击挡下来。", "", ""], ["Unit_mFeature_37112", "Produces a Queen Spider when left out of combat for a while. Eliminate it before it hatches.", "待机一段时间后能够孵化出蛛后，请在孵化前尽快击杀", "", ""], ["Unit_mName_37105", "Poison Mage", "剧毒法师", "", ""], ["Unit_mName_37106", "Elite Skeleton Archer", "精英骷髅弓手", "", ""], ["Unit_mName_37107", "Small Arachnid", "小噬蛛", "", ""], ["Unit_mName_37108", "Suicide", "爆虫", "", ""], ["Unit_mName_37110", "Skeletal Giant-Shielder", "骸骨巨盾兵", "", ""], ["Unit_mName_37112", "Huge Spider Egg", "巨型虫卵", "", ""], ["Unit_mFeature_16474", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "天生可以控制岩石的生物，对于侵犯自己领地的敌人将发起无情的进攻。", "", ""], ["Unit_mFeature_16475", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "天生可以控制岩石的生物，对于侵犯自己领地的敌人将发起无情的进攻。", "", ""], ["Unit_mFeature_16481", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "天生可以控制岩石的生物，对于侵犯自己领地的敌人将发起无情的进攻。", "", ""], ["Unit_mFeature_16487", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "天生可以控制岩石的生物，对于侵犯自己领地的敌人将发起无情的进攻。", "", ""], ["Unit_mFeature_16496", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "天生可以控制岩石的生物，对于侵犯自己领地的敌人将发起无情的进攻。", "", ""], ["Unit_mFeature_16497", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "天生可以控制岩石的生物，对于侵犯自己领地的敌人将发起无情的进攻。", "", ""], ["Unit_mFeature_18133", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "天生可以控制岩石的生物，对于侵犯自己领地的敌人将发起无情的进攻。", "", ""], ["Unit_mFeature_18137", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "天生可以控制岩石的生物，对于侵犯自己领地的敌人将发起无情的进攻。", "", ""], ["Unit_mFeature_11127", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "天生可以控制岩石的生物，对于侵犯自己领地的敌人将发起无情的进攻。", "", ""], ["Stage_mStageDesc_9042001", "The Nine-Tailed Fox, resurrected by the grievance from the Shang Dynasty, wreaks havoc upon the mortal realm with her illusions. Four supreme arrays must be laid to obliterate its true spirit.\\n\\nFire Realm: Molten lava surges as crimson chains, coiling round her nine tails to scorch demonic bones. The fox’s wails crackle like searing thunder.", "九尾妖狐借殷商怨气重生，以幻惑之术祸乱人间。需布下四大绝阵磨灭其真灵。\\n\\n火狱境：地涌熔岩化赤链，缠其九尾焚其妖骨，妖狐哀泣如焦雷。", "", ""], ["Item_mItemName_214901", "Shawl of the Lifegiver", "永不陷落的勇气", "", ""], ["Skill_mSkillSimpleDesc_232170_1", "When the Talent is triggered, increases the hero&#x27;s DMG by &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;, with an additional &lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt; against Elite and Boss units for &lt;color=&quot;#4A9DF2&quot;&gt;{skm3}&lt;/color&gt; sec.", "天赋触发时，自身伤害增加&lt;color=&quot;#4A9DF2&quot;&gt;{skm1}%&lt;/color&gt;，对精英和首领单位伤害额外增加&lt;color=&quot;#4A9DF2&quot;&gt;{skm2}%&lt;/color&gt;，持续&lt;color=&quot;#4A9DF2&quot;&gt;{skm3}&lt;/color&gt;秒", "", ""], ["CommonText_mMessage_25947", "Corresponding Arena Challenge Attack Mode", "竞技场对应挑战进攻模式", "", ""], ["CommonText_mMessage_25948", "Corresponding Arena Challenge Defense Mode", "竞技场对应挑战防御模式", "", ""], ["Skill_mSkillSimpleDesc_220903_5", "Applies &lt;color=&quot;#28d37c&quot;&gt;[322095]&lt;/color&gt; to &lt;color=&quot;#4A9DF2&quot;&gt;1&lt;/color&gt; ally with the lowest HP percentage in range for &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}&lt;/color&gt; sec.", "为范围内生命百分比最低的&lt;color=&quot;#4A9DF2&quot;&gt;1&lt;/color&gt;名友方附加&lt;color=&quot;#28d37c&quot;&gt;[322095]&lt;/color&gt;，持续&lt;color=&quot;#4A9DF2&quot;&gt;{skm1}&lt;/color&gt;秒。", "", ""], ["Skill_mSkillSimpleDesc_220903_4", "Applies &lt;color=&quot;#28d37c&quot;&gt;[322094]&lt;/color&gt; to &lt;color=&quot;#4A9DF2&quot;&gt;1&lt;/color&gt; ally with the lowest HP percentage in range for &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}&lt;/color&gt; sec.", "为范围内生命百分比最低的&lt;color=&quot;#4A9DF2&quot;&gt;1&lt;/color&gt;名友方附加&lt;color=&quot;#28d37c&quot;&gt;[322094]&lt;/color&gt;，持续&lt;color=&quot;#4A9DF2&quot;&gt;{skm1}&lt;/color&gt;秒。", "", ""], ["Skill_mSkillSimpleDesc_220903_3", "Applies &lt;color=&quot;#28d37c&quot;&gt;[322093]&lt;/color&gt; to &lt;color=&quot;#4A9DF2&quot;&gt;1&lt;/color&gt; ally with the lowest HP percentage in range for &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}&lt;/color&gt; sec.", "为范围内生命百分比最低的&lt;color=&quot;#4A9DF2&quot;&gt;1&lt;/color&gt;名友方附加&lt;color=&quot;#28d37c&quot;&gt;[322093]&lt;/color&gt;，持续&lt;color=&quot;#4A9DF2&quot;&gt;{skm1}&lt;/color&gt;秒。", "", ""], ["Skill_mSkillSimpleDesc_220903_2", "Applies &lt;color=&quot;#28d37c&quot;&gt;[322092]&lt;/color&gt; to &lt;color=&quot;#4A9DF2&quot;&gt;1&lt;/color&gt; ally with the lowest HP percentage in range for &lt;color=&quot;#4A9DF2&quot;&gt;{skm1}&lt;/color&gt; sec.", "为范围内生命百分比最低的&lt;color=&quot;#4A9DF2&quot;&gt;1&lt;/color&gt;名友方附加&lt;color=&quot;#28d37c&quot;&gt;[322092]&lt;/color&gt;，持续&lt;color=&quot;#4A9DF2&quot;&gt;{skm1}&lt;/color&gt;秒。", "", ""], ["LANG_STRID_notice_NineTailedNightmare", "Nine-Tailed Nightmare Event Intro", "九尾祸活动介绍", "", ""], ["LANG_STRID_push_long9_title_1", "Grimmscale Invasion Launches", "萨尔扬之战挑战开启", "", ""], ["LANG_STRID_push_long9_title_2", "Commanders can challenge Sauryan, Wing of Chaos infinitely every day. Rewards are based on the highest total damage dealt in a single challenge attempt.", "指挥官们可无限次挑战【混沌之力·萨尔扬】，每日依据单次最高伤害获取各类珍贵奖励。", "", ""], ["LANG_STRID_push_xyx_title_1", "Zombie Invasion Starts!", "僵尸被我包围了活动开启", "", ""], ["LANG_STRID_push_xyx_title_2", "Build your hero&#x27;s skills, equip powerful Relics, and battle through waves of monsters to survive!", "构筑英雄技能，选择合适遗物，击退来袭怪物，努力生存到最后！", "", ""], ["LANG_STRID_notice_jwhpv", "Event Trailer: Nine-Tailed Nightmare", "九尾祸活动PV", "", ""], ["LANG_STRID_push_jwhyy1", "Nine-Tailed Nightmare Is Here!", "九尾祸活动来袭！", "", ""], ["LANG_STRID_push_jwhyy2", "The new Legendary heroes Ne Zha and Erlang Shen arrive! Join the events to claim event-exclusive rewards, including Exclusive Artifacts, Summoning Crystals, Avatar, Emote, and more! Plus, Erlang Shen&#x27;s time-limited skin is now available!", "全新传说英雄「哪吒」「杨戬」登场！参与系列活动领取专属神器、各类召唤水晶和头像、表情等活动限定奖励，还有杨戬皮肤限时上线！", "", ""], ["LANG_STRID_notice_NineTailed2", "Nine-Tailed Nightmare Starts!", "九尾祸活动开启", "", ""], ["LANG_STRID_notice_NineTailed3", "Join the event to obtain event-exclusive rewards, including Exclusive Artifacts, Avatar, Avatar Border, Summoning Crystals, and more!", "参与活动获得专属神器、头像、头像框等活动限定奖励、各类召唤水晶等奖励！", "", ""], ["LANG_STRID_push_shardsummon_nezha", "Collect shards to assemble Ne Zha&#x27;s Exclusive Artifact: Fire-Tipped Spear!", "收集碎片，合成哪吒专属神器「火尖枪」！", "", ""], ["LANG_STRID_push_shardsummon_sqhcending", "Artifact Shard Assembly Countdown", "神器碎片合成倒计时", "", ""], ["LANG_STRID_push_shardsummon_nezhaend2", "Last chance to collect shards and assemble Ne Zha&#x27;s Exclusive Artifact: Fire-Tipped Spear! Don&#x27;t miss out!", "收集碎片合成哪吒专属神器「火尖枪」的最后机会，不要错过！", "", ""], ["LANG_STRID_notice_CreativeShort", "Creative Short", "创意短剧", "", ""], ["LANG_STRID_compete_brief", "After the event starts, Commanders earn League points by participating in the Arena, Guild - Drake&#x27;s Chasm and spending Stamina and can claim Personal Score Rewards. Commanders within the same League compete against each other for ranking rewards. After the event ends, Commanders who have earned points can claim the Basic League Rewards. Members of the League with a higher total score will receive additional Champion League Reward.", "活动开启后，指挥官通过参与竞技场、公会-巨龙遗迹、消耗体力等途径获得联盟积分，领取个人积分奖励。同时联盟内的指挥官将互相竞争，赢得排名奖励。活动结束后，获得过积分的指挥官可领取基础联盟奖励，总积分更高的联盟成员将额外获得联盟获胜奖励。", "", ""], ["LANG_STRID_Anniversary_Discount_Event_Des_01", "Discount Tokens obtained from event quests can be used to randomly discount an item on the event page once. Each item can be discounted up to 3 times.", "使用活动任务中获得的打折币可随机给活动页面内商品打折1次，每个商品最多可打折3次。", "", ""], ["LANG_STRID_FishingRanking", "&lt;color=#e1e1e1&gt;After the event ends, the top 3 Commanders on the leaderboard will each receive a physical merchandise reward. Contact info will be requested via in-game mail for delivery.&lt;/color&gt;", "&lt;color=#e1e1e1&gt;活动结束后，排行榜前三名的指挥官将会分别获得一份实体周边奖励，后续将通过游戏内邮件联系填写地址。&lt;/color&gt;", "", ""], ["LANG_STRID_notice_nzgl", "Hero Gameplay: Ne Zha", "哪吒玩法推荐", "", ""], ["LANG_STRID_notice_yjgl", "Hero Gameplay: Erlang Shen", "杨戬玩法推荐", "", ""], ["LANG_STRID_GDP_title_26", "Celestial Season", "寰天季", "", ""], ["LANG_STRID_activity_popup_GDP_htj", "Gold Dragon Pass - Celestial Season", "金龙通行证-寰天季", "", ""], ["LANG_STRID_CompeteEvent_Rule11", "&lt;color=#e1e1e1&gt;Consume general items to gain points.&lt;/color&gt;", "&lt;color=#e1e1e1&gt;消耗通用物品获得积分&lt;/color&gt;", "", ""], ["LANG_STRID_CompeteEvent_Rule12", "&lt;color=#e1e1e1&gt;Consume Mythril and Meteorite to gain points.&lt;/color&gt;", "&lt;color=#e1e1e1&gt;消耗秘银、陨星获得积分&lt;/color&gt;", "", ""], ["LANG_STRID_Moon_Dec_01", "Shadows of Tomorrow", "胧月双华", "", ""], ["LANG_STRID_Anniversary_Discount_Event_Detail", "&lt;color=&quot;#cec2b1&quot;&gt;Discount Event&lt;/color&gt;\\nEach use of a Discount Token will apply a &lt;color=&quot;#28d37c&quot;&gt;random discount&lt;/color&gt; to a random item in the event. Participate in event quests to obtain Discount Tokens. All unused Discount Tokens will be removed after the event ends.\\nPlayers may choose to purchase event items at their original prices without using any Discount Tokens.\\n\\nEach time a Discount Token is used, one item will be randomly selected from the three available in the event interface for a discount. After each discount, the price of the currently selected item will be further reduced. &lt;color=&quot;#28d37c&quot;&gt;Each item reaches its maximum discount after being discounted 3 times&lt;/color&gt;.\\nOnly items that have not reached the maximum discount and have not been purchased can continue to participate in the discount event.", "&lt;color=&quot;#cec2b1&quot;&gt;折扣活动&lt;/color&gt;\\n折扣币每次使用后会对活动内的商品进行&lt;color=&quot;#28d37c&quot;&gt;随机打折&lt;/color&gt;。参与活动任务可获取活动打折币，每一期的活动打折币在活动结束后会被清空。\\n玩家可以选择在不使用任何打折币进行打折的情况下，以原价购买活动商品。\\n\\n每次使用打折币时，会随机从活动界面的3个商品中，选中1个进行打折。每1次打折后都会使当前被选中的商品价格变得更低，&lt;color=&quot;#28d37c&quot;&gt;每个商品打折3次后达到最低折扣&lt;/color&gt;。\\n只有未达到最低折扣且未被购买的商品才能继续参与打折。", "", ""]];
+            const formattedData = [["BUFFAttribute_mName_8202044", "DMG Increase", "伤害提升", "", ""], ["BUFFAttribute_mName_8202045", "DMG Reduction", "伤害降低", "", ""], ["BUFFAttribute_mTips_322928", "Fire-Tipped Spear ignores {30,num}% of the enemy's DEF. Universe Ring bounces {31,num} extra time(s) and can hit the same target multiple times. Yin-Yang Blade executes common monsters with HP below {32,num}%.", "火尖枪会无视敌人{30,num}%的防御；乾坤圈会额外弹射{31,num}次并可对相同目标重复弹射；阴阳剑会斩杀血量低于{32,num}%的普通怪物。", "", ""], ["ChampionshipPlan_mChampionshipDesc_833", "Participate in Artifact Material Raid to win trophies and redeem rewards.", "参与神器材料副本，获得奖杯，兑换大奖", "", ""], ["ChampionshipPlan_mChampionshipDesc_834", "Level up/star up/promote heroes or upgrade heroes' skills to win trophies and redeem rewards.", "升级升星进阶英雄，升级技能，获得奖杯，兑换大奖", "", ""], ["ChampionshipPlan_mChampionshipDesc_835", "Participate in Gear Raid I to win trophies and redeem rewards.", "参与装备副本I，获得奖杯，兑换大奖", "", ""], ["ChampionshipPlan_mChampionshipDesc_836", "Participate in Gear Raid II to win trophies and redeem rewards.", "参与装备副本II，获得奖杯，兑换大奖", "", ""], ["ChampionshipPlan_mChampionshipDesc_837", "Summon heroes to win trophies and redeem rewards.", "召唤英雄，获得奖杯，兑换大奖", "", ""], ["ChampionshipPlan_mChampionshipDesc_838", "Participate in Artifact Material Raid to win trophies and redeem rewards.", "参与神器材料副本，获得奖杯，兑换大奖", "", ""], ["ChampionshipPlan_mChampionshipDesc_839", "Participate in Gear Raid III to win trophies and redeem rewards.", "参与装备副本III，获得奖杯，兑换大奖", "", ""], ["ChampionshipPlan_mChampionshipDesc_840", "Level up/star up/promote heroes or upgrade heroes' skills to win trophies and redeem rewards.", "升级升星进阶英雄，升级技能，获得奖杯，兑换大奖", "", ""], ["ChampionshipPlan_mChampionshipDesc_841", "Participate in Gear Raid I to win trophies and redeem rewards.", "参与装备副本I，获得奖杯，兑换大奖", "", ""], ["ChampionshipPlan_mChampionshipDesc_842", "Participate in Gear Raid II to win trophies and redeem rewards.", "参与装备副本II，获得奖杯，兑换大奖", "", ""], ["ChampionshipPlan_mChampionshipGlobalName_837", "Arrival of Heroes Ultimate Leaderboard", "英雄降临巅峰排行榜", "", ""], ["ChampionshipPlan_mChampionshipName_833", "Mystery of Artifacts", "神器秘境", "", ""], ["ChampionshipPlan_mChampionshipName_834", "Hero Training", "英雄培养", "", ""], ["ChampionshipPlan_mChampionshipName_835", "The Lost Legacy", "失落遗产", "", ""], ["ChampionshipPlan_mChampionshipName_836", "Vault in the Sands", "沙海宝库", "", ""], ["ChampionshipPlan_mChampionshipName_837", "Arrival of Heroes", "英雄降临", "", ""], ["ChampionshipPlan_mChampionshipName_838", "Mystery of Artifacts", "神器秘境", "", ""], ["ChampionshipPlan_mChampionshipName_839", "Forgotten Palace", "迷失之地", "", ""], ["ChampionshipPlan_mChampionshipName_840", "Hero Training", "英雄培养", "", ""], ["ChampionshipPlan_mChampionshipName_841", "The Lost Legacy", "失落遗产", "", ""], ["ChampionshipPlan_mChampionshipName_842", "Vault in the Sands", "沙海宝库", "", ""], ["Chapter_mChapterName_4301", "Titanic Ruins - Playtest", "泰坦废墟-试玩", "", ""], ["CommonText_mMessage_25116", "Awaken the mystical power within.", "唤醒神秘的魔法力量。", "", ""], ["CommonText_mMessage_25125", "Take destiny into your own hands.", "将命运掌握在自己手中。", "", ""], ["CommonText_mMessage_25132", "Reveal cards to earn Dragon's Gold by matching the designated patterns.", "揭示卡牌，翻出指定图案可获得对应数量的龙脉金币。", "", ""], ["CommonText_mMessage_25133", "Reveal cards and match 3 identical patterns to earn a <span style=\"color: #fdbe36;\">{num}</span>x reward!", "揭示卡牌，翻出3个相同图案可获得<span style=\"color: #fdbe36;\">{num}</span>倍奖励。", "", ""], ["CommonText_mMessage_25631", "Number:", "点数：", "", ""], ["CommonText_mMessage_25635", "The [?] corresponds to 3 numbers that will be filled into empty slots in sequence—the resulting number will determine the final amount of Dragon's Gold you receive!", "[?]对应的3个数字将依次填入空缺位置——由此产生的数字将决定最终获得的龙脉金币数量！", "", ""], ["CommonText_mMessage_25773", "Nine-Tailed Nightmare", "九尾祸", "", ""], ["CommonText_mMessage_25828", "Locked", "未解锁", "", ""], ["CommonText_mMessage_25829", "Invalid", "已失效", "", ""], ["CommonText_mMessage_25830", "New Recruit", "获取新招募", "", ""], ["CommonText_mMessage_25846", "Officials", "官员", "", ""], ["CommonText_mMessage_25847", "Guild War Officials Appointment", "公会战官员任命", "", ""], ["CommonText_mMessage_25848", "Rank", "职位", "", ""], ["CommonText_mMessage_25849", "Marshal", "统帅", "", ""], ["CommonText_mMessage_25850", "Members", "成员", "", ""], ["CommonText_mMessage_25851", "BP", "战力", "", ""], ["CommonText_mMessage_25852", "Season's Attacks", "赛季进攻情况", "", ""], ["CommonText_mMessage_25853", "Actions", "操作", "", ""], ["CommonText_mMessage_25854", "Appoint", "任命", "", ""], ["CommonText_mMessage_25855", "Dismiss", "卸任", "", ""], ["CommonText_mMessage_25856", "No Access", "无权限", "", ""], ["CommonText_mMessage_25857", "All Marshals gain <span style=\"color: #e37b00;\">{num} extra attack(s) </span> per Guild War round. Only the Guild Leader and Vice Leaders can appoint a Marshal during the preparation phase. If no appointments are made, this position will be automatically assigned based on members' contribution and BP.", "所有统帅，每轮公会战可以<span style=\"color: #e37b00;\">额外获得{num}次进攻次数</span>，统帅只能由会长和副会长在备战期任命，若未任命会按照贡献度和战力自动分配", "", ""], ["CommonText_mMessage_25858", "Appointed: {num1}/{num2}", "已任命：{num1}/{num2}", "", ""], ["CommonText_mMessage_25859", "Appointment successful. Player gains {num} extra attack(s) per round.", "任命成功，该玩家每轮进攻次数增加{num}次", "", ""], ["CommonText_mMessage_25860", "Marshal slots are full. Dismiss one to continue.", "当前统帅数量已满，请卸任其他统帅后任命", "", ""], ["CommonText_mMessage_25861", "<span style=\"color: #feab53;\">Are you sure you want to dismiss this player from the Marshal position?</span><br>Each Guild can have up to {num1} Marshals, each gaining {num2} extra attack(s) per round.", "<span style=\"color: #feab53;\">确定卸任该玩家的统帅职位吗？</span><br>每个公会最多有{num1}名统帅，统帅每轮进攻次数可增加{num2}次。", "", ""], ["CommonText_mMessage_25862", "Marshal dismissed successfully. Please appoint a new one.", "统帅卸任成功，请任命其他统帅", "", ""], ["CommonText_mMessage_25863", "Guild War Attempts", "公会战次数", "", ""], ["CommonText_mMessage_25931", "Points of the Round", "本次积分", "", ""], ["CommonText_mMessage_26080", "Prioritize Guild War team.", "优先使用公会战的队伍", "", ""], ["CommonText_mMessage_26081", "Playtest mode cannot save battle results or auto-fight.", "试玩模式无法保存对战结果和自动战斗", "", ""], ["CommonText_mMessage_60708", "Score Details", "积分统计", "", ""], ["Difficulty_mDetail_1100001", "Only heroes from <span style=\"color: #e37b00;\">The Nightmare Council, The Star Piercers</span> can challenge this stage.<br>Lord Skills of each Faction can only affect up to <span style=\"color: #fd4540;\">5</span> heroes.", "仅能使用<span style=\"color: #e37b00;\">噩梦议会,贯星之箭</span>阵营的英雄挑战副本<br>每个阵营的领主技能最多对<span style=\"color: #fd4540;\">5</span>名英雄生效", "", ""], ["Difficulty_mDetail_1100003", "Only heroes from <span style=\"color: #e37b00;\">The Infernal Blast, The North Throne</span> can challenge this stage.<br>Lord Skills of each Faction can only affect up to <span style=\"color: #fd4540;\">5</span> heroes.", "仅能使用<span style=\"color: #e37b00;\">炼狱爆破,北境王座</span>阵营的英雄挑战副本<br>每个阵营的领主技能最多对<span style=\"color: #fd4540;\">5</span>名英雄生效", "", ""], ["Difficulty_mDetail_1100004", "Only heroes from <span style=\"color: #e37b00;\">The Esoteria Order, The Chaos Dominion, and The Supreme Arbiters</span> can challenge this stage.<br>Lord Skills of each Faction can only affect up to <span style=\"color: #fd4540;\">5</span> heroes.", "仅能使用<span style=\"color: #e37b00;\">秘法会,混沌征服者,至高仲裁者</span>阵营的英雄挑战副本<br>每个阵营的领主技能最多对<span style=\"color: #fd4540;\">5</span>名英雄生效", "", ""], ["Difficulty_mDetail_1200001", "The following heroes are exempt from map info restrictions.", "以下英雄不受地图信息限制", "", ""], ["Difficulty_mDetail_1200002", "The following heroes are exempt from map info restrictions.", "以下英雄不受地图信息限制", "", ""], ["Difficulty_mDetail_1200003", "The following heroes are exempt from map info restrictions.", "以下英雄不受地图信息限制", "", ""], ["Difficulty_mDetail_1200004", "The following heroes are exempt from map info restrictions.", "以下英雄不受地图信息限制", "", ""], ["Difficulty_mDetail_1300001", "Erlang Shen cannot be deployed in this special stage.", "当前为特殊关卡杨戬无法上阵", "", ""], ["Difficulty_mDetail_32010053", "Mage heroes cannot be included in the team.", "编队中禁止编入法师英雄", "", ""], ["Difficulty_mDetail_32010153", "Destroyers gain the Camaraderie skill. When they die, nearby monsters receive an enhancement.", "毁灭者获得技能同气连枝，死亡时附近的怪物会获得强化", "", ""], ["Difficulty_mDetail_32010163", "When the Priest of Thunder appears, he gains Ghost Form for 30 sec.", "雷之祭司出现时获得幽魂形态，持续30秒", "", ""], ["Difficulty_mDetail_32010364", "Boss enemies restore 1% Max HP per sec, while other enemies restore 5% Max HP per sec.", "首领敌人每秒触发1%的最大生命回复，非首领敌人每秒触发5%的最大生命回复", "", ""], ["Difficulty_mDetail_32010476", "Langlyn's Max HP increases by 50%, but cannot be healed.", "兰林的最大生命提高50%，但无法被治疗", "", ""], ["Difficulty_mDetail_32010477", "Langlyn's Max HP increases by 75%, but cannot be healed.", "兰林的最大生命提高75%，但无法被治疗", "", ""], ["Difficulty_mDetail_32010478", "Langlyn's Max HP increases by 100%, but cannot be healed.", "兰林的最大生命提高100%，但无法被治疗", "", ""], ["ExpStageUI_mRaidName_8201006", "COTD-1", "COTD-1", "", ""], ["ExpStageUI_mRaidName_8201007", "COTD-2", "COTD-2", "", ""], ["ExpStageUI_mRaidName_8201008", "COTD-3", "COTD-3", "", ""], ["ExpStageUI_mRaidName_8201009", "COTD-4", "COTD-4", "", ""], ["ExpStageUI_mRaidName_8201010", "COTD-5", "COTD-5", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010153", "Destroyers gain the Camaraderie skill. When a Destroyer dies, nearby Destroyers receive an enhancement.", "毁灭者获得技能同气连枝，其他毁灭者死亡时，附近的毁灭者会获得强化", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010163", "When the Priest of Thunder appears, he gains Ghost Form for 30 sec.", "雷之祭司出现时获得幽魂形态，持续30秒", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010364", "Boss enemies restore 1% Max HP per sec, while other enemies restore 5% Max HP per sec.", "首领敌人每秒触发1%的最大生命回复，非首领敌人每秒触发5%的最大生命回复", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010476", "Langlyn's Max HP increases by 50%, but cannot be healed.", "兰林的最大生命提高50%，但无法被治疗", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010477", "Langlyn's Max HP increases by 75%, but cannot be healed.", "兰林的最大生命提高75%，但无法被治疗", "", ""], ["ExtensionGroup_mExtensionGroupDesc_32010478", "Langlyn's Max HP increases by 100%, but cannot be healed.", "兰林的最大生命提高100%，但无法被治疗", "", ""], ["HeroFactionKingSkill_mName_100441_1", "The Cursed Cult", "诅咒神教", "", ""], ["HeroFactionKingSkill_mName_100441_2", "The Cursed Cult", "诅咒神教", "", ""], ["HeroFactionKingSkill_mName_100441_3", "The Cursed Cult", "诅咒神教", "", ""], ["HeroFactionKingSkill_mName_100441_4", "The Cursed Cult", "诅咒神教", "", ""], ["HeroFactionKingSkill_mName_100441_5", "The Cursed Cult", "诅咒神教", "", ""], ["Item_mItemDesc_110", "Purchase to obtain a 30-Day Monthly Card of Diamonds.", "购买可获得钻石月卡30天天数", "", ""], ["Item_mItemDesc_111", "Purchase to obtain a 30-Day Monthly Card of Summoning.", "购买可获得召唤月卡30天天数", "", ""], ["Item_mItemDesc_112", "Purchase to obtain a 30-Day Monthly Card of Stamina.", "购买可获得体力月卡30天天数", "", ""], ["Item_mItemDesc_31096", "Select 1 event-exclusive hero to join the event. The selected exclusive hero has an increased drop rate & is guaranteed within 200 summons!", "可自选一名限定英雄参与活动，自选的限定英雄掉落概率提升&200抽内必得！", "", ""], ["Item_mItemDesc_31097", "<span style=\"color: #eadca2;\">Special Summon Offer</span><br><br>Get the necessary materials for Hero Summon", "<span style=\"color: #eadca2;\">英雄召唤特惠</span><br><br>获得英雄召唤的必需资源", "", ""], ["Item_mItemDesc_3333", "<span style=\"color: #498a40;\">Exclusive avatar border for the Gold Dragon Pass.</span>", "<span style=\"color: #498a40;\">金龙通行证专属限定头像框</span>", "", ""], ["Item_mItemDesc_3519", "Unknown Clue of Erlang Shen. When obtained, it will automatically convert into a random one from Erlang Shen's Clues 1-5.", "杨戬的未知故事线索，获得时将自动转化为杨戬故事线索1~5中的随机一个。", "", ""], ["Item_mItemDesc_3521", "Erlang Shen's Clue 2.<br><span style=\"color: #498a40;\">Usage: Consume this item via Fate's Chapters to unlock the corresponding clue.</span>", "杨戬的故事线索2。<br><span style=\"color: #498a40;\">使用方式：【命运之章】活动。消耗此道具解锁对应线索</span>", "", ""], ["Item_mItemDesc_3522", "Erlang Shen's Clue 3.<br><span style=\"color: #498a40;\">Usage: Consume this item via Fate's Chapters to unlock the corresponding clue.</span>", "杨戬的故事线索3。<br><span style=\"color: #498a40;\">使用方式：【命运之章】活动。消耗此道具解锁对应线索</span>", "", ""], ["Item_mItemDesc_3523", "Erlang Shen's Clue 4.<br><span style=\"color: #498a40;\">Usage: Consume this item via Fate's Chapters to unlock the corresponding clue.</span>", "杨戬的故事线索4。<br><span style=\"color: #498a40;\">使用方式：【命运之章】活动。消耗此道具解锁对应线索</span>", "", ""], ["Item_mItemDesc_3524", "Erlang Shen's Clue 5.<br><span style=\"color: #498a40;\">Usage: Consume this item via Fate's Chapters to unlock the corresponding clue.</span>", "杨戬的故事线索5。<br><span style=\"color: #498a40;\">使用方式：【命运之章】活动。消耗此道具解锁对应线索</span>", "", ""], ["Item_mItemDesc_35473", "You can obtain the following items:<br>Monthly Card of Diamonds (30-Day)<br>Diamond x500", "可获得以下道具<br>钻石月卡（30天）<br>钻石*500", "", ""], ["Item_mItemDesc_35474", "You can obtain the following items:<br>Monthly Card of Summoning (30-Day)<br>Rare Summoning Crystal x500", "可获得以下道具<br>召唤月卡（30天）<br>稀有召唤水晶*500", "", ""], ["Item_mItemDesc_35475", "You can obtain the following items:<br>Monthly Card of Stamina (30-Day)<br>Stamina x600<br>Auto-Fight Chance x30", "可获得以下道具<br>体力月卡（30天）<br>体力*600<br>自动战斗次数*30", "", ""], ["Item_mItemDesc_56310", "Grants a random <span style=\"color: #498a40;\">Lvl. 2-4</span> Trial Keystone.", "可随机获得<span style=\"color: #498a40;\">2-4级</span>的试炼石板", "", ""], ["Item_mItemDesc_56311", "Grants a random <span style=\"color: #498a40;\">Lvl. 2-5</span> Trial Keystone.", "可随机获得<span style=\"color: #498a40;\">2-5级</span>的试炼石板", "", ""], ["Item_mItemName_110", "Monthly Card of Diamonds (30-Day)", "钻石月卡（30天）", "", ""], ["Item_mItemName_111", "Monthly Card of Summoning (30-Day)", "召唤月卡（30天）", "", ""], ["Item_mItemName_112", "Monthly Card of Stamina (30-Day)", "体力月卡（30天）", "", ""], ["Item_mItemName_31096", "Exclusive Lucky Pick", "限定自选召唤活动", "", ""], ["Item_mItemName_31097", "Turbo Summon Bundle", "召唤加速包", "", ""], ["Item_mItemName_3324", "Avatar Border: Nine-Tailed Nightmare Ranking Champion", "“九尾祸”积分排名冠军头像框", "", ""], ["Item_mItemName_3325", "Avatar Border: Nine-Tailed Nightmare Ranking Runner-Up", "“九尾祸”积分排名亚军头像框", "", ""], ["Item_mItemName_3326", "Avatar Border: Nine-Tailed Nightmare Ranking Third Place", "“九尾祸”积分排名季军头像框", "", ""], ["Item_mItemName_3333", "Avatar Border: Gold Dragon Pass", "“金龙通行证”限定头像框", "", ""], ["Item_mItemName_35473", "Monthly Card of Diamonds", "钻石月卡", "", ""], ["Item_mItemName_35474", "Monthly Card of Summoning", "召唤月卡", "", ""], ["Item_mItemName_35475", "Monthly Card of Stamina", "体力月卡", "", ""], ["Item_mItemName_56310", "Random Trial Keystone (Lvl. 2-4)", "随机试炼石板（2-4级）", "", ""], ["Item_mItemName_56311", "Random Trial Keystone (Lvl. 2-5)", "随机试炼石板（2-5级）", "", ""], ["Quest_mQuestTitle_380034", "Obtain a total of 100 Dragon's Gold.", "累计获得100龙脉金币", "", ""], ["Quest_mQuestTitle_380035", "Obtain a total of 200 Dragon's Gold.", "累计获得200龙脉金币", "", ""], ["Quest_mQuestTitle_380036", "Obtain a total of 300 Dragon's Gold.", "累计获得300龙脉金币", "", ""], ["Quest_mQuestTitle_380037", "Obtain a total of 500 Dragon's Gold.", "累计获得500龙脉金币", "", ""], ["Quest_mQuestTitle_380038", "Obtain a total of 800 Dragon's Gold.", "累计获得800龙脉金币", "", ""], ["Quest_mQuestTitle_380039", "Obtain a total of 1,000 Dragon's Gold.", "累计获得1000龙脉金币", "", ""], ["Quest_mQuestTitle_380040", "Obtain a total of 1,500 Dragon's Gold.", "累计获得1500龙脉金币", "", ""], ["Quest_mQuestTitle_380041", "Obtain a total of 2,000 Dragon's Gold.", "累计获得2000龙脉金币", "", ""], ["Quest_mQuestTitle_380042", "Obtain a total of 3,000 Dragon's Gold.", "累计获得3000龙脉金币", "", ""], ["Quest_mQuestTitle_380043", "Obtain a total of 4,000 Dragon's Gold.", "累计获得4000龙脉金币", "", ""], ["Quest_mQuestTitle_380044", "Obtain a total of 5,000 Dragon's Gold.", "累计获得5000龙脉金币", "", ""], ["RoleHeadFrame_mSourceDesc_84", "Awarded to the Commander who ranks first on the Points Leaderboard in the Echoes of Woe during the Nine-Tailed Nightmare.", "在“九尾祸”活动的殷墟怨狐副本中积分总榜排名第一的指挥官获得", "", ""], ["RoleHeadFrame_mSourceDesc_85", "Awarded to the Commander who ranks second on the Points Leaderboard in the Echoes of Woe during the Nine-Tailed Nightmare.", "在“九尾祸”活动的殷墟怨狐副本中积分总榜排名第二的指挥官获得", "", ""], ["RoleHeadFrame_mSourceDesc_86", "Awarded to the Commander who ranks third on the Points Leaderboard in the Echoes of Woe during the Nine-Tailed Nightmare.", "在“九尾祸”活动的殷墟怨狐副本中积分总榜排名第三的指挥官获得", "", ""], ["RoleHeadFrame_mSourceDesc_89", "Guild War S10 \"Overlord\" exclusive avatar border.", "“公会战S10赛季”霸主段位限定头像框", "", ""], ["RoleHeadFrame_mSourceDesc_91", "Obtained from Gold Dragon Pass.", "金龙通行证中获得", "", ""], ["RollDiceBuilding_mName_11_1", "Turn of Luck", "时来运转", "", ""], ["RollDiceBuilding_mName_12_1", "Turn of Luck", "时来运转", "", ""], ["Skill_mSkillDesc_1908301_1", "Swings claws, dealing DMG to all heroes within 1 tile ahead.", "挥舞利爪，对身前1格范围内所有英雄单位造成伤害", "", ""], ["Skill_mSkillDesc_1908304_1", "Swings claws, dealing DMG to all heroes within 1 tile ahead.", "挥舞利爪，对身前1格范围内所有英雄单位造成伤害", "", ""], ["Skill_mSkillDesc_1908315_1", "When the Nine-Tailed Fox takes fatal DMG, she flees the battlefield and activates the tails on the field to attack. When the tails are defeated, the Nine-Tailed Fox returns to the battlefield. After all tails on the field are defeated, the Nine-Tailed Fox transforms and summons a large number of foxes.", "九尾狐每次受到致命伤害后会逃离战场，同时激活场上尾巴发动攻击，击败尾巴九尾狐会继续登场，当场上所有尾巴被击败后，九尾妖狐会变身，同时召唤大量狐狸。", "", ""], ["Skill_mSkillDesc_1908345_1", "Deals M. DMG to the last deployed unit on the battlefield, prioritizing Defenders.", "对场上最后放置单位造成魔法伤害，优先选择守护者职业", "", ""], ["Skill_mSkillDesc_1908357_1", "Deals M. DMG to the last deployed unit on the battlefield, prioritizing Defenders.", "对场上最后放置单位造成魔法伤害，优先选择守护者职业", "", ""], ["Skill_mSkillDesc_803803_1", "Immune to all <span style=\"color: #4A9DF2;\">CC Effects</span> (except Slow).", "免疫除减速外的所有<span style=\"color: #4A9DF2;\">控制效果</span>", "", ""], ["Skill_mSkillDesc_8202053_1", "Reduces the Redeployment Time of allied heroes by <span style=\"color: #4A9DF2;\">{sk1}%</span>, but increases their Deployment Cost by <span style=\"color: #4A9DF2;\">+{sk2}</span>.", "己方英雄的再部署时间减少<span style=\"color: #4A9DF2;\">{sk1}%</span>，但是上阵费用<span style=\"color: #4A9DF2;\">+{sk2}</span>。", "", ""], ["Skill_mSkillDesc_8202084_1", "Increases allied heroes' DMG by <span style=\"color: #4A9DF2;\">{sk1}%</span> each round and reduces Basic ATK interval by <span style=\"color: #4A9DF2;\">{sk1}%</span>. Vulnerability (P. DMG) and Vulnerability (M. DMG) increase by <span style=\"color: #4A9DF2;\">{sk2}%</span> each round.", "己方英雄对敌人造成的伤害每回合提升<span style=\"color: #4A9DF2;\">{sk1}%</span>、普攻间隔减少<span style=\"color: #4A9DF2;\">{sk1}%</span>，同时物理易伤和魔法易伤每回合提升<span style=\"color: #4A9DF2;\">{sk2}%</span>。", "", ""], ["Skill_mSkillDesc_8202103_1", "Allied Hero Deployment Limit +<span style=\"color: #4A9DF2;\">{sk1}</span>", "己方可放置英雄数量<span style=\"color: #4A9DF2;\">+{sk1}</span>。", "", ""], ["Skill_mSkillName_1033701_1", "Accelerated Incubation", "急速孵化", "", ""], ["Skill_mSkillName_3991865_1", "High Quality", "高质", "", ""], ["Skill_mSkillName_803610_1", "Freeze", "冰冻", "", ""], ["Skill_mSkillName_803801_1", "Frostbite Strike", "霜蚀之击", "", ""], ["Skill_mSkillName_803803_1", "Control Immunity", "免疫控制", "", ""], ["Skill_mSkillName_804001_1", "Frostbite Rupture", "霜蚀爆裂", "", ""], ["Skill_mSkillName_8202053_1", "Time VS Money", "代偿契约", "", ""], ["Skill_mSkillName_8202084_1", "Heating Up", "愈战愈烈", "", ""], ["Skill_mSkillName_8202103_1", "Rigged Arena", "雄师压境", "", ""], ["Skill_mSkillSimpleDesc_11015501_1", "Increases ATK by <span style=\"color: #4A9DF2;\">{skm1}%</span>, and reduces the number of attacks required to trigger Nature's Fury enhanced attack by <span style=\"color: #4A9DF2;\">{skm2}</span>. When in Berserker Stance, Basic ATK restores <span style=\"color: #4A9DF2;\">{skm3}%</span> Max HP, and triggering Ground Stomp restores <span style=\"color: #4A9DF2;\">{skm4}%</span> Max HP.", "攻击提升<span style=\"color: #4A9DF2;\">{skm1}%</span>，丛林之怒触发强化攻击所需的攻击次数-<span style=\"color: #4A9DF2;\">{skm2}</span>；若处于咆哮者形态，普攻回复自身<span style=\"color: #4A9DF2;\">{skm3}%</span>最大生命值的生命，触发裂地震击时回复自身<span style=\"color: #4A9DF2;\">{skm4}%</span>最大生命值的生命。", "", ""], ["Skill_mSkillSimpleDesc_11015501_2", "Increases ATK by <span style=\"color: #4A9DF2;\">{skm1}%</span>, and reduces the number of attacks required to trigger Nature's Fury enhanced attack by <span style=\"color: #4A9DF2;\">{skm2}</span>. When in Berserker Stance, Basic ATK restores <span style=\"color: #4A9DF2;\">{skm3}%</span> Max HP, and triggering Ground Stomp restores <span style=\"color: #4A9DF2;\">{skm4}%</span> Max HP.", "攻击提升<span style=\"color: #4A9DF2;\">{skm1}%</span>，丛林之怒触发强化攻击所需的攻击次数-<span style=\"color: #4A9DF2;\">{skm2}</span>；若处于咆哮者形态，普攻回复自身<span style=\"color: #4A9DF2;\">{skm3}%</span>最大生命值的生命，触发裂地震击时回复自身<span style=\"color: #4A9DF2;\">{skm4}%</span>最大生命值的生命。", "", ""], ["Skill_mSkillSimpleDesc_11015501_3", "Increases ATK by <span style=\"color: #4A9DF2;\">{skm1}%</span>, and reduces the number of attacks required to trigger Nature's Fury enhanced attack by <span style=\"color: #4A9DF2;\">{skm2}</span>. When in Berserker Stance, Basic ATK restores <span style=\"color: #4A9DF2;\">{skm3}%</span> Max HP, and triggering Ground Stomp restores <span style=\"color: #4A9DF2;\">{skm4}%</span> Max HP.", "攻击提升<span style=\"color: #4A9DF2;\">{skm1}%</span>，丛林之怒触发强化攻击所需的攻击次数-<span style=\"color: #4A9DF2;\">{skm2}</span>；若处于咆哮者形态，普攻回复自身<span style=\"color: #4A9DF2;\">{skm3}%</span>最大生命值的生命，触发裂地震击时回复自身<span style=\"color: #4A9DF2;\">{skm4}%</span>最大生命值的生命。", "", ""], ["Skill_mSkillSimpleDesc_11015501_4", "Increases ATK by <span style=\"color: #4A9DF2;\">{skm1}%</span>, and reduces the number of attacks required to trigger Nature's Fury enhanced attack by <span style=\"color: #4A9DF2;\">{skm2}</span>. When in Berserker Stance, Basic ATK restores <span style=\"color: #4A9DF2;\">{skm3}%</span> Max HP, and triggering Ground Stomp restores <span style=\"color: #4A9DF2;\">{skm4}%</span> Max HP.", "攻击提升<span style=\"color: #4A9DF2;\">{skm1}%</span>，丛林之怒触发强化攻击所需的攻击次数-<span style=\"color: #4A9DF2;\">{skm2}</span>；若处于咆哮者形态，普攻回复自身<span style=\"color: #4A9DF2;\">{skm3}%</span>最大生命值的生命，触发裂地震击时回复自身<span style=\"color: #4A9DF2;\">{skm4}%</span>最大生命值的生命。", "", ""], ["Skill_mSkillSimpleDesc_11015501_5", "Increases ATK by <span style=\"color: #4A9DF2;\">{skm1}%</span>, and reduces the number of attacks required to trigger Nature's Fury enhanced attack by <span style=\"color: #4A9DF2;\">{skm2}</span>. When in Berserker Stance, Basic ATK restores <span style=\"color: #4A9DF2;\">{skm3}%</span> Max HP, and triggering Ground Stomp restores <span style=\"color: #4A9DF2;\">{skm4}%</span> Max HP.", "攻击提升<span style=\"color: #4A9DF2;\">{skm1}%</span>，丛林之怒触发强化攻击所需的攻击次数-<span style=\"color: #4A9DF2;\">{skm2}</span>；若处于咆哮者形态，普攻回复自身<span style=\"color: #4A9DF2;\">{skm3}%</span>最大生命值的生命，触发裂地震击时回复自身<span style=\"color: #4A9DF2;\">{skm4}%</span>最大生命值的生命。", "", ""], ["Skill_mSkillSimpleDesc_11015501_6", "Increases ATK by <span style=\"color: #4A9DF2;\">{skm1}%</span>, and reduces the number of attacks required to trigger Nature's Fury enhanced attack by <span style=\"color: #4A9DF2;\">{skm2}</span>. When in Berserker Stance, Basic ATK restores <span style=\"color: #4A9DF2;\">{skm3}%</span> Max HP, and triggering Ground Stomp restores <span style=\"color: #4A9DF2;\">{skm4}%</span> Max HP.", "攻击提升<span style=\"color: #4A9DF2;\">{skm1}%</span>，丛林之怒触发强化攻击所需的攻击次数-<span style=\"color: #4A9DF2;\">{skm2}</span>；若处于咆哮者形态，普攻回复自身<span style=\"color: #4A9DF2;\">{skm3}%</span>最大生命值的生命，触发裂地震击时回复自身<span style=\"color: #4A9DF2;\">{skm4}%</span>最大生命值的生命。", "", ""], ["Skill_mSkillSimpleDesc_13000441_1", "Increases faction team members' basic attributes by <span style=\"color: #4A9DF2;\">{skm1}%</span>.<br>Increases faction team members' DMG dealt to enemies inflicted with Slow, Stun, Freeze, Immobilized State, and other CC Effects by <span style=\"color: #4A9DF2;\">{skm2}%</span>. <br>Increases faction team members' DMG by <span style=\"color: #4A9DF2;\">{skm3}%</span>. When the Lord is on the battlefield and an allied summon dies, increases all faction team members' DMG by an additional <span style=\"color: #4A9DF2;\">{skm4}%</span> for <span style=\"color: #4A9DF2;\">{skm5}</span> sec, stacking up to <span style=\"color: #4A9DF2;\">{skm6}</span> time(s).", "阵营小队成员基础属性提升<span style=\"color: #4A9DF2;\">{skm1}%</span>。<br>阵营小队成员对受到减速、眩晕、冰冻、定身等控制效果影响的敌人增伤<span style=\"color: #4A9DF2;\">{skm2}%</span>。<br>阵营小队成员造成的伤害提升<span style=\"color: #4A9DF2;\">{skm3}%</span>。当领主在场上且友方召唤物死亡时额外提升所有阵营小队成员伤害<span style=\"color: #4A9DF2;\">{skm4}%</span>，持续<span style=\"color: #4A9DF2;\">{skm5}</span>秒，最多叠加<span style=\"color: #4A9DF2;\">{skm6}</span>层。", "", ""], ["Skill_mSkillSimpleDesc_13000441_2", "Increases faction team members' basic attributes by <span style=\"color: #4A9DF2;\">{skm1}%</span>.<br>Increases faction team members' DMG dealt to enemies inflicted with Slow, Stun, Freeze, Immobilized State, and other CC Effects by <span style=\"color: #4A9DF2;\">{skm2}%</span>. <br>Increases faction team members' DMG by <span style=\"color: #4A9DF2;\">{skm3}%</span>. When the Lord is on the battlefield and an allied summon dies, increases all faction team members' DMG by an additional <span style=\"color: #4A9DF2;\">{skm4}%</span> for <span style=\"color: #4A9DF2;\">{skm5}</span> sec, stacking up to <span style=\"color: #4A9DF2;\">{skm6}</span> time(s).", "阵营小队成员基础属性提升<span style=\"color: #4A9DF2;\">{skm1}%</span>。<br>阵营小队成员对受到减速、眩晕、冰冻、定身等控制效果影响的敌人增伤<span style=\"color: #4A9DF2;\">{skm2}%</span>。<br>阵营小队成员造成的伤害提升<span style=\"color: #4A9DF2;\">{skm3}%</span>。当领主在场上且友方召唤物死亡时额外提升所有阵营小队成员伤害<span style=\"color: #4A9DF2;\">{skm4}%</span>，持续<span style=\"color: #4A9DF2;\">{skm5}</span>秒，最多叠加<span style=\"color: #4A9DF2;\">{skm6}</span>层。", "", ""], ["Skill_mSkillSimpleDesc_13000441_3", "Increases faction team members' basic attributes by <span style=\"color: #4A9DF2;\">{skm1}%</span>.<br>Increases faction team members' DMG dealt to enemies inflicted with Slow, Stun, Freeze, Immobilized State, and other CC Effects by <span style=\"color: #4A9DF2;\">{skm2}%</span>. <br>Increases faction team members' DMG by <span style=\"color: #4A9DF2;\">{skm3}%</span>. When the Lord is on the battlefield and an allied summon dies, increases all faction team members' DMG by an additional <span style=\"color: #4A9DF2;\">{skm4}%</span> for <span style=\"color: #4A9DF2;\">{skm5}</span> sec, stacking up to <span style=\"color: #4A9DF2;\">{skm6}</span> time(s).", "阵营小队成员基础属性提升<span style=\"color: #4A9DF2;\">{skm1}%</span>。<br>阵营小队成员对受到减速、眩晕、冰冻、定身等控制效果影响的敌人增伤<span style=\"color: #4A9DF2;\">{skm2}%</span>。<br>阵营小队成员造成的伤害提升<span style=\"color: #4A9DF2;\">{skm3}%</span>。当领主在场上且友方召唤物死亡时额外提升所有阵营小队成员伤害<span style=\"color: #4A9DF2;\">{skm4}%</span>，持续<span style=\"color: #4A9DF2;\">{skm5}</span>秒，最多叠加<span style=\"color: #4A9DF2;\">{skm6}</span>层。", "", ""], ["Skill_mSkillSimpleDesc_13000441_4", "Increases faction team members' basic attributes by <span style=\"color: #4A9DF2;\">{skm1}%</span>.<br>Increases faction team members' DMG dealt to enemies inflicted with Slow, Stun, Freeze, Immobilized State, and other CC Effects by <span style=\"color: #4A9DF2;\">{skm2}%</span>. <br>Increases faction team members' DMG by <span style=\"color: #4A9DF2;\">{skm3}%</span>. When the Lord is on the battlefield and an allied summon dies, increases all faction team members' DMG by an additional <span style=\"color: #4A9DF2;\">{skm4}%</span> for <span style=\"color: #4A9DF2;\">{skm5}</span> sec, stacking up to <span style=\"color: #4A9DF2;\">{skm6}</span> time(s).", "阵营小队成员基础属性提升<span style=\"color: #4A9DF2;\">{skm1}%</span>。<br>阵营小队成员对受到减速、眩晕、冰冻、定身等控制效果影响的敌人增伤<span style=\"color: #4A9DF2;\">{skm2}%</span>。<br>阵营小队成员造成的伤害提升<span style=\"color: #4A9DF2;\">{skm3}%</span>。当领主在场上且友方召唤物死亡时额外提升所有阵营小队成员伤害<span style=\"color: #4A9DF2;\">{skm4}%</span>，持续<span style=\"color: #4A9DF2;\">{skm5}</span>秒，最多叠加<span style=\"color: #4A9DF2;\">{skm6}</span>层。", "", ""], ["Skill_mSkillSimpleDesc_13000441_5", "Increases faction team members' basic attributes by <span style=\"color: #4A9DF2;\">{skm1}%</span>.<br>Increases faction team members' DMG dealt to enemies inflicted with Slow, Stun, Freeze, Immobilized State, and other CC Effects by <span style=\"color: #4A9DF2;\">{skm2}%</span>. <br>Increases faction team members' DMG by <span style=\"color: #4A9DF2;\">{skm3}%</span>. When the Lord is on the battlefield and an allied summon dies, increases all faction team members' DMG by an additional <span style=\"color: #4A9DF2;\">{skm4}%</span> for <span style=\"color: #4A9DF2;\">{skm5}</span> sec, stacking up to <span style=\"color: #4A9DF2;\">{skm6}</span> time(s).", "阵营小队成员基础属性提升<span style=\"color: #4A9DF2;\">{skm1}%</span>。<br>阵营小队成员对受到减速、眩晕、冰冻、定身等控制效果影响的敌人增伤<span style=\"color: #4A9DF2;\">{skm2}%</span>。<br>阵营小队成员造成的伤害提升<span style=\"color: #4A9DF2;\">{skm3}%</span>。当领主在场上且友方召唤物死亡时额外提升所有阵营小队成员伤害<span style=\"color: #4A9DF2;\">{skm4}%</span>，持续<span style=\"color: #4A9DF2;\">{skm5}</span>秒，最多叠加<span style=\"color: #4A9DF2;\">{skm6}</span>层。", "", ""], ["Skill_mSkillSimpleDesc_8202053_1", "Reduces the Redeployment Time of allied heroes by <span style=\"color: #4A9DF2;\">{skm1}%</span>, but increases their Deployment Cost by <span style=\"color: #4A9DF2;\">+{skm2}</span>.", "己方英雄的再部署时间减少<span style=\"color: #4A9DF2;\">{skm1}%</span>，但是上阵费用<span style=\"color: #4A9DF2;\">+{skm2}</span>。", "", ""], ["Skill_mSkillSimpleDesc_8202084_1", "Increases allied heroes' DMG by <span style=\"color: #4A9DF2;\">{skm1}%</span> each round and reduces Basic ATK Interval by <span style=\"color: #4A9DF2;\">{skm1}%</span>. Vulnerability (P. DMG) and Vulnerability (M. DMG) increase by <span style=\"color: #4A9DF2;\">{skm2}%</span> each round.", "己方英雄对敌人造成的伤害每回合提升<span style=\"color: #4A9DF2;\">{skm1}%</span>、普攻间隔减少<span style=\"color: #4A9DF2;\">{skm1}%</span>，同时物理易伤和魔法易伤每回合提升<span style=\"color: #4A9DF2;\">{skm2}%</span>。", "", ""], ["Skill_mSkillSimpleDesc_8202103_1", "Allied Hero Deployment Limit +<span style=\"color: #4A9DF2;\">{skm1}</span>", "己方可放置英雄数量<span style=\"color: #4A9DF2;\">+{skm1}</span>。", "", ""], ["Skill_mSkillSimpleDesc_8203031_1", "Hotspot appears on both players' battlefields. Heroes standing on the Hotspot have all attributes increased by 20%.", "双方玩家的战场上会出现增幅阵地，上阵增幅阵地的英雄全属性提升20%。", "", ""], ["Stage_mStageDesc_5003001", "In this epic battle, you will face an unprecedented enemy - Semrah. Hailing from ancient times, Semrah fights in 3 Battle Modes, each posing a tough challenge.", "在这场宏伟的战斗中，将遭遇前所未有的敌人——塞姆拉。古老的塞姆拉拥有3种战斗模式，每种模式都将是极为艰难的考验。", "", ""], ["Stage_mStageDesc_5003002", "In this epic battle, you will face an unprecedented enemy - Semrah. Hailing from ancient times, Semrah fights in 3 Battle Modes, each posing a tough challenge.", "在这场宏伟的战斗中，将遭遇前所未有的敌人——塞姆拉。古老的塞姆拉拥有3种战斗模式，每种模式都将是极为艰难的考验。", "", ""], ["Stage_mStageDesc_8101001", "Starting from Round 5, <span style=\"color: #fd4540;\">all monsters gain Invisibility and become untargetable</span> for 7 sec.", "第5回合开始，<span style=\"color: #fd4540;\">所有怪物获得隐身效果，无法被选中为目标</span>，持续7秒。", "", ""], ["Stage_mStageDesc_8101002", "Starting from Round 5, <span style=\"color: #fd4540;\">all monsters gain Invincibility upon taking DMG for the first time, becoming immune to all DMG</span> for 4 sec.", "第5回合开始，<span style=\"color: #fd4540;\">所有怪物第一次受到伤害后获得无敌效果，免疫所有伤害</span>，持续4秒。", "", ""], ["Stage_mStageDesc_8101003", "Starting from Round 5, <span style=\"color: #fd4540;\">all heroes continuously take True DMG equal to 4% of their Max HP per sec</span>.", "第5回合开始，<span style=\"color: #fd4540;\">所有英雄会持续受到每秒最大生命值4%的真实伤害</span>。", "", ""], ["Stage_mStageDesc_8201011", "Team up with your friends to defeat the enemy Boss and fend off the tides of enemies.", "与你的好友一起，击败敌方首领，阻挡如潮水般的敌人进攻吧", "", ""], ["Stage_mStageDesc_8201012", "Team up with your friends to defeat the enemy Boss and fend off the tides of enemies.", "与你的好友一起，击败敌方首领，阻挡如潮水般的敌人进攻吧", "", ""], ["Stage_mStageDesc_8201013", "Team up with your friends to defeat the enemy Boss and fend off the tides of enemies.", "与你的好友一起，击败敌方首领，阻挡如潮水般的敌人进攻吧", "", ""], ["Stage_mStageDesc_8201014", "Team up with your friends to defeat the enemy Boss and fend off the tides of enemies.", "与你的好友一起，击败敌方首领，阻挡如潮水般的敌人进攻吧", "", ""], ["Stage_mStageDesc_8201015", "Team up with your friends to defeat the enemy Boss and fend off the tides of enemies.", "与你的好友一起，击败敌方首领，阻挡如潮水般的敌人进攻吧", "", ""], ["Stage_mStageFailDesc_5003001", "Pay extra attention to Semrah's Battle Mode and exploit its weakness.", "注意塞姆拉战斗模式，每种模式都有着可以突破的弱点。", "", ""], ["Stage_mStageFailDesc_5003002", "Pay extra attention to Semrah's Battle Mode and exploit its weakness.", "注意塞姆拉战斗模式，每种模式都有着可以突破的弱点。", "", ""], ["Stage_mStageIdDesc_5003001", "Apocalypse I - Playtest", "末日Ⅰ-试玩", "", ""], ["Stage_mStageIdDesc_5003002", "Apocalypse II - Playtest", "末日Ⅱ-试玩", "", ""], ["Stage_mStageIdDesc_8201011", "Stage 1", "关卡1", "", ""], ["Stage_mStageIdDesc_8201012", "Stage 2", "关卡2", "", ""], ["Stage_mStageIdDesc_8201013", "Stage 3", "关卡3", "", ""], ["Stage_mStageIdDesc_8201014", "Stage 4", "关卡4", "", ""], ["Stage_mStageIdDesc_8201015", "Stage 5", "关卡5", "", ""], ["Stage_mStageIdDesc_991001", "Test 1-1", "Test1-1", "", ""], ["Stage_mStageIdDesc_991002", "Test 1-2", "Test1-2", "", ""], ["Stage_mStageIdDesc_991003", "Test 1-3", "Test1-3", "", ""], ["Stage_mStageName_5003001", "Semrah", "塞姆拉", "", ""], ["Stage_mStageName_5003002", "Semrah", "塞姆拉", "", ""], ["Stage_mStageName_8201011", "Co-op Mode", "合作模式", "", ""], ["Stage_mStageName_8201012", "Co-op Mode", "合作模式", "", ""], ["Stage_mStageName_8201013", "Co-op Mode", "合作模式", "", ""], ["Stage_mStageName_8201014", "Co-op Mode", "合作模式", "", ""], ["Stage_mStageName_8201015", "Co-op Mode", "合作模式", "", ""], ["UILanguage_mKeyValue_Form_BackpackIntegration_SubTitle", "Sort", "排序", "", ""], ["UILanguage_mKeyValue_Panel_BackpackEquipPanel_EquipedText", "Equipped", "已装备", "", ""], ["UILanguage_mKeyValue_Panel_MaterialPanel_GetWayTitle_Text", "Access", "Access", "", ""], ["UILanguage_mKeyValue_Panel_MaterialPanel_Text_Use", "Use", "使用", "", ""], ["UnionRaise_mRaiseText_15", "Donate <color=#28d37c>{num}</color> Mythic Extract(s).", "募集<color=#28d37c>{num}</color>个神话精粹", "", ""], ["UnionRaise_mRaiseText_16", "Donate <color=#28d37c>{num}</color> 5-star Psychic Power(s).", "募集<color=#28d37c>{num}</color>个5星通灵体", "", ""], ["UnionRaise_mRaiseTitle_15", "Promotion Insignia III", "进阶材料III", "", ""], ["UnionRaise_mRaiseTitle_16", "Hero Star Up", "角色升星", "", ""], ["Unit_mDescribe_37105", "Scalekin mages, adept in the art of poisonous magic, possess the ability to <color=#ff4500>inflict poison on enemies</color>.", "掌握毒系魔法的蜥蜴人法师，<color=#ff4500>攻击能够使敌人中毒</color>。", "", ""], ["Unit_mDescribe_37106", "Elite Skeleton Archers that can deal massive DMG from afar.", "骷髅弓手中的精英，能够造成较高的远程伤害。", "", ""], ["Unit_mDescribe_37107", "Small spiders, very aggressive but weak individually.", "小型蜘蛛，攻击欲望极强，但个体较弱。", "", ""], ["Unit_mDescribe_37108", "Toxic Suicides will explode when approaching enemies, <color=#ff4500>dealing moderate AoE DMG and poisoning them</color>.", "剧毒爆虫在接近敌人时会自爆，造成<color=#ff4500>造成少量范围伤害并使敌人中毒</color>。", "", ""], ["Unit_mDescribe_37110", "Clad in giant shields and possessing unyielding skeletal frames, they are renowned for their exceptional DEF.", "手持巨盾的强壮骷髅兵，防御能力很强。", "", ""], ["Unit_mDescribe_37112", "Produces a Queen Spider when left out of combat for a while. Eliminate it before it hatches.", "待机一段时间后能够孵化出蛛后，请在孵化前尽快击杀", "", ""], ["Unit_mFeature_10408", "Ludwig has been reborn from the abyss. With a horrifying power granted by his master - the Eldritch God. Ludwig has now lost his humanity.", "路德维希自深渊中焕然新生，它的主人赐予了它可怕的邪神之力，如今的路德维希人性尽失。", "", ""], ["Unit_mFeature_10409", "Ludwig has been reborn from the abyss. With a horrifying power granted by his master - the Eldritch God. Ludwig has now lost his humanity.", "路德维希自深渊中焕然新生，它的主人赐予了它可怕的邪神之力，如今的路德维希人性尽失。", "", ""], ["Unit_mFeature_10410", "Ludwig has been reborn from the abyss. With a horrifying power granted by his master - the Eldritch God. Ludwig has now lost his humanity.", "路德维希自深渊中焕然新生，它的主人赐予了它可怕的邪神之力，如今的路德维希人性尽失。", "", ""], ["Unit_mFeature_37105", "Scalekin mages, adept in the art of poisonous magic, possess the ability to inflict continuous Poison DMG on enemies.", "掌握毒系魔法的蜥蜴人法师，能够对敌人造成持续毒性伤害。", "", ""], ["Unit_mFeature_37106", "Elite Skeleton Archers that can deal massive DMG from afar.", "骷髅弓手中的精英，能够造成较高的远程伤害。", "", ""], ["Unit_mFeature_37107", "Small spiders, very aggressive but weak individually.", "小型蜘蛛，攻击欲望极强，但个体较弱。", "", ""], ["Unit_mFeature_37108", "The inferior zraks, whose bodies are filled with corrosive liquids, will launch suicide attacks on enemies.", "虫族中的下等成员，体内充满腐蚀性液体，会对敌人发起自杀式攻击。", "", ""], ["Unit_mFeature_37110", "Equipped with a giant shield, these stiff skeletons are able to hold off heavy attacks.", "手持巨盾的强壮骷髅兵，使用巨大盾牌来抵挡，并且可以把强力的攻击挡下来。", "", ""], ["Unit_mFeature_37112", "Produces a Queen Spider when left out of combat for a while. Eliminate it before it hatches.", "待机一段时间后能够孵化出蛛后，请在孵化前尽快击杀", "", ""], ["Unit_mName_37105", "Poison Mage", "剧毒法师", "", ""], ["Unit_mName_37106", "Elite Skeleton Archer", "精英骷髅弓手", "", ""], ["Unit_mName_37107", "Small Arachnid", "小噬蛛", "", ""], ["Unit_mName_37108", "Suicide", "爆虫", "", ""], ["Unit_mName_37110", "Skeletal Giant-Shielder", "骸骨巨盾兵", "", ""], ["Unit_mName_37112", "Huge Spider Egg", "巨型虫卵", "", ""], ["Unit_mFeature_16474", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "天生可以控制岩石的生物，对于侵犯自己领地的敌人将发起无情的进攻。", "", ""], ["Unit_mFeature_16475", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "天生可以控制岩石的生物，对于侵犯自己领地的敌人将发起无情的进攻。", "", ""], ["Unit_mFeature_16481", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "天生可以控制岩石的生物，对于侵犯自己领地的敌人将发起无情的进攻。", "", ""], ["Unit_mFeature_16487", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "天生可以控制岩石的生物，对于侵犯自己领地的敌人将发起无情的进攻。", "", ""], ["Unit_mFeature_16496", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "天生可以控制岩石的生物，对于侵犯自己领地的敌人将发起无情的进攻。", "", ""], ["Unit_mFeature_16497", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "天生可以控制岩石的生物，对于侵犯自己领地的敌人将发起无情的进攻。", "", ""], ["Unit_mFeature_18133", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "天生可以控制岩石的生物，对于侵犯自己领地的敌人将发起无情的进攻。", "", ""], ["Unit_mFeature_18137", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "天生可以控制岩石的生物，对于侵犯自己领地的敌人将发起无情的进攻。", "", ""], ["Unit_mFeature_11127", "Creatures that are born to manipulate stones, will relentlessly attack whoever intrudes into their territory.", "天生可以控制岩石的生物，对于侵犯自己领地的敌人将发起无情的进攻。", "", ""], ["Stage_mStageDesc_9042001", "The Nine-Tailed Fox, resurrected by the grievance from the Shang Dynasty, wreaks havoc upon the mortal realm with her illusions. Four supreme arrays must be laid to obliterate its true spirit.<br><br>Fire Realm: Molten lava surges as crimson chains, coiling round her nine tails to scorch demonic bones. The fox’s wails crackle like searing thunder.", "九尾妖狐借殷商怨气重生，以幻惑之术祸乱人间。需布下四大绝阵磨灭其真灵。<br><br>火狱境：地涌熔岩化赤链，缠其九尾焚其妖骨，妖狐哀泣如焦雷。", "", ""], ["Item_mItemName_214901", "Shawl of the Lifegiver", "永不陷落的勇气", "", ""], ["Skill_mSkillSimpleDesc_232170_1", "When the Talent is triggered, increases the hero's DMG by <span style=\"color: #4A9DF2;\">{skm1}%</span>, with an additional <span style=\"color: #4A9DF2;\">{skm2}%</span> against Elite and Boss units for <span style=\"color: #4A9DF2;\">{skm3}</span> sec.", "天赋触发时，自身伤害增加<span style=\"color: #4A9DF2;\">{skm1}%</span>，对精英和首领单位伤害额外增加<span style=\"color: #4A9DF2;\">{skm2}%</span>，持续<span style=\"color: #4A9DF2;\">{skm3}</span>秒", "", ""], ["CommonText_mMessage_25947", "Corresponding Arena Challenge Attack Mode", "竞技场对应挑战进攻模式", "", ""], ["CommonText_mMessage_25948", "Corresponding Arena Challenge Defense Mode", "竞技场对应挑战防御模式", "", ""], ["Skill_mSkillSimpleDesc_220903_5", "Applies <span style=\"color: #28d37c;\">[322095]</span> to <span style=\"color: #4A9DF2;\">1</span> ally with the lowest HP percentage in range for <span style=\"color: #4A9DF2;\">{skm1}</span> sec.", "为范围内生命百分比最低的<span style=\"color: #4A9DF2;\">1</span>名友方附加<span style=\"color: #28d37c;\">[322095]</span>，持续<span style=\"color: #4A9DF2;\">{skm1}</span>秒。", "", ""], ["Skill_mSkillSimpleDesc_220903_4", "Applies <span style=\"color: #28d37c;\">[322094]</span> to <span style=\"color: #4A9DF2;\">1</span> ally with the lowest HP percentage in range for <span style=\"color: #4A9DF2;\">{skm1}</span> sec.", "为范围内生命百分比最低的<span style=\"color: #4A9DF2;\">1</span>名友方附加<span style=\"color: #28d37c;\">[322094]</span>，持续<span style=\"color: #4A9DF2;\">{skm1}</span>秒。", "", ""], ["Skill_mSkillSimpleDesc_220903_3", "Applies <span style=\"color: #28d37c;\">[322093]</span> to <span style=\"color: #4A9DF2;\">1</span> ally with the lowest HP percentage in range for <span style=\"color: #4A9DF2;\">{skm1}</span> sec.", "为范围内生命百分比最低的<span style=\"color: #4A9DF2;\">1</span>名友方附加<span style=\"color: #28d37c;\">[322093]</span>，持续<span style=\"color: #4A9DF2;\">{skm1}</span>秒。", "", ""], ["Skill_mSkillSimpleDesc_220903_2", "Applies <span style=\"color: #28d37c;\">[322092]</span> to <span style=\"color: #4A9DF2;\">1</span> ally with the lowest HP percentage in range for <span style=\"color: #4A9DF2;\">{skm1}</span> sec.", "为范围内生命百分比最低的<span style=\"color: #4A9DF2;\">1</span>名友方附加<span style=\"color: #28d37c;\">[322092]</span>，持续<span style=\"color: #4A9DF2;\">{skm1}</span>秒。", "", ""], ["LANG_STRID_notice_NineTailedNightmare", "Nine-Tailed Nightmare Event Intro", "九尾祸活动介绍", "", ""], ["LANG_STRID_push_long9_title_1", "Grimmscale Invasion Launches", "萨尔扬之战挑战开启", "", ""], ["LANG_STRID_push_long9_title_2", "Commanders can challenge Sauryan, Wing of Chaos infinitely every day. Rewards are based on the highest total damage dealt in a single challenge attempt.", "指挥官们可无限次挑战【混沌之力·萨尔扬】，每日依据单次最高伤害获取各类珍贵奖励。", "", ""], ["LANG_STRID_push_xyx_title_1", "Zombie Invasion Starts!", "僵尸被我包围了活动开启", "", ""], ["LANG_STRID_push_xyx_title_2", "Build your hero's skills, equip powerful Relics, and battle through waves of monsters to survive!", "构筑英雄技能，选择合适遗物，击退来袭怪物，努力生存到最后！", "", ""], ["LANG_STRID_notice_jwhpv", "Event Trailer: Nine-Tailed Nightmare", "九尾祸活动PV", "", ""], ["LANG_STRID_push_jwhyy1", "Nine-Tailed Nightmare Is Here!", "九尾祸活动来袭！", "", ""], ["LANG_STRID_push_jwhyy2", "The new Legendary heroes Ne Zha and Erlang Shen arrive! Join the events to claim event-exclusive rewards, including Exclusive Artifacts, Summoning Crystals, Avatar, Emote, and more! Plus, Erlang Shen's time-limited skin is now available!", "全新传说英雄「哪吒」「杨戬」登场！参与系列活动领取专属神器、各类召唤水晶和头像、表情等活动限定奖励，还有杨戬皮肤限时上线！", "", ""], ["LANG_STRID_notice_NineTailed2", "Nine-Tailed Nightmare Starts!", "九尾祸活动开启", "", ""], ["LANG_STRID_notice_NineTailed3", "Join the event to obtain event-exclusive rewards, including Exclusive Artifacts, Avatar, Avatar Border, Summoning Crystals, and more!", "参与活动获得专属神器、头像、头像框等活动限定奖励、各类召唤水晶等奖励！", "", ""], ["LANG_STRID_push_shardsummon_nezha", "Collect shards to assemble Ne Zha's Exclusive Artifact: Fire-Tipped Spear!", "收集碎片，合成哪吒专属神器「火尖枪」！", "", ""], ["LANG_STRID_push_shardsummon_sqhcending", "Artifact Shard Assembly Countdown", "神器碎片合成倒计时", "", ""], ["LANG_STRID_push_shardsummon_nezhaend2", "Last chance to collect shards and assemble Ne Zha's Exclusive Artifact: Fire-Tipped Spear! Don't miss out!", "收集碎片合成哪吒专属神器「火尖枪」的最后机会，不要错过！", "", ""], ["LANG_STRID_notice_CreativeShort", "Creative Short", "创意短剧", "", ""], ["LANG_STRID_compete_brief", "After the event starts, Commanders earn League points by participating in the Arena, Guild - Drake's Chasm and spending Stamina and can claim Personal Score Rewards. Commanders within the same League compete against each other for ranking rewards. After the event ends, Commanders who have earned points can claim the Basic League Rewards. Members of the League with a higher total score will receive additional Champion League Reward.", "活动开启后，指挥官通过参与竞技场、公会-巨龙遗迹、消耗体力等途径获得联盟积分，领取个人积分奖励。同时联盟内的指挥官将互相竞争，赢得排名奖励。活动结束后，获得过积分的指挥官可领取基础联盟奖励，总积分更高的联盟成员将额外获得联盟获胜奖励。", "", ""], ["LANG_STRID_Anniversary_Discount_Event_Des_01", "Discount Tokens obtained from event quests can be used to randomly discount an item on the event page once. Each item can be discounted up to 3 times.", "使用活动任务中获得的打折币可随机给活动页面内商品打折1次，每个商品最多可打折3次。", "", ""], ["LANG_STRID_FishingRanking", "<color=#e1e1e1>After the event ends, the top 3 Commanders on the leaderboard will each receive a physical merchandise reward. Contact info will be requested via in-game mail for delivery.</color>", "<color=#e1e1e1>活动结束后，排行榜前三名的指挥官将会分别获得一份实体周边奖励，后续将通过游戏内邮件联系填写地址。</color>", "", ""], ["LANG_STRID_notice_nzgl", "Hero Gameplay: Ne Zha", "哪吒玩法推荐", "", ""], ["LANG_STRID_notice_yjgl", "Hero Gameplay: Erlang Shen", "杨戬玩法推荐", "", ""], ["LANG_STRID_GDP_title_26", "Celestial Season", "寰天季", "", ""], ["LANG_STRID_activity_popup_GDP_htj", "Gold Dragon Pass - Celestial Season", "金龙通行证-寰天季", "", ""], ["LANG_STRID_CompeteEvent_Rule11", "<color=#e1e1e1>Consume general items to gain points.</color>", "<color=#e1e1e1>消耗通用物品获得积分</color>", "", ""], ["LANG_STRID_CompeteEvent_Rule12", "<color=#e1e1e1>Consume Mythril and Meteorite to gain points.</color>", "<color=#e1e1e1>消耗秘银、陨星获得积分</color>", "", ""], ["LANG_STRID_Moon_Dec_01", "Shadows of Tomorrow", "胧月双华", "", ""], ["LANG_STRID_Anniversary_Discount_Event_Detail", "<span style=\"color: #cec2b1;\">Discount Event</span><br>Each use of a Discount Token will apply a <span style=\"color: #28d37c;\">random discount</span> to a random item in the event. Participate in event quests to obtain Discount Tokens. All unused Discount Tokens will be removed after the event ends.<br>Players may choose to purchase event items at their original prices without using any Discount Tokens.<br><br>Each time a Discount Token is used, one item will be randomly selected from the three available in the event interface for a discount. After each discount, the price of the currently selected item will be further reduced. <span style=\"color: #28d37c;\">Each item reaches its maximum discount after being discounted 3 times</span>.<br>Only items that have not reached the maximum discount and have not been purchased can continue to participate in the discount event.", "<span style=\"color: #cec2b1;\">折扣活动</span><br>折扣币每次使用后会对活动内的商品进行<span style=\"color: #28d37c;\">随机打折</span>。参与活动任务可获取活动打折币，每一期的活动打折币在活动结束后会被清空。<br>玩家可以选择在不使用任何打折币进行打折的情况下，以原价购买活动商品。<br><br>每次使用打折币时，会随机从活动界面的3个商品中，选中1个进行打折。每1次打折后都会使当前被选中的商品价格变得更低，<span style=\"color: #28d37c;\">每个商品打折3次后达到最低折扣</span>。<br>只有未达到最低折扣且未被购买的商品才能继续参与打折。", "", ""]];
+            let showingRaw = false;
+            let tableData = formattedData;
+            let dataTable;
+        
+            function getStateKey(index) {
+                return "state_StringZ Visualizer - CN_row_" + index; 
+            }
+            
+            function getNotesKey(index) {
+                return "notes_StringZ Visualizer - CN_row_" + index;
+            }
+        
+            function generateRowWithState(row, idx) {
+                const savedState = localStorage.getItem(getStateKey(idx)) || "";
+                const savedNotes = localStorage.getItem(getNotesKey(idx)) || "";
+                
+                const selectHTML = '<select class="state-select ' + savedState.toLowerCase() + '">' +
+                    '<option value="" ' + (savedState === "" ? "selected" : "") + '></option>' +
+                    '<option value="Pass" ' + (savedState === "Pass" ? "selected" : "") + '>Pass</option>' +
+                    '<option value="Fail" ' + (savedState === "Fail" ? "selected" : "") + '>Fail</option>' +
+                    '</select>';
+                
+                const notesHTML = '<input type="text" class="notes-input" value="' + 
+                    savedNotes.replace(/"/g, '&quot;') + 
+                    '" placeholder="Personal notes..." maxlength="200">';
+                
+                const newRow = row.slice();
+                const stateIndex = headers.indexOf("State") + 1;
+                const notesIndex = headers.indexOf("Notes") + 1;
+                newRow[stateIndex] = selectHTML;
+                newRow[notesIndex] = notesHTML;
+                return newRow;
+            }
+        
+            function renderData(data) {
+                tableData = data;
+                const transformed = data.map((row, idx) => {
+                  const rowWithNumber = [idx + 1, ...row];
+                  return generateRowWithState(rowWithNumber, idx);
+                });
+        
+                if (!dataTable) {
+                    const columnsWithNumber = [{ title: '#' }, ...headers.map(h => ({ title: h }))];
+                    dataTable = $('#myTable').DataTable({
+                        data: transformed,
+                        columns: columnsWithNumber,
+                        scrollX: true,
+                        paging: true,
+                        searching: true,
+                        ordering: true,
+                        deferRender: true,
+                        lengthMenu: [[-1, 10, 25, 50], ["All", 10, 25, 50]],
+                        order: [],
+                        columnDefs: [
+                            {
+                                targets: headers.indexOf("State"),
+                                orderable: true
+                            }
+                        ]
+                    });
+        
+                    $('#myTable tbody').on('change', 'select.state-select', function () {
+                        const rowIdx = dataTable.row($(this).closest('tr')).index();
+                        const value = $(this).val();
+                        localStorage.setItem(getStateKey(rowIdx), value);
+                        this.className = "state-select " + value.toLowerCase();
+                    });
+                    
+                    $('#myTable tbody').on('input', 'input.notes-input', function () {
+                        const rowIdx = dataTable.row($(this).closest('tr')).index();
+                        const value = $(this).val();
+                        localStorage.setItem(getNotesKey(rowIdx), value);
+                    });
+
+                    $('#myTable tbody').on('keydown', 'input.notes-input', function(e) {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        $(this).blur(); // Remove focus from notes
+                      }
+                    });
+                } else {
+                    const currentPage = dataTable.page();
+                    const currentLength = dataTable.page.len();
+                    dataTable.clear().rows.add(transformed).draw(false);
+                    dataTable.page.len(currentLength).draw();
+                    dataTable.page(currentPage).draw(false);
+                }
+            }
+        
+            function toggleData() {
+                showingRaw = !showingRaw;
+                renderData(showingRaw ? rawData : formattedData);
+                
+                // Update button text
+                const btn = document.querySelector('.toggle-btn');
+                btn.textContent = showingRaw ? 'Show Formatted' : 'Show Raw';
+            }
+        
+            function clearAllStates() {
+                const total = tableData.length;
+                let clearedCount = 0;
+                
+                for (let i = 0; i < total; i++) {
+                    const stateKey = getStateKey(i);
+                    const notesKey = getNotesKey(i);
+                    
+                    if (localStorage.getItem(stateKey)) {
+                        localStorage.removeItem(stateKey);
+                        clearedCount++;
+                    }
+                    if (localStorage.getItem(notesKey)) {
+                        localStorage.removeItem(notesKey);
+                    }
+                }
+                
+                renderData(tableData);
+                
+                // Better user feedback
+                if (clearedCount > 0) {
+                    alert(`✅ Cleared ${clearedCount} review states and all notes!`);
+                } else {
+                    alert('ℹ️ No review states to clear.');
+                }
+            }
+        
+            function getProgress() {
+                const total = tableData.length;
+                let reviewed = 0;
+                let passed = 0;
+                let failed = 0;
+                
+                for (let i = 0; i < total; i++) {
+                    const state = localStorage.getItem(getStateKey(i));
+                    if (state) {
+                        reviewed++;
+                        if (state === 'Pass') passed++;
+                        if (state === 'Fail') failed++;
+                    }
+                }
+                
+                return { total, reviewed, passed, failed };
+            }
+            
+            function updateProgressDisplay() {
+                const progress = getProgress();
+                const percentage = Math.round((progress.reviewed / progress.total) * 100);
+                
+                // Update the info banner with progress
+                const banner = document.querySelector('.info-banner p');
+                if (banner) {
+                    const originalText = banner.textContent.split('•')[0] + '•';
+                    banner.innerHTML = `${originalText} 📊 <strong>${progress.reviewed}/${progress.total}</strong> reviewed (<strong>${percentage}%</strong>) • ✅ <strong>${progress.passed}</strong> passed • ❌ <strong>${progress.failed}</strong> failed`;
+                }
+            }
+        
+            function toggleDarkMode() {
+                const body = document.body;
+                const btn = document.querySelector('.dark-mode-btn');
+                const isDark = body.getAttribute('data-theme') === 'dark';
+                
+                if (isDark) {
+                    body.removeAttribute('data-theme');
+                    btn.textContent = '🌙 Dark';
+                    localStorage.setItem('visualizer-theme', 'light');
+                } else {
+                    body.setAttribute('data-theme', 'dark');
+                    btn.textContent = '☀️ Light'; 
+                    localStorage.setItem('visualizer-theme', 'dark');
+                }
+            }
+            
+            function initializeTheme() {
+                const savedTheme = localStorage.getItem('visualizer-theme');
+                const btn = document.querySelector('.dark-mode-btn');
+                
+                if (savedTheme === 'dark') {
+                    document.body.setAttribute('data-theme', 'dark');
+                    btn.textContent = '☀️ Light';
+                } else {
+                    btn.textContent = '🌙 Dark';
+                }
+            }
+
+            // New copyToClipboard function to copy ONLY the rawText
+            // Can be updated to copy depending on the Formatting/Raw toggle
+            function copyToClipboard(text, element) {
+                const rowIndex = dataTable.row(element).index();
+                const cellIndex = $(element).index();
+
+                let rawText = text;
+                if (!showingRaw && rawData[rowIndex]) {
+                    rawText = rawData[rowIndex][cellIndex - 1];
+                }
+    
+                // Decode HTML entities to get original text
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = rawText;
+                const decodedText = tempDiv.textContent || tempDiv.innerText || rawText;
+
+                navigator.clipboard.writeText(decodedText).then(() => {
+                    // Show feedback
+                    const feedback = document.createElement('div');
+                    feedback.className = 'copy-feedback show';
+                    feedback.textContent = 'Copied!';
+                    element.style.position = 'relative';
+                    element.appendChild(feedback);
+
+                    setTimeout(() => {
+                        feedback.classList.remove('show');
+                        setTimeout(() => {
+                            if (feedback.parentNode) {
+                                feedback.parentNode.removeChild(feedback);
+                            }
+                            $(element).removeClass('copyable-cell');
+                        }, 300);
+                    }, 1000);
+                });
+            }        
+
+            $(document).ready(function () {
+              initializeTheme();
+              renderData(formattedData);
+              $('#clearState').click(clearAllStates);
+  
+              // Update progress on page load
+              updateProgressDisplay();
+  
+              // Update progress when states change
+              $('#myTable tbody').on('change', 'select.state-select', function () {
+                  setTimeout(updateProgressDisplay, 100);
+              });
+
+              $('#myTable tbody').on('mouseenter', 'td:nth-child(2), td:nth-child(3), td:nth-child(4)', function() {
+                $(this).addClass('copyable-cell');
+              }).on('mouseleave', 'td:nth-child(2), td:nth-child(3), td:nth-child(4)', function() {
+                if (!$(this).find('.copy-feedback').length) {
+                  $(this).removeClass('copyable-cell');
+                }
+              }).on('click', 'td:nth-child(2), td:nth-child(3), td:nth-child(4)', function() {
+                const text = $(this).text().trim();
+                if (text) {
+                  copyToClipboard(text, this);
+                }
+              });
+
+              // Initialize keyboard navigation and show initial hint
+              initKeyboardNavigation();
+              showInitialHint();
+            });
+
+            // Keyboard shortcuts
+            let currentRowIndex = 0;
+            let isKeyboardMode = false;
+
+            function initKeyboardNavigation() {
+              $(document).keydown(function(e) {
+                // Important, don't interfere when typing in inputs
+                if (e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT') return;
+
+                // Even more important! DO NOT INTERFERE WITH BROWSER SHORTCUTS
+                if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+                // Don't interfere with Fn keys either
+                if (e.key.startsWith('F') && e.key.length > 1) return;
+
+                const table = $('#myTable').DataTable();
+                const totalRows = table.rows().count();
+
+                switch(e.key.toLowerCase()) {
+                  case 'p':
+                    e.preventDefault();
+                    markCurrentRow('Pass');
+                    break;
+                  case 'f':
+                    e.preventDefault();
+                    markCurrentRow('Fail');
+                    break;
+                  case 'c':
+                    e.preventDefault();
+                    clearCurrentRow();
+                    break;
+                  case 'arrowdown':
+                  case 'j':
+                    e.preventDefault();
+                    navigateRow(1);
+                    break;
+                  case 'arrowup':
+                  case 'k':
+                    e.preventDefault();
+                    navigateRow(-1);
+                    break;
+                  case 'enter':
+                    e.preventDefault();
+                    focusNotes();
+                    break;
+                  case 'escape':
+                    e.preventDefault();
+                    exitKeyboardMode();
+                    break;
+                  case ' ':
+                    e.preventDefault();
+                    enterKeyboardMode();
+                    break;
+                }
+              });
+            }
+
+            function markCurrentRow(state) {
+              if (!isKeyboardMode) return;
+
+              const currentRow = getCurrentRow();
+              if (currentRow.length) {
+                const select = currentRow.find('.state-select');
+                select.val(state).trigger('change');
+                navigateRow(1);
+              }
+            }
+
+            function clearCurrentRow() {
+              if (!isKeyboardMode) return;
+
+              const currentRow = getCurrentRow();
+              if (currentRow.length) {
+                currentRow.find('.state-select').val('').trigger('change');
+                // currentRow.find('.notes-input').val('').trigger('input');
+              }
+            }
+
+            function navigateRow(direction) {
+              if (!isKeyboardMode) return;
+
+              const table = $('#myTable').DataTable();
+              const totalRows = table.rows().count();
+
+              currentRowIndex += direction;
+              if (currentRowIndex < 0) currentRowIndex = 0;
+              if (currentRowIndex >= totalRows) currentRowIndex = totalRows - 1;
+
+              highlightCurrentRow();
+              scrollToCurrentRow();
+            }
+
+            function getCurrentRow() {
+              const table = $('#myTable').DataTable();
+              return $(table.row(currentRowIndex).node());
+            }
+
+            function highlightCurrentRow() {
+              $('#myTable tbody tr').removeClass('keyboard-focus');
+
+              const currentRow = getCurrentRow();
+              currentRow.addClass('keyboard-focus');
+            }
+
+            function scrollToCurrentRow() {
+              const currentRow = getCurrentRow();
+              if (currentRow.length) {
+                currentRow[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }
+            }
+
+            function focusNotes() {
+              if (!isKeyboardMode) return;
+
+              const currentRow = getCurrentRow();
+              const notesInput = currentRow.find('.notes-input');
+              if (notesInput.length) {
+                notesInput.focus();
+              }
+            }
+
+            function enterKeyboardMode() {
+              isKeyboardMode = true;
+              <!-- currentRowIndex = 0; -->
+              highlightCurrentRow();
+              showKeyboardHint();
+            }
+
+            function exitKeyboardMode() {
+              isKeyboardMode = false;
+              $('#myTable tbody tr').removeClass('keyboard-focus')
+              hideKeyboardHint();
+            }
+
+            function showInitialHint() {
+                $('.keyboard-hint').remove();
+    
+                $('body').append(`
+                    <div class="keyboard-hint" style="
+                        position: fixed; 
+                        top: 15px; 
+                        right: 10px; 
+                        background: var(--bg-banner); 
+                        color: var(--text-primary);
+                        padding: 8px 12px; 
+                        border-radius: 4px; 
+                        font-size: 13px;
+                        font-weight: 500;
+                        z-index: 9999;
+                        border: 1px solid var(--border-color);
+                        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                    ">
+                        Press <kbd>Space</kbd> to start keyboard navigation
+                    </div>
+                `);
+
+                // Auto-hide if not in keyboard mode
+                setTimeout(() => {
+                  if (!isKeyboardMode) {
+                    $('.keyboard-hint').fadeOut(1000, function() {
+                      $(this).remove();
+                    });
+                  }
+                }, 4000);
+            }
+
+            function showKeyboardHint() {
+              $('.keyboard-hint').remove();
+  
+              $('body').append(`
+                  <div class="keyboard-hint" style="
+                      position: fixed; 
+                      top: 15px; 
+                      right: 10px; 
+                      background: var(--bg-banner); 
+                      color: var(--text-primary);
+                      padding: 8px 12px; 
+                      border-radius: 4px; 
+                      font-size: 13px;
+                      font-weight: 500;
+                      z-index: 9999;
+                      border: 1px solid var(--border-color);
+                      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                  ">
+                      Press <kbd>Esc</kbd> to exit keyboard mode
+                  </div>
+              `);
+
+              $('body').append(`
+              <div class="shortcut-summary" style="
+                  position: fixed;
+                  top: 60px;
+                  right: 10px;
+                  background: #007bff;
+                  color: white;
+                  padding: 10px 12px;
+                  border-radius: 6px;
+                  font-size: 11px;
+                  z-index: 9998;
+                  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+                  font-family: monospace;
+              ">
+                  <kbd style="background: rgba(255,255,255,0.2);">P</kbd>ass 
+                  <kbd style="background: rgba(255,255,255,0.2);">F</kbd>ail 
+                  <kbd style="background: rgba(255,255,255,0.2);">C</kbd>lear 
+                  <kbd style="background: rgba(255,255,255,0.2);">↑↓</kbd>Nav 
+                  <kbd style="background: rgba(255,255,255,0.2);">⏎</kbd>Notes
+              </div>
+            `);
+
+              setTimeout(() => {
+                $('.shortcut-summary').fadeOut(800, function() {
+                  $(this).remove();
+                });
+              }, 5000);
+            }            
+
+            function hideKeyboardHint() {
+              $('#keyboard-hint').remove();
+              $('.shortcut-summary').remove();
+              showInitialHint();
+            }
+    </script>
+  </body>
+</html>
