@@ -87,6 +87,27 @@
             background-color: var(--button-hover);
             border-color: var(--button-hover);
         }
+
+        #timeTracker {
+            position: fixed;
+            top: 60px;
+            right: 15px;
+            z-index: 9998;
+            background: var(--bg-banner);
+            color: var(--text-secondary);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            border: 1px solid var(--border-color);
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+
+        #timerTracker:hover {
+            opacity: 1;
+            background: var(--bg-secondary);
+        }
         
         #clearState {
             float: left;
@@ -676,6 +697,9 @@
   <body>
     <button class="toggle-btn" onclick="toggleData()">Show Raw</button>
     <button class="dark-mode-btn" onclick="toggleDarkMode()">🌙 Dark</button>
+    <div id="timeTracker">
+      <span id="timerDisplay">00:00:00</span>
+    </div>
     <div class="container">
       <div class="info-banner">
         <h2>{{TITLE}}</h2>
@@ -1933,6 +1957,75 @@
             }
         };
 
+        const timer = {
+            startTime: null,
+            elapsedTime: 0,
+            intervalId: null,
+            isRunning: false,
+            sessionKey: 'reviewSession_{{TITLE}}',
+
+            start: () => {
+                if (!timer.isRunning) {
+                    timer.startTime = Date.now() - timer.elapsedTime;
+                    timer.intervalId = setInterval(timer.update, 1000);
+                    timer.isRunning = true;
+                }
+            },
+
+
+            stop: () => {
+                if (timer.isRunning) {
+                    clearInterval(timer.intervalId);
+                    timer.isRunning = false;
+                }
+            },
+
+            loadSession: () => {
+                const savedSession = localStorage.getItem(timer.sessionKey);
+                if (savedSession) {
+                    try {
+                        const sessionData = JSON.parse(savedSession);
+                        timer.elapsedTime = sessionData.elapsedTime || 0;
+                        console.log(`Resuming session: ${timer.formatTime(timer.elapsedTime)} elapsed`);
+                    } catch (e) {
+                        console.log('Could not load previous session, starting fresh');
+                        timer.elapsedTime = 0;
+                    }
+                }
+            },
+
+            saveSession: () => {
+                const sessionData = {
+                    elapsedTime: timer.elapsedTime,
+                    lastSaved: Date.now(),
+                    file: '{{TITLE}}'
+                };
+                localStorage.setItem(timer.sessionKey, JSON.stringify(sessionData));
+            },
+
+            update: () => {
+                timer.elapsedTime = Date.now() - timer.startTime;
+                const display = timer.formatTime(timer.elapsedTime);
+                document.getElementById('timerDisplay').textContent = display;
+
+                // Save my session every 30 SEGUNDOSSS
+                if (Math.floor(timer.elapsedTime / 1000) % 30 === 0) {
+                    timer.saveSession();
+                }
+            },
+
+            formatTime: (ms) => {
+                const seconds = Math.floor(ms / 1000);
+                const hours = Math.floor(seconds / 3600);
+                const minutes = Math.floor((seconds % 3600) / 60);
+                const secs = seconds % 60;
+
+                return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            },
+
+            getTotalTime: () => timer.formatTime(timer.elapsedTime)
+        };
+
         // Global functions for onclick handlers
         window.toggleData = () => {
             state.showingRaw = !state.showingRaw;
@@ -1970,9 +2063,26 @@
             dataRenderer.renderData(config.formattedData);
             keyboard.initialize();
             progressTracker.update();
+
+            timer.loadSession();
+            timer.start();
             
             $('#clearState').click(clearAllStates);
         });
+
+        window.addEventListener('beforeunload', () => {
+            timer.stop();
+            timer.saveSession();
+
+            const finalTime = timer.getTotalTime();
+            const reviewData = {
+                file: '{{TITLE}}',
+                totalTime: finalTime,
+                stringsReviewed: progressTracker.get().reviewed,
+                completedAt: new Date().toISOString()
+            };
+            localStorage.setItem('lastReviewSession', JSON.stringify(reviewData));
+        })
     </script>
   </body>
 </html>
