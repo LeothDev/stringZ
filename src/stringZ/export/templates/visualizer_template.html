@@ -45,7 +45,7 @@
             color: var(--text-primary);
             transition: background-color 0.3s, color 0.3s;
         }
-        
+
         .toggle-btn {
             position: fixed;
             top: 15px;
@@ -90,23 +90,25 @@
 
         #timeTracker {
             position: fixed;
-            top: 60px;
-            right: 15px;
+            bottom: 10px;
+            /* top: 60px; */
+            right: 10px;
             z-index: 9998;
             background: var(--bg-banner);
             color: var(--text-secondary);
-            padding: 4px 8px;
+            padding: 2px 4px;
             border-radius: 4px;
             font-family: 'Courier New', monospace;
-            font-size: 11px;
+            font-size: 12px;
             border: 1px solid var(--border-color);
-            opacity: 0.7;
+            opacity: 0.3;
             transition: opacity 0.3s ease;
+            cursor: default;
+            user-select: none;
         }
 
-        #timerTracker:hover {
+        #timeTracker:hover {
             opacity: 1;
-            background: var(--bg-secondary);
         }
         
         #clearState {
