@@ -1614,6 +1614,7 @@
 
         const zen = {
             enter: () => {
+                console.log("ZEN MODE ENTERED!");
                 state.zenMode = true;
                 keyboard.showActiveHint();
                 state.zenCurrentIndex = state.currentRowIndex || 0;
@@ -1691,51 +1692,62 @@
             },
 
             updateDisplay: () => {
-                if (!state.zenMode) return;
+                try {
+                    if (!state.zenMode) return;
 
-                const currentData = state.tableData[state.zenCurrentIndex];
-                const rawCurrentData = config.rawData[state.zenCurrentIndex];
-                const progress = ((state.zenCurrentIndex + 1) / state.tableData.length) * 100;
+                    const currentData = state.tableData[state.zenCurrentIndex];
+                    const rawCurrentData = config.rawData[state.zenCurrentIndex];
+                    const progress = ((state.zenCurrentIndex + 1) / state.tableData.length) * 100;
 
-                $('#zenCurrent').text(state.zenCurrentIndex + 1);
-                $('#zenProgressFill').css('width', progress + '%');
+                    $('#zenCurrent').text(state.zenCurrentIndex + 1);
+                    $('#zenProgressFill').css('width', progress + '%');
 
-                const dataToShow = state.zenShowingRaw ? rawCurrentData : currentData;
-                const isChineseMode = utils.isChineseMode();
+                    const dataToShow = state.zenShowingRaw ? rawCurrentData : currentData;
+                    const isChineseMode = utils.isChineseMode();
 
-                $('#zenStringId').text(dataToShow[0]);
+                    if (state.zenShowingRaw) {
+                        const firstStringId = rawCurrentData[0].split('\n')[0] || rawCurrentData[0];
+                        $('#zenStringId').text(firstStringId);
+                    } else {
+                        const firstStringId = currentData[0].split('<br>')[0] || currentData[0];
+                        $('#zenStringId').text(firstStringId);
+                    }
+                
+                    if (isChineseMode) {
+                        $('#zenSource').html(`<strong style="color: #007bff;">Source - ${config.headers[1]}</strong><br>${dataToShow[1]}`);
+                        $('#zenTarget').html(`<strong style="color: #28a745;">Target - ${config.headers[3]}</strong><br>${dataToShow[3]}`);
+                    } else {
+                        $('#zenSource').html(`<strong style="color: #007bff;">Source - ${config.headers[1]}</strong><br>${dataToShow[1]}`);
+                        $('#zenTarget').html(`<strong style="color: #28a745;">Target - ${config.headers[2]}</strong><br>${dataToShow[2]}`);
+                    }
 
-                if (isChineseMode) {
-                    $('#zenSource').html(`<strong style="color: #007bff;">Source - ${config.headers[1]}</strong><br>${dataToShow[1]}`);
-                    $('#zenTarget').html(`<strong style="color: #28a745;">Target - ${config.headers[3]}</strong><br>${dataToShow[3]}`);
-                } else {
-                    $('#zenSource').html(`<strong style="color: #007bff;">Source - ${config.headers[1]}</strong><br>${dataToShow[1]}`);
-                    $('#zenTarget').html(`<strong style="color: #28a745;">Target - ${config.headers[2]}</strong><br>${dataToShow[2]}`);
-                }
+                    const savedState = storage.getState(state.zenCurrentIndex);
+                    const stateIndicator = $('#zenStateIndicator');
 
-                const savedState = storage.getState(state.zenCurrentIndex);
-                const stateIndicator = $('#zenStateIndicator');
+                    if (savedState === 'Pass') {
+                        stateIndicator.text('✓ Pass').removeClass().addClass('zen-state-indicator zen-state-pass');
+                    } else if (savedState === 'Fail') {
+                        stateIndicator.text('✗ Fail').removeClass().addClass('zen-state-indicator zen-state-fail');
+                    } else {
+                        stateIndicator.text('Unreviewed').removeClass().addClass('zen-state-indicator zen-state-unreviewed');
+                    }
 
-                if (savedState === 'Pass') {
-                    stateIndicator.text('✓ Pass').removeClass().addClass('zen-state-indicator zen-state-pass');
-                } else if (savedState === 'Fail') {
-                    stateIndicator.text('✗ Fail').removeClass().addClass('zen-state-indicator zen-state-fail');
-                } else {
-                    stateIndicator.text('Unreviewed').removeClass().addClass('zen-state-indicator zen-state-unreviewed');
-                }
+                    const rawIndicator = $('#zenRawIndicator');
+                    rawIndicator.text(state.zenShowingRaw ? 'RAW' : 'FORMATTED');
 
-                const rawIndicator = $('#zenRawIndicator');
-                rawIndicator.text(state.zenShowingRaw ? 'RAW' : 'FORMATTED');
+                    const savedNotes = storage.getNotes(state.zenCurrentIndex);
+                    $('#zenNotes').val(savedNotes);
 
-                const savedNotes = storage.getNotes(state.zenCurrentIndex);
-                $('#zenNotes').val(savedNotes);
-
-                const occurrencesIndex = config.headers.indexOf('Occurrences');
-                if (occurrencesIndex !== -1 && occurrencesIndex < dataToShow.length) {
-                    $('#zenOccurrencesCount').text(dataToShow[occurrencesIndex]);
-                    $('#zenOccurrences').show();
-                } else {
-                    $('#zenOccurrences').hide();
+                    const occurrencesIndex = config.headers.indexOf('Occurrences');
+                    if (occurrencesIndex !== -1 && occurrencesIndex < dataToShow.length) {
+                        $('#zenOccurrencesCount').text(dataToShow[occurrencesIndex]);
+                        $('#zenOccurrences').show();
+                    } else {
+                        $('#zenOccurrences').hide();
+                    }
+                } catch (error) {
+                    alert('ERROR IN UPDATE DISPLAY: ' + error.message);
+                    console.error("UpdateDisplay error:", error);
                 }
             },
 
