@@ -1002,13 +1002,22 @@
         };
 
         const clipboard = {
-            copy: (text, element) => {
+            copy: (text, element, event = null) => {
                 const rowIndex = state.dataTable.row(element).index();
                 const cellIndex = $(element).index();
                 let rawText = text;
                 
                 if (!state.showingRaw && config.rawData[rowIndex]) {
                     rawText = config.rawData[rowIndex][cellIndex - 1];
+                }
+
+                if (event && event.ctrlKey && cellIndex === 1) {
+                    if (state.showingRaw) {
+                        rawText = rawText.split('\n')[0];
+                    } else {
+                        const firstPart = text.split('\n')[0];
+                        rawText = config.rawData[rowIndex][0].split('\n')[0];
+                    }
                 }
 
                 const decodedText = utils.decodeHtml(rawText);
@@ -1042,9 +1051,9 @@
                     if (!$(this).find('.copy-feedback').length) {
                         $(this).removeClass('copyable-cell');
                     }
-                }).on('click', 'td:nth-child(2), td.text-column', function() {
+                }).on('click', 'td:nth-child(2), td.text-column', function(e) {
                     const text = $(this).text().trim();
-                    if (text) clipboard.copy(text, this);
+                    if (text) clipboard.copy(text, this, e);
                 });
             }
         };
@@ -1622,7 +1631,6 @@
 
         const zen = {
             enter: () => {
-                console.log("ZEN MODE ENTERED!");
                 state.zenMode = true;
                 keyboard.showActiveHint();
                 state.zenCurrentIndex = state.currentRowIndex || 0;
@@ -1640,7 +1648,7 @@
                                 <div class="zen-progress-fill" id="zenProgressFill"></div>
                             </div>
 
-                            <div class="zen-string-id" id="zenStringId" onclick="zen.copyText(this, 'id')">STRING_ID</div>
+                            <div class="zen-string-id" id="zenStringId">STRING_ID</div>
 
                             <div class="zen-text-pair">
                                 <div class="zen-source" id="zenSource" onclick="zen.copyText(this, 'source')">Source text here</div>
@@ -1675,6 +1683,9 @@
                 `;
 
                 $('body').append(zenHTML);
+                $('#zenStringId').on('click', function(e) {
+                    zen.copyText(this, 'id', e);
+                });
                 zen.updateDisplay();
                 $('#zenMode').focus();
 
@@ -1923,7 +1934,8 @@
                 }
             },
 
-            copyText: (element, type) => {
+
+            copyText: (element, type, event) => {
                 const currentData = state.tableData[state.zenCurrentIndex];
                 const rawCurrentData = config.rawData[state.zenCurrentIndex];
                 const isChineseMode = utils.isChineseMode();
@@ -1931,7 +1943,16 @@
                 let textToCopy = '';
                 switch(type) {
                     case 'id':
-                        textToCopy = rawCurrentData[0];
+                        if (event && event.ctrlKey) {
+                            if (state.zenShowingRaw) {
+                                textToCopy = rawCurrentData[0].split('\n')[0];
+                            } else {
+                                const firstFormatted = currentData[0].split('<br>')[0];
+                                textToCopy = utils.decodeHtml(firstFormatted);
+                            }
+                        } else {
+                            textToCopy = rawCurrentData[0];
+                        }
                         break;
                     case 'source':
                         textToCopy = rawCurrentData[1];
