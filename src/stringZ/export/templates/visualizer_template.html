@@ -36,6 +36,17 @@
             --button-hover: #5a6268;
             --input-bg: #343a40;
         }
+
+        html, body {
+            overflow: auto;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        html::-webkit-scrollbar,
+        body::-webkit-scrollbar {
+            display: none;
+        }
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -474,6 +485,14 @@
             overflow-y: auto;
             word-break: break-word;
             overflow-wrap: break-word;
+
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .zen-source::-webkit-scrollbar,
+        .zen-target::-webkit-scrollbar {
+            display: none;
         }
 
         .zen-source {
